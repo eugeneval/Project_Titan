@@ -4,7 +4,7 @@
 // New Version - drag and lift currently commented out.
 // This version will try to implement a genetic algorithm to ooptimise a specific flight mission.
 
-/*
+/* test
 
   QuadX motor configuration
 

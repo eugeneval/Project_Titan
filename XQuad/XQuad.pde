@@ -4,19 +4,19 @@
 // New Version - drag and lift currently commented out.
 // This version will try to implement a genetic algorithm to ooptimise a specific flight mission.
 
-/*
+/*    
 
   QuadX motor configuration
 
-          4      2
+          4      2                   
            \    /
             \  /
              \/
-             /\
+             /\        
             /  \
            /    \
           3      1
-
+          
 */
 
 import peasy.*;
@@ -44,8 +44,8 @@ float motor4Thrust = 0;
 float motorMaxThrust = 11;
 float motorMinThrust = 0;
 
-float armLength = 0.1;
-float armWidth = 0.02;
+float armLength = 0.1; 
+float armWidth = 0.02; 
 float armMass =  0.03;
 float armI;
 
@@ -76,11 +76,11 @@ float maxPitch = 20;
 
 /////////PID ANGLE Controller////////////
 
-float setXA;
+float setXA; 
 float setYA;
 float setZA;
 
-float kpXA = 0.0004;
+float kpXA = 0.0004; 
 float kpYA = 0.00009;
 float kpZA = 0.0004;
 
@@ -100,7 +100,7 @@ float lastErrorXA, lastErrorYA, lastErrorZA;
 
 /////////PID POSITION Controller////////////
 
-float setXP = 0;
+float setXP = 0; 
 float setYP = 200;
 float setZP = 0;
 
@@ -157,19 +157,19 @@ float timeToSave = 0;
 
 
 void setup(){
-
+  
   cam = new PeasyCam(this,  500, 400, 0, 600);
   cam.setMinimumDistance(50);
   cam.setMaximumDistance(3000);
-
+  
 /////////Genetic Setup////////////////////////////////
-
+  
   for (int i = 0; i < population.length; i++) {
     population[i] = new DNA();
   }
-
+  
   route1 = new Route();
-
+  
 // float v = route1.xPoint[0];
 
 /////////Max Roll and Pitch Angle/////////////////////
@@ -183,16 +183,16 @@ maxPitch = radians(maxPitch);
   size(1000, 700, P3D);
 
 /////////Drag Surface Area Calculations///////////////
-
+  
   surfaceA = 4*(armWidth*armLength);
-
+  
 //////CSV setup///////
 
   valuesToCSV.addColumn("time");
-  valuesToCSV.addColumn("velocityX");
-  valuesToCSV.addColumn("velocityY");
-  valuesToCSV.addColumn("velocityZ");
-
+  valuesToCSV.addColumn("Xangle");
+  valuesToCSV.addColumn("Yangle");
+  valuesToCSV.addColumn("Zangle");
+  
 
 }
 
@@ -203,55 +203,55 @@ maxPitch = radians(maxPitch);
 
 
 void draw(){
-
+  
   millis();
-
-
+  
+  
   TableRow newRow = valuesToCSV.addRow();
   timeToSave += time;
   newRow.setString("time", String.format("%.2f", timeToSave));
-
-
+  
+  
 /////////Genetic Setup////////////////////////////////
 
-
+  
 //////////////////////////////////////////////////////
-
-
+ 
+  
   lights();
   background(250);
-
+     
   pidAngleX();
   pidAngleY();
   pidAngleZ();
-
+   
   pidPositionX();
   pidPositionY();
   pidPositionZ();
-
-  calculateZAngle();
-  calculateYAngle();
-  calculateXAngle();
-
-
+  
+  calculateZAngle(newRow);
+  calculateYAngle(newRow);
+  calculateXAngle(newRow);
+  
+  
   dragCalculations();
   liftCalculations();
-
+  
   //println( dragX + "   " + dragZ + "   " + liftX + "   " + liftZ);
-
+  
   motorCalculations();
   motorEndpoints();
-
-  movementX(newRow);
-  movementZ(newRow);
-  movementY(newRow);
-
-
+  
+  movementX();
+  movementZ();
+  movementY();
+  
+  
 ///////////////////////////////////////////////////////////
-
+  
 
   yPosition = 600 + displacementYI;
-
+  
   if ((yPosition) > 601)
   {
     yPosition = 600;
@@ -264,27 +264,27 @@ void draw(){
 ///////////////////////////////////////////////////////////
 
   pushMatrix();
-  translate(500 + displacementXI, yPosition, displacementZI);
+  translate(500 + displacementXI, yPosition, displacementZI); 
   rotateZ(thetaZO);
   rotateX(thetaXO);
   rotateY(thetaYO + 0.785398);
   fill(100);
   box(armLength*100,1,armLength*10);
-
+ 
   trailCounter++;
-
+  
   if (trailCounter == 99){
-
+  
   trailPointsX[posX] = 500 + displacementXI;
   trailPointsY[posX] = yPosition;
   trailPointsZ[posX] = displacementZI;
-
+  
   posX++;
   posY++;
   posZ++;
-
+  
   trailCounter = 0;
-
+      
   if (posX > 98)
   {
     posX = 0;
@@ -293,34 +293,34 @@ void draw(){
   }
  }
   popMatrix();
-
-//////////////////////////////
-
+  
+//////////////////////////////  
+  
   pushMatrix();
-  translate(500 + displacementXI, yPosition, displacementZI);
+  translate(500 + displacementXI, yPosition, displacementZI); 
   rotateZ(thetaZO);
   rotateX(thetaXO);
   rotateY(thetaYO + 0.785398);
   fill(100);
   box(armLength*10,1,armLength*100);
   popMatrix();
-
+ 
   pushMatrix();
-  translate(500 + setXP, 600 - setYP, -setZP);
+  translate(500 + setXP, 600 - setYP, -setZP); 
   fill(230,0,0);
   box(5);
   popMatrix();
-
+  
   pushMatrix();
   translate(500,600,0);
   fill(230);
   box(500,1,500);
   popMatrix();
-
+  
   //println(displacementXI + "    " + displacementYI + "    " + displacementZI + "    " + frameRate);
   //println(velocityXI + "    " + velocityYI + "    " + velocityZI + "    " + frameRate);
   //println(liftX + "    " + liftZ + "    " + dragY + "    " + frameRate);
-
+  
   for (i = 0; i < 200; i++)
   {
     pushMatrix();
@@ -331,33 +331,33 @@ void draw(){
   }
 
   float distance = sqrt (((displacementXI-setXP)*(displacementXI-setXP)) + ((displacementZI+setZP)*(displacementZI+setZP)) + ((displacementYI+setYP)*(displacementYI+setYP)));
-
+  
 if (distance < 15) {
-
+    
   timerNew = millis();
   println(timerNew);
-
+  
      if (pos > 9){
-     timerNew = millis() - timerOld;
+     timerNew = millis() - timerOld; 
      pos = 0;
      println("Lap Time = " + timerNew/1000);
      timerNew = timerOld;
      }
-
+   
    setXP = route1.xPoint[pos];
    setZP = route1.zPoint[pos];
    setYP = route1.yPoint[pos];
    pos ++;
-
+   
    if (pos == 9) {
-    saveTable(valuesToCSV, "data/velocityValues.csv");
+    saveTable(valuesToCSV, "data/accelValues.csv"); 
    }
-
-
-
+   
+   
+   
   }
-
-
+   
+  
 }
 
 
@@ -366,115 +366,121 @@ if (distance < 15) {
 ///////////////////////////////////////////////////////////
 
 
-void calculateZAngle() {
-
+void calculateZAngle(TableRow newRow) {
+  
   // : 2/3 since mass of both arms is included and multiplied by sin(0.785398) to account for length shortening in quadX configuration
-
+    
   alphaZ = ((motor3Thrust+motor4Thrust) - (motor2Thrust+motor1Thrust))  / (((2/3)*armMass + 2*motorMass)*(armLength*sin(0.785398)));
-
+  
   omegaIZ = omegaIZ + (alphaZ * time);
-
+  
   thetaZO = thetaZI + omegaIZ*time + (1/2)*alphaZ*time*time;
-
+  
   thetaZI = thetaZO;
-
+  
+  newRow.setFloat("Zangle", thetaZO);
+  
 }
 
-void calculateXAngle() {
-
+void calculateXAngle(TableRow newRow) {
+    
   alphaX = ((motor1Thrust+motor3Thrust) - (motor4Thrust+motor2Thrust) ) / (((2/3)*armMass + 2*motorMass)*armLength*sin(0.785398));
-
+  
   omegaIX = omegaIX + (alphaX * time);
-
+  
   thetaXO = thetaXI + omegaIX*time + (1/2)*alphaX*time*time;
-
+  
   thetaXI = thetaXO;
-
+  
+  newRow.setFloat("Xangle", thetaXO);
+  
 }
 
-void calculateYAngle() {
-
+void calculateYAngle(TableRow newRow) {
+    
   alphaY = ((motor4Thrust+motor1Thrust)*torqueFactor - (motor3Thrust+motor2Thrust)*torqueFactor) / (((1/3)*(armMass*2+motorMass*2)*(2*armLength)*(2*armLength))+((armMass*2+motorMass*2)*armLength*armLength));
-
+  
   omegaIY = omegaIY + (alphaY * time);
-
+  
   thetaYO = thetaYI + omegaIY*time + (1/2)*alphaY*time*time;
-
+  
   thetaYI = thetaYO;
-
+  
+  newRow.setFloat("Yangle", thetaYO);
+  
 }
 
 
 
-///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////  
 
 
 
-void movementX(TableRow newRow) {
-
+void movementX() {
+  
   forceX = ((motor1Thrust+motor2Thrust+motor3Thrust+motor4Thrust) * sin(thetaZO)) + dragX;
-
+  
   if(forceX < -40){
     forceX = -40;
   }
-
+  
   if (forceX > 40){
     forceX = 40;
   }
-
+ 
   accelerationX = forceX/totalMass;
   velocityXO = accelerationX*time;
   velocityXI = velocityXO+velocityXI;
   displacementXI = (velocityXI*time) + ((1/2)*accelerationX*time*time) + displacementXO;
   displacementXO = displacementXI;
-
-  newRow.setFloat("velocityX", velocityXI);
+  
+  //newRow.setFloat("accelX", accelerationX);
 
 }
 
 //movementy checked
-void movementY(TableRow newRow) {
-
+void movementY() {
+  
   forceY = -((motor1Thrust+motor2Thrust+motor3Thrust+motor4Thrust) * sin((PI/2 - thetaZO))* sin((PI/2 - thetaXO))) + totalMass*accelerationG + dragY - liftX - liftY;
-
+  
     if(forceY < -40){
     forceY = -40;
   }
-
+  
 
   accelerationY = forceY/totalMass;
   velocityYO = accelerationY*time;
   velocityYI = velocityYO+velocityYI;
   displacementYI = velocityYI*time + (1/2)*accelerationY*time*time + displacementYO;
   displacementYO = displacementYI;
-
-  newRow.setFloat("velocityY", velocityYI);
-
+  
+  //newRow.setFloat("accelY", accelerationY);
+  
 }
 
 
-void movementZ(TableRow newRow) {
-
+void movementZ() {
+  
   forceZ =  -((motor1Thrust+motor2Thrust+motor3Thrust+motor4Thrust) * sin(thetaXO)) - dragZ  ;
-
+  
   if(forceZ < -40)
   {
     forceZ = -40;
   }
-
+  
   if (forceZ > 40)
   {
     forceZ = 40;
   }
-
+  
   accelerationZ = forceZ/totalMass;
   velocityZO = accelerationZ*time;
   velocityZI = velocityZO+velocityZI;
   displacementZI = velocityZI*time + (1/2)*accelerationZ*time*time + displacementZO;
   displacementZO = displacementZI;
-
-  newRow.setFloat("velocityZ", velocityZI);
-
+  
+  //newRow.setFloat("accelZ", accelerationZ);
+  
 }
 
 
@@ -486,7 +492,7 @@ void movementZ(TableRow newRow) {
 
 ///done/////
 void pidAngleX(){
-
+  
  setXA = pZError;
 
  if (setXA < - maxPitch){
@@ -496,55 +502,55 @@ void pidAngleX(){
   if (setXA > maxPitch){
    setXA = maxPitch;
  }
-
+ 
  errorXA = setXA + thetaXO;
-
+ 
  integralXA = integralXA + errorXA*time;
-
+ 
  derivativeXA = (errorXA-lastErrorXA)/time;
-
+ 
  pXAError = kpXA*errorXA + kiXA*integralXA + kdXA*derivativeXA;
-
+ 
  lastErrorXA = errorXA;
-
+ 
 }
 //////done///////
 void pidAngleZ(){
-
+  
  setZA = -pXError;
-
+ 
  if (setZA < - maxRoll){
    setZA = - maxRoll;
  }
-
+ 
   if (setZA > maxRoll){
    setZA = maxRoll;
  }
 
  errorZA = setZA + thetaZO;
-
+ 
  integralZA = integralZA + errorZA*time;
-
+ 
  derivativeZA = (errorZA-lastErrorZA)/time;
-
+ 
  pZAError = kpZA*errorZA + kiZA*integralZA + kdZA*derivativeZA;
-
+ 
  lastErrorZA = errorZA;
-
+ 
 }
 
 void pidAngleY(){
 
  errorYA = setYA - thetaYO;
-
+ 
  integralYA = integralYA + errorYA*time;
-
+ 
  derivativeYA = (errorYA-lastErrorYA)/time;
-
+ 
  pYAError = kpYA*errorYA + kiYA*integralYA + kdYA*derivativeYA;
-
+ 
  lastErrorYA = errorYA;
-
+ 
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -556,13 +562,13 @@ void pidAngleY(){
 void pidPositionY(){
 
  errorYP = setYP + displacementYI;
-
+ 
  integralYP = integralYP + (errorYP*time);
-
+ 
  derivativeYP = (errorYP-lastErrorYP)/time;
-
+ 
  pYError = (kpYP*errorYP + kiYP*integralYP + kdYP*derivativeYP);
-
+ 
  lastErrorYP = errorYP;
 
 }
@@ -570,13 +576,13 @@ void pidPositionY(){
 void pidPositionX(){
 
  errorXP = setXP - displacementXI;
-
+ 
  integralXP = integralXP + errorXP*time;
-
+ 
  derivativeXP = (errorXP-lastErrorXP)/time;
-
+ 
  pXError = (kpXP*errorXP + kiXP*integralXP + kdXP*derivativeXP);
-
+ 
  lastErrorXP = errorXP;
 
 }
@@ -584,18 +590,18 @@ void pidPositionX(){
 void pidPositionZ(){
 
  errorZP = -(setZP + displacementZI);
-
+ 
  integralZP = integralZP + errorZP*time;
-
+ 
  derivativeZP = (errorZP-lastErrorZP)/time;
-
+ 
  pZError = kpZP*errorZP + kiZP*integralZP + kdZP*derivativeZP;
-
+ 
  lastErrorZP = errorZP;
 
 }
 
-///////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// 
 
 void motorCalculations(){
 
@@ -604,51 +610,51 @@ void motorCalculations(){
   motor2Thrust = pYError  + pXAError + pZAError - pYAError;
 
   motor3Thrust = pYError  - pXAError - pZAError - pYAError;
-
+  
   motor4Thrust = pYError  + pXAError - pZAError + pYAError;
-
+  
 }
-///////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// 
 
 void motorEndpoints(){
-
+  
       if (motor1Thrust < motorMinThrust )
   {
     motor1Thrust = motorMinThrust;
   }
-
+  
       if (motor2Thrust < motorMinThrust)
     {
       motor2Thrust = motorMinThrust;
     }
-
+  
         if (motor3Thrust < motorMinThrust)
       {
         motor3Thrust = motorMinThrust;
       }
-
+  
           if (motor4Thrust < motorMinThrust)
         {
           motor4Thrust = motorMinThrust;
         }
-
-
-
+  
+ 
+  
     if (motor1Thrust > motorMaxThrust )
   {
     motor1Thrust = motorMaxThrust;
   }
-
+  
       if (motor2Thrust > motorMaxThrust)
     {
       motor2Thrust = motorMaxThrust;
     }
-
+  
         if (motor3Thrust > motorMaxThrust)
       {
         motor3Thrust = motorMaxThrust;
       }
-
+  
           if (motor4Thrust > motorMaxThrust)
         {
           motor4Thrust = motorMaxThrust;
@@ -656,7 +662,7 @@ void motorEndpoints(){
 }
 
 void dragCalculations(){
-
+  
   if (velocityXI > 0){
   cDX = 1.28 * sqrt(sin(thetaZO) * sin(thetaZO));
   dragX = -(0.5 * cDX * density * velocityXI * velocityXI * (surfaceA*sqrt(sin(thetaZO)*sin(thetaZO))));
@@ -665,7 +671,7 @@ void dragCalculations(){
   cDX = 1.28 * sqrt(sin(thetaZO) * sin(thetaZO));
   dragX = (0.5 * cDX * density * velocityXI * velocityXI * (surfaceA*sqrt(sin(thetaZO)*sin(thetaZO))));
   }
-
+  
   if (velocityZI > 0){
   cDZ = 1.28 * sqrt(sin(thetaXO) * sin(thetaXO));
   dragZ = -(0.5 * cDZ * density * velocityZI * velocityZI * (surfaceA*sqrt(sin(thetaXO)*sin(thetaXO))));
@@ -674,7 +680,7 @@ void dragCalculations(){
   cDZ = 1.28 * sqrt(sin(thetaXO) * sin(thetaXO));
   dragZ = (0.5 * cDZ * density * velocityZI * velocityZI * (surfaceA*sqrt(sin(thetaXO)*sin(thetaXO))));
   }
-
+  
   if (velocityYI > 0){
   cDY = ((1.28 * cos(thetaXO)) + (1.28 * cos(thetaZO)))/2 ;
   dragY = (0.5 * cDY * density * velocityYI * velocityYI * (surfaceA*sqrt(cos(thetaXO)*cos(thetaXO))*sqrt(cos(thetaZO)*cos(thetaZO))));
@@ -683,51 +689,51 @@ void dragCalculations(){
   cDY = ((1.28 * cos(thetaXO)) + (1.28 * cos(thetaZO)))/2 ;
   dragY = -(0.5 * cDY * density * velocityYI * velocityYI * (surfaceA*sqrt(cos(thetaXO)*cos(thetaXO))*sqrt(cos(thetaZO)*cos(thetaZO))));
   }
-
+  
 }
 
 void liftCalculations(){
-
+  
   if (thetaZO > 0 && velocityXI > 0){
   cLX = 2 * PI * sqrt(thetaZO*thetaZO);
   liftX = (0.5 * cLX * density * velocityXI * velocityXI * (surfaceA*sqrt(cos(thetaZO)*cos(thetaZO))));
   }
-
+  
   if (thetaZO < 0 && velocityXI > 0){
   cLX = 2* PI * sqrt(thetaZO*thetaZO);
-  liftX = -(0.5 * cLX * density * velocityXI * velocityXI * (surfaceA*sqrt(cos(thetaZO)*cos(thetaZO))));
+  liftX = -(0.5 * cLX * density * velocityXI * velocityXI * (surfaceA*sqrt(cos(thetaZO)*cos(thetaZO)))); 
   }
-
+  
   if (thetaZO > 0 && velocityXI < 0){
   cLX = 2* PI * sqrt(thetaZO*thetaZO);
-  liftX = -(0.5 * cLX * density * velocityXI * velocityXI * (surfaceA*sqrt(cos(thetaZO)*cos(thetaZO))));
+  liftX = -(0.5 * cLX * density * velocityXI * velocityXI * (surfaceA*sqrt(cos(thetaZO)*cos(thetaZO)))); 
   }
-
+  
   if (thetaZO < 0 && velocityXI < 0){
   cLX = 2* PI * sqrt(thetaZO*thetaZO);
-  liftX = (0.5 * cLX * density * velocityXI * velocityXI * (surfaceA*sqrt(cos(thetaZO)*cos(thetaZO))));
+  liftX = (0.5 * cLX * density * velocityXI * velocityXI * (surfaceA*sqrt(cos(thetaZO)*cos(thetaZO)))); 
   }
-
-
-
+  
+    
+    
   if (thetaXO > 0 && velocityZI > 0){
   cLX = 2 * PI * sqrt(thetaXO*thetaXO);
   liftZ = (0.5 * cLX * density * velocityZI * velocityZI * (surfaceA*sqrt(cos(thetaXO)*cos(thetaXO))));
   }
-
+  
   if (thetaXO < 0 && velocityZI > 0){
   cLX = 2* PI * sqrt(thetaXO*thetaXO);
-  liftZ = -(0.5 * cLX * density * velocityZI * velocityZI * (surfaceA*sqrt(cos(thetaXO)*cos(thetaXO))));
+  liftZ = -(0.5 * cLX * density * velocityZI * velocityZI * (surfaceA*sqrt(cos(thetaXO)*cos(thetaXO)))); 
   }
-
+  
   if (thetaXO > 0 && velocityZI < 0){
   cLX = 2* PI * sqrt(thetaXO*thetaXO);
-  liftZ = -(0.5 * cLX * density * velocityZI * velocityZI * (surfaceA*sqrt(cos(thetaXO)*cos(thetaXO))));
+  liftZ = -(0.5 * cLX * density * velocityZI * velocityZI * (surfaceA*sqrt(cos(thetaXO)*cos(thetaXO)))); 
   }
-
+  
   if (thetaXO < 0 && velocityZI < 0){
   cLX = 2* PI * sqrt(thetaXO*thetaXO);
-  liftZ = (0.5 * cLX * density * velocityZI * velocityZI * (surfaceA*sqrt(cos(thetaXO)*cos(thetaXO))));
+  liftZ = (0.5 * cLX * density * velocityZI * velocityZI * (surfaceA*sqrt(cos(thetaXO)*cos(thetaXO)))); 
   }
-
+  
 }

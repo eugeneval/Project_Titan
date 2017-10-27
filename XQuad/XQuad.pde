@@ -189,9 +189,13 @@ maxPitch = radians(maxPitch);
 //////CSV setup///////
 
   valuesToCSV.addColumn("time");
+  data_saving_velocity
   valuesToCSV.addColumn("velocityX");
   valuesToCSV.addColumn("velocityY");
   valuesToCSV.addColumn("velocityZ");
+  valuesToCSV.addColumn("accelX");
+  valuesToCSV.addColumn("accelY");
+  valuesToCSV.addColumn("accelZ");
 
 
 }
@@ -351,6 +355,7 @@ if (distance < 15) {
 
    if (pos == 9) {
     saveTable(valuesToCSV, "data/velocityValues.csv");
+    saveTable(valuesToCSV, "data/accelValues.csv");
    }
 
 
@@ -428,7 +433,9 @@ void movementX(TableRow newRow) {
   displacementXI = (velocityXI*time) + ((1/2)*accelerationX*time*time) + displacementXO;
   displacementXO = displacementXI;
 
+
   newRow.setFloat("velocityX", velocityXI);
+  newRow.setFloat("accelX", accelerationX);
 
 }
 
@@ -449,6 +456,7 @@ void movementY(TableRow newRow) {
   displacementYO = displacementYI;
 
   newRow.setFloat("velocityY", velocityYI);
+  newRow.setFloat("accelY", accelerationY);
 
 }
 
@@ -473,7 +481,9 @@ void movementZ(TableRow newRow) {
   displacementZI = velocityZI*time + (1/2)*accelerationZ*time*time + displacementZO;
   displacementZO = displacementZI;
 
+
   newRow.setFloat("velocityZ", velocityZI);
+  newRow.setFloat("accelZ", accelerationZ);
 
 }
 

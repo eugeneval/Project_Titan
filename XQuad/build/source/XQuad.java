@@ -1,3 +1,21 @@
+import processing.core.*; 
+import processing.data.*; 
+import processing.event.*; 
+import processing.opengl.*; 
+
+import peasy.*; 
+
+import java.util.HashMap; 
+import java.util.ArrayList; 
+import java.io.File; 
+import java.io.BufferedReader; 
+import java.io.PrintWriter; 
+import java.io.InputStream; 
+import java.io.OutputStream; 
+import java.io.IOException; 
+
+public class XQuad extends PApplet {
+
 // xQuad - Project Titan : Ismail Ahmad v4.0 Genetic
 // Designed for engineers to test UAV's virtually before actually creating a prototype........ #ProjectTitan
 // Currently uses standard PID Position ----> PID Angle controller.
@@ -19,7 +37,7 @@
 
 */
 
-import peasy.*;
+
 PeasyCam cam;
 
 /////////Genetic Algorithm/////////////
@@ -28,10 +46,10 @@ Route route1;
 
 /////////Initial Conditions////////////
 
-float accelerationG = 9.81;
+float accelerationG = 9.81f;
 float torqueFactor = 1;
-float density = 1.225;
-float totalMass = 2.8;
+float density = 1.225f;
+float totalMass = 2.8f;
 
 /////////Quad Configuration Conditions////////////
 
@@ -44,13 +62,13 @@ float motor4Thrust = 0;
 float motorMaxThrust = 11;
 float motorMinThrust = 0;
 
-float armLength = 0.1;
-float armWidth = 0.02;
-float armMass =  0.03;
+float armLength = 0.1f;
+float armWidth = 0.02f;
+float armMass =  0.03f;
 float armI;
 
-float motorMass = 0.03;
-float motorDiameter = 0.02;
+float motorMass = 0.03f;
+float motorDiameter = 0.02f;
 float motorI;
 
 float thetaZI, thetaYI, thetaXI = 0;
@@ -59,7 +77,7 @@ float omegaIZ, omegaIY, omegaIX;
 float alphaZ, alphaY, alphaX;
 
 float totalArmInertia;
-float time = 0.01;
+float time = 0.01f;
 float yPosition;
 
 float forceX, forceY, forceZ;
@@ -80,17 +98,17 @@ float setXA;
 float setYA;
 float setZA;
 
-float kpXA = 0.0004;
-float kpYA = 0.00009;
-float kpZA = 0.0004;
+float kpXA = 0.0004f;
+float kpYA = 0.00009f;
+float kpZA = 0.0004f;
 
-float kiXA = 0.000001;
-float kiYA = 0.000001;
-float kiZA = 0.000001;
+float kiXA = 0.000001f;
+float kiYA = 0.000001f;
+float kiZA = 0.000001f;
 
-float kdXA = 0.005;
-float kdYA = 0.001;
-float kdZA = 0.005;
+float kdXA = 0.005f;
+float kdYA = 0.001f;
+float kdZA = 0.005f;
 
 float errorXA, errorYA, errorZA;
 float pXAError, pYAError, pZAError;
@@ -104,17 +122,17 @@ float setXP = 0;
 float setYP = 200;
 float setZP = 0;
 
-float kpXP = 0.3;
-float kpYP = 1.4;
-float kpZP = 0.4;
+float kpXP = 0.3f;
+float kpYP = 1.4f;
+float kpZP = 0.4f;
 
-float kiXP = 0.0001;
-float kiYP = 0.001;
-float kiZP = 0.0001;
+float kiXP = 0.0001f;
+float kiYP = 0.001f;
+float kiZP = 0.0001f;
 
 float kdXP = 1;
 float kdYP = 10;
-float kdZP = 1.3;
+float kdZP = 1.3f;
 
 float errorXP, errorYP, errorZP;
 float pXError, pYError, pZError ;
@@ -156,7 +174,7 @@ Table valuesToCSV = new Table();
 float timeToSave = 0;
 
 
-void setup(){
+public void setup(){
 
   cam = new PeasyCam(this,  500, 400, 0, 600);
   cam.setMinimumDistance(50);
@@ -180,7 +198,7 @@ maxPitch = radians(maxPitch);
 //////////////////////////////////////////////////////
 
   frameRate(1000);
-  size(1000, 700, P3D);
+  
 
 /////////Drag Surface Area Calculations///////////////
 
@@ -210,7 +228,7 @@ maxPitch = radians(maxPitch);
 ///////////////////////////////////////////////////////////
 
 
-void draw(){
+public void draw(){
 
   millis();
 
@@ -275,7 +293,7 @@ void draw(){
   translate(500 + displacementXI, yPosition, displacementZI);
   rotateZ(thetaZO);
   rotateX(thetaXO);
-  rotateY(thetaYO + 0.785398);
+  rotateY(thetaYO + 0.785398f);
   fill(100);
   box(armLength*100,1,armLength*10);
 
@@ -308,7 +326,7 @@ void draw(){
   translate(500 + displacementXI, yPosition, displacementZI);
   rotateZ(thetaZO);
   rotateX(thetaXO);
-  rotateY(thetaYO + 0.785398);
+  rotateY(thetaYO + 0.785398f);
   fill(100);
   box(armLength*10,1,armLength*100);
   popMatrix();
@@ -378,11 +396,11 @@ if (distance < 15) {
 ///////////////////////////////////////////////////////////
 
 
-void calculateZAngle(TableRow newRow) {
+public void calculateZAngle(TableRow newRow) {
 
   // : 2/3 since mass of both arms is included and multiplied by sin(0.785398) to account for length shortening in quadX configuration
 
-  alphaZ = ((motor3Thrust+motor4Thrust) - (motor2Thrust+motor1Thrust))  / (((2/3)*armMass + 2*motorMass)*(armLength*sin(0.785398)));
+  alphaZ = ((motor3Thrust+motor4Thrust) - (motor2Thrust+motor1Thrust))  / (((2/3)*armMass + 2*motorMass)*(armLength*sin(0.785398f)));
 
   omegaIZ = omegaIZ + (alphaZ * time);
 
@@ -394,9 +412,9 @@ void calculateZAngle(TableRow newRow) {
 
 }
 
-void calculateXAngle(TableRow newRow) {
+public void calculateXAngle(TableRow newRow) {
 
-  alphaX = ((motor1Thrust+motor3Thrust) - (motor4Thrust+motor2Thrust) ) / (((2/3)*armMass + 2*motorMass)*armLength*sin(0.785398));
+  alphaX = ((motor1Thrust+motor3Thrust) - (motor4Thrust+motor2Thrust) ) / (((2/3)*armMass + 2*motorMass)*armLength*sin(0.785398f));
 
   omegaIX = omegaIX + (alphaX * time);
 
@@ -408,7 +426,7 @@ void calculateXAngle(TableRow newRow) {
 
 }
 
-void calculateYAngle(TableRow newRow) {
+public void calculateYAngle(TableRow newRow) {
 
   alphaY = ((motor4Thrust+motor1Thrust)*torqueFactor - (motor3Thrust+motor2Thrust)*torqueFactor) / (((1/3)*(armMass*2+motorMass*2)*(2*armLength)*(2*armLength))+((armMass*2+motorMass*2)*armLength*armLength));
 
@@ -428,7 +446,7 @@ void calculateYAngle(TableRow newRow) {
 
 
 
-void movementX(TableRow newRow) {
+public void movementX(TableRow newRow) {
 
   forceX = ((motor1Thrust+motor2Thrust+motor3Thrust+motor4Thrust) * sin(thetaZO)) + dragX;
 
@@ -453,7 +471,7 @@ void movementX(TableRow newRow) {
 }
 
 //movementy checked
-void movementY(TableRow newRow) {
+public void movementY(TableRow newRow) {
 
   forceY = -((motor1Thrust+motor2Thrust+motor3Thrust+motor4Thrust) * sin((PI/2 - thetaZO))* sin((PI/2 - thetaXO))) + totalMass*accelerationG + dragY - liftX - liftY;
 
@@ -475,7 +493,7 @@ void movementY(TableRow newRow) {
 }
 
 
-void movementZ(TableRow newRow) {
+public void movementZ(TableRow newRow) {
 
   forceZ =  -((motor1Thrust+motor2Thrust+motor3Thrust+motor4Thrust) * sin(thetaXO)) - dragZ  ;
 
@@ -509,7 +527,7 @@ void movementZ(TableRow newRow) {
 ////////////////////////////////////////////////////////////////////////////////
 
 ///done/////
-void pidAngleX(){
+public void pidAngleX(){
 
  setXA = pZError;
 
@@ -533,7 +551,7 @@ void pidAngleX(){
 
 }
 //////done///////
-void pidAngleZ(){
+public void pidAngleZ(){
 
  setZA = -pXError;
 
@@ -557,7 +575,7 @@ void pidAngleZ(){
 
 }
 
-void pidAngleY(){
+public void pidAngleY(){
 
  errorYA = setYA - thetaYO;
 
@@ -577,7 +595,7 @@ void pidAngleY(){
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void pidPositionY(){
+public void pidPositionY(){
 
  errorYP = setYP + displacementYI;
 
@@ -591,7 +609,7 @@ void pidPositionY(){
 
 }
 
-void pidPositionX(){
+public void pidPositionX(){
 
  errorXP = setXP - displacementXI;
 
@@ -605,7 +623,7 @@ void pidPositionX(){
 
 }
 
-void pidPositionZ(){
+public void pidPositionZ(){
 
  errorZP = -(setZP + displacementZI);
 
@@ -621,7 +639,7 @@ void pidPositionZ(){
 
 ///////////////////////////////////////////////////////////
 
-void motorCalculations(){
+public void motorCalculations(){
 
   motor1Thrust = pYError  - pXAError + pZAError + pYAError;
 
@@ -634,7 +652,7 @@ void motorCalculations(){
 }
 ///////////////////////////////////////////////////////////
 
-void motorEndpoints(){
+public void motorEndpoints(){
 
       if (motor1Thrust < motorMinThrust )
   {
@@ -679,79 +697,246 @@ void motorEndpoints(){
         }
 }
 
-void dragCalculations(){
+public void dragCalculations(){
 
   if (velocityXI > 0){
-  cDX = 1.28 * sqrt(sin(thetaZO) * sin(thetaZO));
-  dragX = -(0.5 * cDX * density * velocityXI * velocityXI * (surfaceA*sqrt(sin(thetaZO)*sin(thetaZO))));
+  cDX = 1.28f * sqrt(sin(thetaZO) * sin(thetaZO));
+  dragX = -(0.5f * cDX * density * velocityXI * velocityXI * (surfaceA*sqrt(sin(thetaZO)*sin(thetaZO))));
   }
   else{
-  cDX = 1.28 * sqrt(sin(thetaZO) * sin(thetaZO));
-  dragX = (0.5 * cDX * density * velocityXI * velocityXI * (surfaceA*sqrt(sin(thetaZO)*sin(thetaZO))));
+  cDX = 1.28f * sqrt(sin(thetaZO) * sin(thetaZO));
+  dragX = (0.5f * cDX * density * velocityXI * velocityXI * (surfaceA*sqrt(sin(thetaZO)*sin(thetaZO))));
   }
 
   if (velocityZI > 0){
-  cDZ = 1.28 * sqrt(sin(thetaXO) * sin(thetaXO));
-  dragZ = -(0.5 * cDZ * density * velocityZI * velocityZI * (surfaceA*sqrt(sin(thetaXO)*sin(thetaXO))));
+  cDZ = 1.28f * sqrt(sin(thetaXO) * sin(thetaXO));
+  dragZ = -(0.5f * cDZ * density * velocityZI * velocityZI * (surfaceA*sqrt(sin(thetaXO)*sin(thetaXO))));
   }
   else{
-  cDZ = 1.28 * sqrt(sin(thetaXO) * sin(thetaXO));
-  dragZ = (0.5 * cDZ * density * velocityZI * velocityZI * (surfaceA*sqrt(sin(thetaXO)*sin(thetaXO))));
+  cDZ = 1.28f * sqrt(sin(thetaXO) * sin(thetaXO));
+  dragZ = (0.5f * cDZ * density * velocityZI * velocityZI * (surfaceA*sqrt(sin(thetaXO)*sin(thetaXO))));
   }
 
   if (velocityYI > 0){
-  cDY = ((1.28 * cos(thetaXO)) + (1.28 * cos(thetaZO)))/2 ;
-  dragY = (0.5 * cDY * density * velocityYI * velocityYI * (surfaceA*sqrt(cos(thetaXO)*cos(thetaXO))*sqrt(cos(thetaZO)*cos(thetaZO))));
+  cDY = ((1.28f * cos(thetaXO)) + (1.28f * cos(thetaZO)))/2 ;
+  dragY = (0.5f * cDY * density * velocityYI * velocityYI * (surfaceA*sqrt(cos(thetaXO)*cos(thetaXO))*sqrt(cos(thetaZO)*cos(thetaZO))));
   }
   else{
-  cDY = ((1.28 * cos(thetaXO)) + (1.28 * cos(thetaZO)))/2 ;
-  dragY = -(0.5 * cDY * density * velocityYI * velocityYI * (surfaceA*sqrt(cos(thetaXO)*cos(thetaXO))*sqrt(cos(thetaZO)*cos(thetaZO))));
+  cDY = ((1.28f * cos(thetaXO)) + (1.28f * cos(thetaZO)))/2 ;
+  dragY = -(0.5f * cDY * density * velocityYI * velocityYI * (surfaceA*sqrt(cos(thetaXO)*cos(thetaXO))*sqrt(cos(thetaZO)*cos(thetaZO))));
   }
 
 }
 
-void liftCalculations(){
+public void liftCalculations(){
 
   if (thetaZO > 0 && velocityXI > 0){
   cLX = 2 * PI * sqrt(thetaZO*thetaZO);
-  liftX = (0.5 * cLX * density * velocityXI * velocityXI * (surfaceA*sqrt(cos(thetaZO)*cos(thetaZO))));
+  liftX = (0.5f * cLX * density * velocityXI * velocityXI * (surfaceA*sqrt(cos(thetaZO)*cos(thetaZO))));
   }
 
   if (thetaZO < 0 && velocityXI > 0){
   cLX = 2* PI * sqrt(thetaZO*thetaZO);
-  liftX = -(0.5 * cLX * density * velocityXI * velocityXI * (surfaceA*sqrt(cos(thetaZO)*cos(thetaZO))));
+  liftX = -(0.5f * cLX * density * velocityXI * velocityXI * (surfaceA*sqrt(cos(thetaZO)*cos(thetaZO))));
   }
 
   if (thetaZO > 0 && velocityXI < 0){
   cLX = 2* PI * sqrt(thetaZO*thetaZO);
-  liftX = -(0.5 * cLX * density * velocityXI * velocityXI * (surfaceA*sqrt(cos(thetaZO)*cos(thetaZO))));
+  liftX = -(0.5f * cLX * density * velocityXI * velocityXI * (surfaceA*sqrt(cos(thetaZO)*cos(thetaZO))));
   }
 
   if (thetaZO < 0 && velocityXI < 0){
   cLX = 2* PI * sqrt(thetaZO*thetaZO);
-  liftX = (0.5 * cLX * density * velocityXI * velocityXI * (surfaceA*sqrt(cos(thetaZO)*cos(thetaZO))));
+  liftX = (0.5f * cLX * density * velocityXI * velocityXI * (surfaceA*sqrt(cos(thetaZO)*cos(thetaZO))));
   }
 
 
 
   if (thetaXO > 0 && velocityZI > 0){
   cLX = 2 * PI * sqrt(thetaXO*thetaXO);
-  liftZ = (0.5 * cLX * density * velocityZI * velocityZI * (surfaceA*sqrt(cos(thetaXO)*cos(thetaXO))));
+  liftZ = (0.5f * cLX * density * velocityZI * velocityZI * (surfaceA*sqrt(cos(thetaXO)*cos(thetaXO))));
   }
 
   if (thetaXO < 0 && velocityZI > 0){
   cLX = 2* PI * sqrt(thetaXO*thetaXO);
-  liftZ = -(0.5 * cLX * density * velocityZI * velocityZI * (surfaceA*sqrt(cos(thetaXO)*cos(thetaXO))));
+  liftZ = -(0.5f * cLX * density * velocityZI * velocityZI * (surfaceA*sqrt(cos(thetaXO)*cos(thetaXO))));
   }
 
   if (thetaXO > 0 && velocityZI < 0){
   cLX = 2* PI * sqrt(thetaXO*thetaXO);
-  liftZ = -(0.5 * cLX * density * velocityZI * velocityZI * (surfaceA*sqrt(cos(thetaXO)*cos(thetaXO))));
+  liftZ = -(0.5f * cLX * density * velocityZI * velocityZI * (surfaceA*sqrt(cos(thetaXO)*cos(thetaXO))));
   }
 
   if (thetaXO < 0 && velocityZI < 0){
   cLX = 2* PI * sqrt(thetaXO*thetaXO);
-  liftZ = (0.5 * cLX * density * velocityZI * velocityZI * (surfaceA*sqrt(cos(thetaXO)*cos(thetaXO))));
+  liftZ = (0.5f * cLX * density * velocityZI * velocityZI * (surfaceA*sqrt(cos(thetaXO)*cos(thetaXO))));
   }
 
+}
+class DNA {
+  
+  float[] genes = new float[18];  
+  
+  float[] genesPAXZ = new float[10];  //genes Proportional Angle Xdirection Zdirection
+  float[] genesIAXZ = new float[10];
+  float[] genesDAXZ = new float[10];
+  float[] genesPAY = new float[10];
+  float[] genesIAY = new float[10];
+  float[] genesDAY = new float[10];
+  
+  float[] genesPPXZ = new float[10];  //genes Proportional Position Xdirection Zdirection
+  float[] genesIPXZ = new float[10];
+  float[] genesDPXZ = new float[10];
+  float[] genesPPY = new float[10];
+  float[] genesIPY = new float[10];
+  float[] genesDPY = new float[10];
+  
+  
+  DNA() {
+    
+////////////xzAngle///////////////
+
+    for (int i = 0; i < genesPAXZ.length; i++) {
+      genesPAXZ[i] = random(0.0001f, -0.0001f);
+    }
+    
+    for (int i = 0; i < genesIAXZ.length; i++) {
+      genesIAXZ[i] = random(0.000001f, -0.000001f);
+    }
+    
+    for (int i = 0; i < genesDAXZ.length; i++) {
+      genesDAXZ[i] = random(0.001f, -0.001f);
+    }
+////////////yAngle/////////////////    
+      
+    for (int i = 0; i < genesPAY.length; i++) {
+      genesPAY[i] = random(0.0001f, -0.0001f);
+    }
+    
+    for (int i = 0; i < genesIAY.length; i++) {
+      genesIAY[i] = random(0.000001f, -0.000001f);
+    }
+    
+    for (int i = 0; i < genesDAY.length; i++) {
+      genesDAY[i] = random(0.001f, -0.001f);
+    }
+    
+    
+    
+////////////xzPosition///////////////
+
+    for (int i = 0; i < genesPPXZ.length; i++) {
+      genesPPXZ[i] = random(0.1f, -0.1f);
+    }
+    
+    for (int i = 0; i < genesIPXZ.length; i++) {
+      genesIPXZ[i] = random(0.0001f, -0.0001f);
+    }
+    
+    for (int i = 0; i < genesDPXZ.length; i++) {
+      genesDPXZ[i] = random(0.1f, -0.1f);
+    }
+////////////yPosition/////////////////   000 
+      
+    for (int i = 0; i < genesPPY.length; i++) {
+      genesPPY[i] = random(0.1f, -0.1f);
+    }
+    
+    for (int i = 0; i < genesIPY.length; i++) {
+      genesIPY[i] = random(0.001f, -0.001f);
+    }
+    
+    for (int i = 0; i < genesDPY.length; i++) {
+      genesDPY[i] = random(1, -1);
+    }   
+    
+    
+    
+    
+  }
+  
+  public void DNASetup(){
+   
+  genes[0] = kpXA + genesPAXZ[i]; 
+  genes[1] = kpYA + genesPAY[i];
+  genes[2] = kpZA + genesPAXZ[i];
+
+  genes[3] = kiXA + genesIAXZ[i];
+  genes[4] = kiYA + genesIAY[i];
+  genes[5] = kiZA + genesIAXZ[i];
+
+  genes[6] = kdXA + genesDAXZ[i];
+  genes[7] = kdYA + genesDAY[i];
+  genes[8] = kdZA + genesDAXZ[i];
+  
+  
+  genes[9] = kpXP + genesPPXZ[i];
+  genes[10] = kpYP + genesPPY[i];
+  genes[11] = kpZP + genesPPXZ[i];
+
+  genes[12] = kiXP + genesIPXZ[i];
+  genes[13] = kiYP + genesIPY[i];
+  genes[14] = kiZP + genesIPXZ[i];
+
+  genes[15] = kdXP + genesDPXZ[i];
+  genes[16] = kdYP + genesDPY[i];
+  genes[17] = kdZP + genesDPXZ[i];
+   
+  }
+  
+}
+class Route {
+  
+  float[] xPoint = new float[10];
+  float[] zPoint = new float[10];
+  float[] yPoint = new float[10]; 
+  
+  Route(){
+    
+  
+  xPoint[0] = 0;
+  xPoint[1] = 0;
+  xPoint[2] = -200;
+  xPoint[3] = -200;
+  xPoint[4] = -100;
+  xPoint[5] = -100;
+  xPoint[6] = -170;
+  xPoint[7] = -80;
+  xPoint[8] = -100;
+  xPoint[9] = 0;
+  
+  zPoint[0] = 0;
+  zPoint[1] = 200;
+  zPoint[2] = 200;
+  zPoint[3] = -100;
+  zPoint[4] = -100;
+  zPoint[5] = 0;
+  zPoint[6] = 30;
+  zPoint[7] = 60;
+  zPoint[8] = 0;
+  zPoint[9] = 0;
+  
+  yPoint[0] = 200;
+  yPoint[1] = 200;
+  yPoint[2] = 200;
+  yPoint[3] = 200;
+  yPoint[4] = 200;
+  yPoint[5] = 200;
+  yPoint[6] = 200;
+  yPoint[7] = 200;
+  yPoint[8] = 200;
+  yPoint[9] = 200;
+  
+}
+
+}
+  public void settings() {  size(1000, 700, P3D); }
+  static public void main(String[] passedArgs) {
+    String[] appletArgs = new String[] { "XQuad" };
+    if (passedArgs != null) {
+      PApplet.main(concat(appletArgs, passedArgs));
+    } else {
+      PApplet.main(appletArgs);
+    }
+  }
 }

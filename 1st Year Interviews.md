@@ -40,6 +40,8 @@
 
 ## Candidate 3 - Daniyal
 
+### <span style="color:green">Probably our third guy unless someone better shows up on Monday</span>
+
 #### Background
 * Organised large football tournament - managing teams, resolving conflicts.
 * Created a catapult 3 day challenge

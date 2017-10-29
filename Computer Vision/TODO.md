@@ -9,6 +9,11 @@
   * Payload Drop Integration/Jet Thrust Integration.
 - [ ] DJI Mobile SDK
 
+## Pixhawk
+- [ ] Pixhawk 2.1 Cube
+- [ ] Companion Computer
+  * TX1/Odroid/Snapdragon  
+
 ## Computer Vision
 - [ ] OpenCV/BoofCV
   - [ ] Alphanumeric Character Reading

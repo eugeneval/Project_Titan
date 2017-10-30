@@ -11,6 +11,7 @@
 
 ## Pixhawk
 - [ ] Pixhawk 2.1 Cube
+  * Research flight controller
 - [ ] Companion Computer
   * TX1/Odroid/Snapdragon  
 

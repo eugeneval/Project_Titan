@@ -177,16 +177,25 @@ BetaFlight, iNav?
 
 ------
 
-## Candidate
+## Candidate 9 - Nicolas
+
+### A strong contender
 
 #### Background
-*
+* Tennis, piano, planes
+* Year rep
+* Group project - organising a party for little kids
+    * Safety, always keeping them busy, organisation
 
 #### Technical
-*
+* Some experiences with lathes and Solidworks
+* Knew about pressure on the flow diagram
+* Understood CG problem
+    * Suggested tilting vehicle forward to compensate?
+    * Understood moments with a bit of prompting
 
 #### General
-*
+* Confident and knowledgable, English not fantastic
 
 ------
 

@@ -130,7 +130,6 @@ BetaFlight, iNav?
 * Did a foundation course to catch up from Russian system
 * Little experience but is interested
 * Built a sauna
-*
 
 #### Technical
 * Suggested putting payload at rear
@@ -199,15 +198,24 @@ BetaFlight, iNav?
 
 ------
 
-## Candidate
+## Candidate 10 - Ahmed
+
+### Actually a pretty good candidate, how badly do we penalise him for being late
 
 #### Background
-*
+* Sports
+* Quantum Leap head of team
+    * Hydroelectric power plant
+    * Speaker
+* Likes maths and physics
 
 #### Technical
-*
+* Came up with entirely new design
+    * Understood CG problem, but solution was meh
+* Understood moments
+* Sort of understood pressure with some prompting
 
 #### General
-*
+* Well spoken, confident
 
 ------

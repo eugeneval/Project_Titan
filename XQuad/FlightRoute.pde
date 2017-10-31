@@ -1,12 +1,12 @@
 class Route {
-  
+
   float[] xPoint = new float[10];
   float[] zPoint = new float[10];
-  float[] yPoint = new float[10]; 
-  
+  float[] yPoint = new float[10];
+
   Route(){
-    
-  
+
+
   xPoint[0] = 0;
   xPoint[1] = 0;
   xPoint[2] = -200;
@@ -17,7 +17,7 @@ class Route {
   xPoint[7] = -80;
   xPoint[8] = -100;
   xPoint[9] = 0;
-  
+
   zPoint[0] = 0;
   zPoint[1] = 200;
   zPoint[2] = 200;
@@ -28,7 +28,7 @@ class Route {
   zPoint[7] = 60;
   zPoint[8] = 0;
   zPoint[9] = 0;
-  
+
   yPoint[0] = 200;
   yPoint[1] = 200;
   yPoint[2] = 200;
@@ -39,7 +39,7 @@ class Route {
   yPoint[7] = 200;
   yPoint[8] = 200;
   yPoint[9] = 200;
-  
+
 }
 
 }

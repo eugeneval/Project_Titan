@@ -3,7 +3,6 @@
 // Currently uses standard PID Position ----> PID Angle controller.
 // New Version - drag and lift now implemented.
 // This version will try to implement a genetic algorithm to ooptimise a specific flight mission.
-
 /*
 
   QuadX motor configuration

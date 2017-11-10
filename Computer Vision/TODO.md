@@ -1,13 +1,8 @@
 
 # Research:
 
-## DJI
-- [ ] DJI A3
-- [ ] DJI Manifold
-  * Research languages used by the DJI Manifold and which one would be best.
-- [ ] DJI On-board SDK
-  * Payload Drop Integration/Jet Thrust Integration.
-- [ ] DJI Mobile SDK
+## Gazebo
+- [ ] Get PX4 running in Gazebo
 
 ## Pixhawk
 - [ ] Pixhawk 2.1 Cube

@@ -9,4 +9,4 @@ Run `make posix jmavsim` to start in JMAVSim, or
 *__Note:__ these simulations are currently for the default quadcopter*
 
 #### Control
-Open QGroundControl. It will automatically connect and can be used to control the quad in the simulation. Alterntively, it can be controlled from the pxh console in the command line.
+Open QGroundControl. It will automatically connect and can be used to control the quad in the simulation. Alternatively, it can be controlled from the pxh console in the command line that opens when you start the sim.

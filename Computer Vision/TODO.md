@@ -2,13 +2,13 @@
 # Research:
 
 ## Gazebo
-- [ ] Get PX4 running in Gazebo
+- [x] Get PX4 running in Gazebo
 
 ## Pixhawk
 - [ ] Pixhawk 2.1 Cube
-  * Research flight controller
+  - Research flight controller
 - [ ] Companion Computer
-  * TX1/Odroid/Snapdragon  
+  - TX1/Odroid/Snapdragon  
 
 ## Computer Vision
 - [ ] OpenCV/BoofCV

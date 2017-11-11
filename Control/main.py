@@ -13,6 +13,7 @@ MAV_MODE_AUTO = 4
 # Connect to vehicle.
 print("Connecting to vehicle on: %s" % (connection_string,))
 vehicle = connect(connection_string, wait_ready=True)
+time.sleep(1)
 vehicle.wait_ready('autopilot_version')
 
 # Get all vehicle attributes (state), uncomment as needed
@@ -40,18 +41,18 @@ print(" Autopilot Firmware version: %s" % vehicle.version)
 # print("   Supports mission_float message type: %s" % vehicle.capabilities.mission_float)
 # print("   Supports onboard compass calibration: %s" % vehicle.capabilities.compass_calibration)
 print(" Global Location: %s" % vehicle.location.global_frame)
-print(" Global Location (relative altitude): %s" % vehicle.location.global_relative_frame)
-print(" Local Location: %s" % vehicle.location.local_frame)
+# print(" Global Location (relative altitude): %s" % vehicle.location.global_relative_frame)
+# print(" Local Location: %s" % vehicle.location.local_frame)
 print(" Attitude: %s" % vehicle.attitude)
 print(" Velocity: %s" % vehicle.velocity)
 print(" GPS: %s" % vehicle.gps_0)
-print(" Gimbal status: %s" % vehicle.gimbal)
+# print(" Gimbal status: %s" % vehicle.gimbal)
 print(" Battery: %s" % vehicle.battery)
-print(" EKF OK?: %s" % vehicle.ekf_ok)
-print(" Last Heartbeat: %s" % vehicle.last_heartbeat)
-print(" Rangefinder: %s" % vehicle.rangefinder)
-print(" Rangefinder distance: %s" % vehicle.rangefinder.distance)
-print(" Rangefinder voltage: %s" % vehicle.rangefinder.voltage)
+# print(" EKF OK?: %s" % vehicle.ekf_ok)
+# print(" Last Heartbeat: %s" % vehicle.last_heartbeat)
+# print(" Rangefinder: %s" % vehicle.rangefinder)
+# print(" Rangefinder distance: %s" % vehicle.rangefinder.distance)
+# print(" Rangefinder voltage: %s" % vehicle.rangefinder.voltage)
 print(" Heading: %s" % vehicle.heading)
 print(" Is Armable?: %s" % vehicle.is_armable)
 print(" System status: %s" % vehicle.system_status.state)
@@ -70,17 +71,11 @@ while not home_position_set:
     print "Waiting for home position..."
     time.sleep(1)
 print(" Home location: %s" % vehicle.home_location)
-
-# Set to Auto mode
-PX4setMode(vehicle, MAV_MODE_AUTO)
-time.sleep(1)
-print("Vehicle mode should be AUTO: %s" % vehicle.mode.name)
+home = vehicle.location.global_relative_frame
 
 # Load commands
 cmds = vehicle.commands
 cmds.clear()
-
-home = vehicle.location.global_relative_frame
 
 # takeoff to 10 meters
 wp = get_location_offset_meters(home, 0, 0, 10);
@@ -109,6 +104,11 @@ cmds.add(PX4Command(wp, "LND"))
 # Upload mission
 cmds.upload()
 time.sleep(2)
+
+# Set to Auto mode
+PX4setMode(vehicle, MAV_MODE_AUTO)
+time.sleep(1)
+print("Vehicle mode should be AUTO: %s" % vehicle.mode.name)
 
 # Arm vehicle
 vehicle.armed = True

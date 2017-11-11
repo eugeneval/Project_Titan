@@ -27,5 +27,9 @@ Open QGroundControl. It will automatically connect and can be used to control th
     * `vehicle.velocity` for velocity
     * `vehicle.battery` for battery status
     * `vehicle.home_location` for the set home location
-        * *Note: this one can be a bit weird. See DroneKit documentation*
 * PX4 mode changes are not currently fully supported in DroneKit and have their own custom function, `PX4setMode`.
+    * *Note: this is currently only capable of switching to AUTO*
+* Use `PX4Command(wp, type)` to create a command to navigate to a waypoint `wp`, with `type` taking:
+    * `"TO"` for a takeoff command
+    * `"WP"` for a navigation to a waypoint
+    * `"LND"` for a land command

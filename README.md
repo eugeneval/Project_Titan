@@ -3,7 +3,7 @@
 ## Simulation
 
 #### Start PX4 Simulation:
-1. Go to Firmware folder.
+1. Go to Firmware folder in Terminal.
 2. Run `make posix jmavsim` to start in JMAVSim, or
 `make posix_sitl_default gazebo` to start in Gazebo.
 
@@ -22,3 +22,9 @@ Open QGroundControl. It will automatically connect and can be used to control th
 ## DroneKit
 
 * The PX4 simulation is accessed on UDP port `127.0.0.1:14540`
+* Vehicle info is accessed as attributes of the `vehicle` class. Examples:
+    * `vehicle.version` for the autopilot firmware version
+    * `vehicle.velocity` for velocity
+    * `vehicle.battery` for battery status
+    * `vehicle.home_location` for the set home location
+        * *Note: this one can be a bit weird. See DroneKit documentation*

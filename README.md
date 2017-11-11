@@ -28,3 +28,4 @@ Open QGroundControl. It will automatically connect and can be used to control th
     * `vehicle.battery` for battery status
     * `vehicle.home_location` for the set home location
         * *Note: this one can be a bit weird. See DroneKit documentation*
+* PX4 mode changes are not currently fully supported in DroneKit and have their own custom function, `PX4setMode`.

@@ -2,8 +2,10 @@
 print("Starting")
 from dronekit import connect
 # from pymavlink import mavutil
-from PX4 import PX4setMode, PX4Command
-from navigation import get_location_offset_meters
+# from PX4 import PX4setMode, PX4Command
+# from navigation import get_location_offset_meters
+from modules.PX4 import PX4setMode, PX4Command
+from modules.navigation import get_location_offset_meters
 import time
 
 # Settings

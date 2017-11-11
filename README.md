@@ -18,3 +18,7 @@ Open QGroundControl. It will automatically connect and can be used to control th
 * `commander land` to land
 * `commander status` for current system system status
 * `shutdown` to shutdown the simulation
+
+## DroneKit
+
+* The PX4 simulation is accessed on UDP port `127.0.0.1:14540`

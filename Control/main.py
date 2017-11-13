@@ -85,22 +85,49 @@ time.sleep(1)
 print("Vehicle mode should be AUTO: %s" % vehicle.mode.name)
 
 shutdown = False;
+missionNum = 0;
 while shutdown == False:
 
     consoleCommand = raw_input("Enter a command: ")
     if consoleCommand == "takeoff":
-        wp = get_location_offset_meters(home, 0, 0, 10);
+        wp = get_location_offset_meters(home, 0, 0, 10)
         cmds.add(PX4Command(wp, "TO"))
+    if consoleCommand == "north":
+        wp = get_location_offset_meters(wp, 10, 0, 0)
+        cmds.add(PX4Command(wp, "WP"))
+    if consoleCommand == "east":
+        wp = get_location_offset_meters(wp, 0, 10, 0)
+        cmds.add(PX4Command(wp, "WP"))
+    if consoleCommand == "south":
+        wp = get_location_offset_meters(wp, -10, 0, 0)
+        cmds.add(PX4Command(wp, "WP"))
+    if consoleCommand == "west":
+        wp = get_location_offset_meters(wp, 0, -10, 0)
+        cmds.add(PX4Command(wp, "WP"))
+    if consoleCommand == "land":
+        wp = get_location_offset_meters(home, 0, 0, 0)
+        cmds.add(PX4Command(wp, "LND"))
+    if consoleCommand == "shutdown":
+        shutdown = True
+        vehicle.armed = False
+        time.sleep(1)
+        vehicle.close()
+        exit("\nCompleted")
 
     cmds.upload()
-    time.sleep(2)
+    time.sleep(1)
     vehicle.armed = True
 
-    while vehicle.commands.next > 0:
-        time.sleep(1)
+    if consoleCommand == "takeoff" or consoleCommand == "land":
+        while vehicle.commands.next > 0:
+            time.sleep(1)
+    else:
+        while vehicle.commands.next > 1:
+            time.sleep(1)
 
     vehicle.armed = False
-    shutdown = True
+    cmds.clear()
+    cmds.upload()
 
     # # takeoff to 10 meters
     # wp = get_location_offset_meters(home, 0, 0, 10);

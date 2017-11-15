@@ -118,65 +118,17 @@ while shutdown == False:
     time.sleep(1)
     vehicle.armed = True
 
-    if consoleCommand == "takeoff" or consoleCommand == "land":
-        while vehicle.commands.next > 0:
-            time.sleep(1)
-    else:
-        while vehicle.commands.next > 1:
-            time.sleep(1)
+    while vehicle.commands.next > 0:
+        cmds.download()
+        cmds.wait_ready()
+        time.sleep(1)
+        print("Waiting for mission compeletion...Remaining: %s" % vehicle.commands.next)
 
+    print("Mission completed")
     vehicle.armed = False
     cmds.clear()
     cmds.upload()
 
-    # # takeoff to 10 meters
-    # wp = get_location_offset_meters(home, 0, 0, 10);
-    # cmds.add(PX4Command(wp, "TO"))
-    #
-    # # move 10 meters north
-    # wp = get_location_offset_meters(wp, 10, 0, 0);
-    # cmds.add(PX4Command(wp, "WP"))
-    #
-    # # move 10 meters east
-    # wp = get_location_offset_meters(wp, 0, 10, 0);
-    # cmds.add(PX4Command(wp, "WP"))
-    #
-    # # move 10 meters south
-    # wp = get_location_offset_meters(wp, -10, 0, 0);
-    # cmds.add(PX4Command(wp, "WP"))
-    #
-    # # move 10 meters west
-    # wp = get_location_offset_meters(wp, 0, -10, 0);
-    # cmds.add(PX4Command(wp, "WP"))
-    #
-    # # land
-    # wp = get_location_offset_meters(home, 0, 0, 10);
-    # cmds.add(PX4Command(wp, "LND"))
-    #
-    # # Upload mission
-    # cmds.upload()
-    # time.sleep(2)
-    #
-    # # Set to Auto mode
-    # PX4setMode(vehicle, MAV_MODE_AUTO)
-    # time.sleep(1)
-    # print("Vehicle mode should be AUTO: %s" % vehicle.mode.name)
-    #
-    # # Arm vehicle
-    # vehicle.armed = True
-    #
-    # # monitor mission execution
-    # nextwaypoint = vehicle.commands.next
-    # while nextwaypoint < len(vehicle.commands):
-    #     if vehicle.commands.next > nextwaypoint:
-    #         display_seq = vehicle.commands.next+1
-    #         print "Moving to waypoint %s" % display_seq
-    #         nextwaypoint = vehicle.commands.next
-    #     time.sleep(1)
-    #
-    # # wait for the vehicle to land
-    # while vehicle.commands.next > 0:
-    #     time.sleep(1)
 
 
 # Disarm vehicle

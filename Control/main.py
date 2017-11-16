@@ -4,7 +4,7 @@ from dronekit import connect, VehicleMode
 from pymavlink import mavutil
 # from PX4 import PX4setMode, PX4Command
 # from navigation import get_location_offset_meters
-from modules.PX4 import PX4setMode, PX4Command
+from modules.PX4 import PX4Command
 from modules.navigation import get_location_offset_meters, get_location_metres, get_distance_metres
 import time
 
@@ -24,13 +24,10 @@ def send_ned_position(pos_x, pos_y, pos_z):
         0, 0, 0, # x, y, z acceleration (not supported yet, ignored in GCS_Mavlink)
         0, 0)    # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink)
 
-
-
     vehicle.send_mavlink(msg)
 
 # Settings
 connection_string = '127.0.0.1:14540'
-MAV_MODE_AUTO = 4
 
 # Connect to vehicle.
 print("Connecting to vehicle on: %s" % (connection_string,))
@@ -56,20 +53,21 @@ def arm_and_takeoff(targetAlt):
             break
         time.sleep(1)
 
-def goto(pos_x, pos_y, pos_z=vehicle.location.global_relative_frame.alt):
+def goto(pos_x, pos_y):
 
     currentLocation = vehicle.location.global_relative_frame
-    targetLocation = get_location_metres(currentLocation, pos_x, pos_y)
+    targetLocation = get_location_metres(home, pos_x, pos_y)
     targetDistance = get_distance_metres(currentLocation, targetLocation)
 
+    pos_z = -10
     send_ned_position(pos_x, pos_y, pos_z)
     vehicle.mode = VehicleMode("OFFBOARD")
     print("Vehicle mode should be OFFBOARD: %s" % vehicle.mode.name)
 
     while True:
-        send_ned_position(pos_x, pos_y, 0)
+        send_ned_position(pos_x, pos_y, pos_z)
         remainingDistance = get_distance_metres(vehicle.location.global_relative_frame, targetLocation)
-        if remainingDistance<=targetDistance*0.01:
+        if remainingDistance<=targetDistance*0.1:
             print("Arrived at target")
             break
         print "Distance to target: ", remainingDistance
@@ -138,10 +136,12 @@ cmds.clear()
 
 arm_and_takeoff(10)
 
+vehicle.groundspeed = 0.01
+
 goto(10, 0)
+goto(10, 10)
 goto(0, 10)
-goto(-10, 0)
-goto(0, -10)
+goto(0, 0)
 
 vehicle.mode = VehicleMode("RTL")
 time.sleep(1)

@@ -5,7 +5,7 @@ from pymavlink import mavutil
 # from PX4 import PX4setMode, PX4Command
 # from navigation import get_location_offset_meters
 from modules.PX4 import PX4setMode, PX4Command
-from modules.navigation import get_location_offset_meters
+from modules.navigation import get_location_offset_meters, get_location_metres, get_distance_metres
 import time
 
 def send_ned_position(pos_x, pos_y, pos_z):
@@ -27,7 +27,6 @@ def send_ned_position(pos_x, pos_y, pos_z):
 
 
     vehicle.send_mavlink(msg)
-    time.sleep(1)
 
 # Settings
 connection_string = '127.0.0.1:14540'
@@ -57,6 +56,24 @@ def arm_and_takeoff(targetAlt):
             break
         time.sleep(1)
 
+def goto(pos_x, pos_y, pos_z=vehicle.location.global_relative_frame.alt):
+
+    currentLocation = vehicle.location.global_relative_frame
+    targetLocation = get_location_metres(currentLocation, pos_x, pos_y)
+    targetDistance = get_distance_metres(currentLocation, targetLocation)
+
+    send_ned_position(pos_x, pos_y, pos_z)
+    vehicle.mode = VehicleMode("OFFBOARD")
+    print("Vehicle mode should be OFFBOARD: %s" % vehicle.mode.name)
+
+    while True:
+        send_ned_position(pos_x, pos_y, 0)
+        remainingDistance = get_distance_metres(vehicle.location.global_relative_frame, targetLocation)
+        if remainingDistance<=targetDistance*0.01:
+            print("Arrived at target")
+            break
+        print "Distance to target: ", remainingDistance
+        time.sleep(0.1)
 
 # Get all vehicle attributes (state), uncomment as needed
 print("\nGet all vehicle attribute values:")
@@ -121,9 +138,10 @@ cmds.clear()
 
 arm_and_takeoff(10)
 
-send_ned_position(10, 0, 0)
-print("Vehicle mode should be OFFBOARD: %s" % vehicle.mode.name)
-time.sleep(15)
+goto(10, 0)
+goto(0, 10)
+goto(-10, 0)
+goto(0, -10)
 
 vehicle.mode = VehicleMode("RTL")
 time.sleep(1)

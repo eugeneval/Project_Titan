@@ -1,12 +1,33 @@
 
 print("Starting")
-from dronekit import connect
-# from pymavlink import mavutil
+from dronekit import connect, VehicleMode
+from pymavlink import mavutil
 # from PX4 import PX4setMode, PX4Command
 # from navigation import get_location_offset_meters
 from modules.PX4 import PX4setMode, PX4Command
 from modules.navigation import get_location_offset_meters
 import time
+
+def send_ned_position(pos_x, pos_y, pos_z):
+    """
+    Move vehicle in direction based on specified velocity vectors.
+    """
+    vehicle.mode = VehicleMode("OFFBOARD")
+
+    msg = vehicle.message_factory.set_position_target_local_ned_encode(
+        0,       # time_boot_ms (not used)
+        0, 0,    # target system, target component
+        mavutil.mavlink.MAV_FRAME_LOCAL_NED, # frame
+        0b0000111111111000, # type_mask
+        pos_x, pos_y, pos_z, # x, y, z positions
+        0, 0, 0, # x, y, z velocity in m/s
+        0, 0, 0, # x, y, z acceleration (not supported yet, ignored in GCS_Mavlink)
+        0, 0)    # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink)
+
+
+
+    vehicle.send_mavlink(msg)
+    time.sleep(1)
 
 # Settings
 connection_string = '127.0.0.1:14540'
@@ -17,6 +38,25 @@ print("Connecting to vehicle on: %s" % (connection_string,))
 vehicle = connect(connection_string, wait_ready=True)
 time.sleep(1)
 vehicle.wait_ready('autopilot_version')
+
+def arm_and_takeoff(targetAlt):
+    wp = get_location_offset_meters(home, 0, 0, targetAlt)
+    cmds.add(PX4Command(wp, "TO"))
+    cmds.upload()
+    time.sleep(1)
+
+    vehicle.mode = VehicleMode("MISSION")
+    time.sleep(1)
+    print("Vehicle mode should be MISSION: %s" % vehicle.mode.name)
+    vehicle.armed = True
+    while True:
+        print " Altitude: ", vehicle.location.global_relative_frame.alt
+        #Break and return from function just below target altitude.
+        if vehicle.location.global_relative_frame.alt>=targetAlt*0.95:
+            print "Reached target altitude"
+            break
+        time.sleep(1)
+
 
 # Get all vehicle attributes (state), uncomment as needed
 print("\nGet all vehicle attribute values:")
@@ -78,56 +118,64 @@ home = vehicle.location.global_relative_frame
 # Load commands
 cmds = vehicle.commands
 cmds.clear()
-cmds.upload()
 
-PX4setMode(vehicle, MAV_MODE_AUTO)
+arm_and_takeoff(10)
+
+send_ned_position(10, 0, 0)
+print("Vehicle mode should be OFFBOARD: %s" % vehicle.mode.name)
+time.sleep(15)
+
+vehicle.mode = VehicleMode("RTL")
 time.sleep(1)
-print("Vehicle mode should be AUTO: %s" % vehicle.mode.name)
+print("Vehicle mode should be RTL: %s" % vehicle.mode.name)
+while vehicle.armed == True:
+    time.sleep(3)
+    print("Waiting for landing...")
 
-shutdown = False;
-missionNum = 0;
-while shutdown == False:
+# shutdown = False;
+# missionNum = 0;
+# while shutdown == False:
+#
+#     consoleCommand = raw_input("Enter a command: ")
+#     if consoleCommand == "takeoff":
+#         wp = get_location_offset_meters(home, 0, 0, 10)
+#         cmds.add(PX4Command(wp, "TO"))
+#     if consoleCommand == "north":
+#         wp = get_location_offset_meters(wp, 10, 0, 0)
+#         cmds.add(PX4Command(wp, "WP"))
+#     if consoleCommand == "east":
+#         wp = get_location_offset_meters(wp, 0, 10, 0)
+#         cmds.add(PX4Command(wp, "WP"))
+#     if consoleCommand == "south":
+#         wp = get_location_offset_meters(wp, -10, 0, 0)
+#         cmds.add(PX4Command(wp, "WP"))
+#     if consoleCommand == "west":
+#         wp = get_location_offset_meters(wp, 0, -10, 0)
+#         cmds.add(PX4Command(wp, "WP"))
+#     if consoleCommand == "land":
+#         wp = get_location_offset_meters(home, 0, 0, 0)
+#         cmds.add(PX4Command(wp, "LND"))
+#     if consoleCommand == "shutdown":
+#         shutdown = True
+#         vehicle.armed = False
+#         time.sleep(1)
+#         vehicle.close()
+#         exit("\nCompleted")
 
-    consoleCommand = raw_input("Enter a command: ")
-    if consoleCommand == "takeoff":
-        wp = get_location_offset_meters(home, 0, 0, 10)
-        cmds.add(PX4Command(wp, "TO"))
-    if consoleCommand == "north":
-        wp = get_location_offset_meters(wp, 10, 0, 0)
-        cmds.add(PX4Command(wp, "WP"))
-    if consoleCommand == "east":
-        wp = get_location_offset_meters(wp, 0, 10, 0)
-        cmds.add(PX4Command(wp, "WP"))
-    if consoleCommand == "south":
-        wp = get_location_offset_meters(wp, -10, 0, 0)
-        cmds.add(PX4Command(wp, "WP"))
-    if consoleCommand == "west":
-        wp = get_location_offset_meters(wp, 0, -10, 0)
-        cmds.add(PX4Command(wp, "WP"))
-    if consoleCommand == "land":
-        wp = get_location_offset_meters(home, 0, 0, 0)
-        cmds.add(PX4Command(wp, "LND"))
-    if consoleCommand == "shutdown":
-        shutdown = True
-        vehicle.armed = False
-        time.sleep(1)
-        vehicle.close()
-        exit("\nCompleted")
-
-    cmds.upload()
-    time.sleep(1)
-    vehicle.armed = True
-
-    while vehicle.commands.next > 0:
-        cmds.download()
-        cmds.wait_ready()
-        time.sleep(1)
-        print("Waiting for mission compeletion...Remaining: %s" % vehicle.commands.next)
-
-    print("Mission completed")
-    vehicle.armed = False
-    cmds.clear()
-    cmds.upload()
+    # cmds.upload()
+    # time.sleep(1)
+    # vehicle.armed = True
+    #
+    # while vehicle.commands.next > 0:
+    #     cmds.download()
+    #     cmds.wait_ready()
+    #     time.sleep(1)
+    #     print("Waiting for mission compeletion...Remaining: %s" % vehicle.commands.next)
+    #
+    # print("Mission completed")
+    # vehicle.armed = False
+    # cmds.clear()
+    # cmds.upload()
 
 
 

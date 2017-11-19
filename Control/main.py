@@ -53,13 +53,36 @@ def arm_and_takeoff(targetAlt):
             break
         time.sleep(1)
 
-def goto(pos_x, pos_y):
+def goto(pos_x, pos_y, pos_z):
+# Go to a position in the NED coordinate system relative to the home position
+# Note: pos_z UP is NEGATIVE (due to the way NED works)
 
     currentLocation = vehicle.location.global_relative_frame
     targetLocation = get_location_metres(home, pos_x, pos_y)
     targetDistance = get_distance_metres(currentLocation, targetLocation)
 
-    pos_z = -10
+
+    send_ned_position(pos_x, pos_y, pos_z)
+    vehicle.mode = VehicleMode("OFFBOARD")
+    print("Vehicle mode should be OFFBOARD: %s" % vehicle.mode.name)
+
+    while True:
+        send_ned_position(pos_x, pos_y, pos_z)
+        remainingDistance = get_distance_metres(vehicle.location.global_relative_frame, targetLocation)
+        if remainingDistance<=targetDistance*0.1:
+            print("Arrived at target")
+            break
+        print "Distance to target: ", remainingDistance
+        time.sleep(0.1)
+
+# TODO: make this work
+def goto_relative(pos_x, pos_y, pos_z):
+
+    currentLocation = vehicle.location.global_relative_frame
+    targetLocation = get_location_metres(currentLocation, pos_x, pos_y)
+    targetDistance = get_distance_metres(currentLocation, targetLocation)
+
+
     send_ned_position(pos_x, pos_y, pos_z)
     vehicle.mode = VehicleMode("OFFBOARD")
     print("Vehicle mode should be OFFBOARD: %s" % vehicle.mode.name)
@@ -138,17 +161,23 @@ arm_and_takeoff(10)
 
 vehicle.groundspeed = 0.01
 
-goto(10, 0)
-goto(10, 10)
-goto(0, 10)
-goto(0, 0)
+# goto(10, 0, -10)
+# goto(10, 10, -10)
+# goto(0, 10, -10)
+# goto(0, 0, -10)
+
+goto_relative(10, 0, -10)
+goto_relative(0, 10, -10)
+goto_relative(-10, 0, -10)
+goto_relative(0, -10, -10)
 
 vehicle.mode = VehicleMode("RTL")
 time.sleep(1)
 print("Vehicle mode should be RTL: %s" % vehicle.mode.name)
 while vehicle.armed == True:
-    time.sleep(3)
     print("Waiting for landing...")
+    time.sleep(3)
+
 
 # shutdown = False;
 # missionNum = 0;

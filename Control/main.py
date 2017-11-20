@@ -103,7 +103,7 @@ def setMaxXYSpeed(speed):
     print("Set max speed to: %s" % vehicle.parameters['MPC_XY_VEL_MAX'])
     time.sleep(0.5)
 
-def rtl():
+def returnToLand():
     vehicle.mode = VehicleMode("RTL")
     time.sleep(1)
     print("Vehicle mode should be RTL: %s" % vehicle.mode.name)
@@ -186,13 +186,13 @@ goto_absolute(10, 10, 10)
 goto_absolute(0, 10, 10)
 goto_absolute(0, 0, 10)
 
-setMaxXYSpeed(1)
+setMaxXYSpeed(2)
 goto_relative(10, 0, 0, 0.1)
 goto_relative(0, 10, 0, 0.1)
 goto_relative(-10, 0, 0, 0.1)
 goto_relative(0, -10, 0, 0.1)
 
-rtl()
+returnToLand()
 
 
 # shutdown = False;

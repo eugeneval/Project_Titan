@@ -186,7 +186,7 @@ goto_absolute(10, 10, 10)
 goto_absolute(0, 10, 10)
 goto_absolute(0, 0, 10)
 
-setMaxXYSpeed(1)
+setMaxXYSpeed(2)
 goto_relative(10, 0, 0, 0.1)
 goto_relative(0, 10, 0, 0.1)
 goto_relative(-10, 0, 0, 0.1)

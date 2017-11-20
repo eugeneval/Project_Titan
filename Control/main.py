@@ -12,7 +12,7 @@ def send_ned_position(pos_x, pos_y, pos_z):
     """
     Move vehicle in direction based on specified velocity vectors.
     """
-    vehicle.mode = VehicleMode("OFFBOARD")
+    # vehicle.mode = VehicleMode("OFFBOARD")
 
     msg = vehicle.message_factory.set_position_target_local_ned_encode(
         0,       # time_boot_ms (not used)
@@ -28,6 +28,7 @@ def send_ned_position(pos_x, pos_y, pos_z):
 
 # Settings
 connection_string = '127.0.0.1:14540'
+accuracy = 0.5 # The precision in meters with which it will navigate to waypoints
 
 # Connect to vehicle.
 print("Connecting to vehicle on: %s" % (connection_string,))
@@ -48,7 +49,7 @@ def arm_and_takeoff(targetAlt):
     while True:
         print " Altitude: ", vehicle.location.global_relative_frame.alt
         #Break and return from function just below target altitude.
-        if vehicle.location.global_relative_frame.alt>=targetAlt*0.95:
+        if vehicle.location.global_relative_frame.alt>=targetAlt-accuracy:
             print "Reached target altitude"
             break
         time.sleep(1)
@@ -56,10 +57,7 @@ def arm_and_takeoff(targetAlt):
 def goto_absolute(pos_x, pos_y, pos_z):
 # Go to a position relative to the home position
 
-    currentLocation = vehicle.location.local_frame
     targetLocation = LocationLocal(pos_x, pos_y, -pos_z)
-    targetDistance = get_distance_metres_local(currentLocation, targetLocation)
-
 
     send_ned_position(pos_x, pos_y, -pos_z)
     vehicle.mode = VehicleMode("OFFBOARD")
@@ -68,7 +66,7 @@ def goto_absolute(pos_x, pos_y, pos_z):
     while True:
         send_ned_position(pos_x, pos_y, -pos_z)
         remainingDistance = get_distance_metres_local(vehicle.location.local_frame, targetLocation)
-        if remainingDistance<=targetDistance*0.1:
+        if remainingDistance<=accuracy:
             print("Arrived at target")
             break
         print "Distance to target: ", remainingDistance
@@ -78,9 +76,7 @@ def goto_relative(pos_x, pos_y, pos_z):
 # Go to a position relative to the current posotion
 
     currentLocation = vehicle.location.local_frame
-    targetLocation = get_location_metres_local(currentLocation, pos_x, pos_y, -pos_z)
-    targetDistance = get_distance_metres_local(currentLocation, targetLocation)
-
+    targetLocation = get_location_metres_local(currentLocation, pos_x, pos_y, -pos_z)\
 
     send_ned_position(targetLocation.north, targetLocation.east, targetLocation.down)
     vehicle.mode = VehicleMode("OFFBOARD")
@@ -89,7 +85,7 @@ def goto_relative(pos_x, pos_y, pos_z):
     while True:
         send_ned_position(targetLocation.north, targetLocation.east, targetLocation.down)
         remainingDistance = get_distance_metres_local(vehicle.location.local_frame, targetLocation)
-        if remainingDistance<=targetDistance*0.1:
+        if remainingDistance<=accuracy:
             print("Arrived at target")
             break
         print "Distance to target: ", remainingDistance
@@ -158,6 +154,7 @@ cmds.clear()
 
 arm_and_takeoff(10)
 
+# TODO: setting groundspeed currently has no effect
 vehicle.groundspeed = 0.01
 
 goto_absolute(10, 0, 10)

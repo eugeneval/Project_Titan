@@ -41,7 +41,7 @@ vehicle.wait_ready('autopilot_version')
 
 ###############################################################################
 # FUNCTION DEFINITIONS
-# Note: these cannot be declared at the begging as they rely on a vehicle object exisiting
+# Note: these cannot be declared at the begining as they rely on a vehicle object exisiting
 ###############################################################################
 def arm_and_takeoff(targetAlt, accuracy=0.5):
     wp = get_location_offset_meters(home, 0, 0, targetAlt)
@@ -246,6 +246,6 @@ returnToLand()
 vehicle.armed = False
 time.sleep(1)
 
-
+# Close and exit
 vehicle.close()
 print("\nCompleted")

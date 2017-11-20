@@ -26,17 +26,24 @@ def send_ned_position(pos_x, pos_y, pos_z):
 
     vehicle.send_mavlink(msg)
 
-# Settings
+###############################################################################
+# SETTINGS
+###############################################################################
 connection_string = '127.0.0.1:14540'
-accuracy = 0.5 # The precision in meters with which it will navigate to waypoints
 
-# Connect to vehicle.
+###############################################################################
+# CONNECT TO VEHICLE
+###############################################################################
 print("Connecting to vehicle on: %s" % (connection_string,))
 vehicle = connect(connection_string, wait_ready=True)
 time.sleep(1)
 vehicle.wait_ready('autopilot_version')
 
-def arm_and_takeoff(targetAlt):
+###############################################################################
+# FUNCTION DEFINITIONS
+# Note: these cannot be declared at the begging as they rely on a vehicle object exisiting
+###############################################################################
+def arm_and_takeoff(targetAlt, accuracy=0.5):
     wp = get_location_offset_meters(home, 0, 0, targetAlt)
     cmds.add(PX4Command(wp, "TO"))
     cmds.upload()
@@ -54,7 +61,7 @@ def arm_and_takeoff(targetAlt):
             break
         time.sleep(1)
 
-def goto_absolute(pos_x, pos_y, pos_z):
+def goto_absolute(pos_x, pos_y, pos_z, accuracy=0.5):
 # Go to a position relative to the home position
 
     targetLocation = LocationLocal(pos_x, pos_y, -pos_z)
@@ -72,7 +79,7 @@ def goto_absolute(pos_x, pos_y, pos_z):
         print "Distance to target: ", remainingDistance
         time.sleep(0.1)
 
-def goto_relative(pos_x, pos_y, pos_z):
+def goto_relative(pos_x, pos_y, pos_z, accuracy=0.5):
 # Go to a position relative to the current posotion
 
     currentLocation = vehicle.location.local_frame
@@ -91,7 +98,23 @@ def goto_relative(pos_x, pos_y, pos_z):
         print "Distance to target: ", remainingDistance
         time.sleep(0.1)
 
+def setMaxXYSpeed(speed):
+    vehicle.parameters['MPC_XY_VEL_MAX']=speed
+    print("Set max speed to: %s" % vehicle.parameters['MPC_XY_VEL_MAX'])
+    time.sleep(0.5)
+
+def rtl():
+    vehicle.mode = VehicleMode("RTL")
+    time.sleep(1)
+    print("Vehicle mode should be RTL: %s" % vehicle.mode.name)
+    while vehicle.armed == True:
+        print("Waiting for landing...")
+        time.sleep(3)
+
+###############################################################################
+# VEHICLE ATTRIBUTES
 # Get all vehicle attributes (state), uncomment as needed
+###############################################################################
 print("\nGet all vehicle attribute values:")
 print(" Autopilot Firmware version: %s" % vehicle.version)
 # print("   Major version number: %s" % vehicle.version.major)
@@ -152,27 +175,24 @@ home = vehicle.location.global_relative_frame
 cmds = vehicle.commands
 cmds.clear()
 
+###############################################################################
+# MISSION
+###############################################################################
 arm_and_takeoff(10)
 
-# TODO: setting groundspeed currently has no effect
-vehicle.groundspeed = 0.01
-
+setMaxXYSpeed(10)
 goto_absolute(10, 0, 10)
 goto_absolute(10, 10, 10)
 goto_absolute(0, 10, 10)
 goto_absolute(0, 0, 10)
 
-goto_relative(10, 0, 0)
-goto_relative(0, 10, 0)
-goto_relative(-10, 0, 0)
-goto_relative(0, -10, 0)
+setMaxXYSpeed(1)
+goto_relative(10, 0, 0, 0.1)
+goto_relative(0, 10, 0, 0.1)
+goto_relative(-10, 0, 0, 0.1)
+goto_relative(0, -10, 0, 0.1)
 
-vehicle.mode = VehicleMode("RTL")
-time.sleep(1)
-print("Vehicle mode should be RTL: %s" % vehicle.mode.name)
-while vehicle.armed == True:
-    print("Waiting for landing...")
-    time.sleep(3)
+rtl()
 
 
 # shutdown = False;

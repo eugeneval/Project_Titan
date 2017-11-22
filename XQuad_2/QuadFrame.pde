@@ -1,4 +1,4 @@
-class QuadFrame {
+class QuadFrame extends PhysicalObject {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Parameters
@@ -7,18 +7,21 @@ class QuadFrame {
 private float frameInnerRadius = 0.18, frameOuterRadius = 0.2, frameHeight = 0.02, rodLength = 0.2, rodRadius = 0.005;
 private float frameMass, rodMass, motorMass = 0.05;
 private float density = 2700;
-float inertiaX, inertiaY, inertiaZ;
 
+///////////////////////////////////////////////////////////////////////////////
+// Constructor
+//////////////////////////////////////////////////////////////////////////////
     QuadFrame() {
 
         calculateParameters();
-
+        
     }
 
     private void calculateParameters() {
 
         frameMass = density * frameHeight * PI * (frameOuterRadius - frameInnerRadius);
         rodMass = density * rodLength * PI * rodRadius;
+        mass = frameMass + rodMass + motorMass;
 
         float frameInertiaX = ((PI*density*frameHeight)/12) * ((3*(pow(frameOuterRadius, 4) - pow(frameInnerRadius, 4))) + pow(frameHeight, 2)*(pow(frameOuterRadius, 2) - pow(frameInnerRadius, 2)));
         float frameInertiaY = frameInertiaX;

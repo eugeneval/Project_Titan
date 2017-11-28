@@ -8,13 +8,24 @@ private float frameInnerRadius = 0.18, frameOuterRadius = 0.2, frameHeight = 0.0
 private float frameMass, rodMass, motorMass = 0.05;
 private float density = 2700;
 
+private float motorMinForce = 0, motorMaxForce = 40, motorTorqueConstant = 1;
+Motor motor1 = new Motor(motorMinForce, motorMaxForce);
+Motor motor2 = new Motor(motorMinForce, motorMaxForce);
+Motor motor3 = new Motor(motorMinForce, motorMaxForce);
+Motor motor4 = new Motor(motorMinForce, motorMaxForce);
+
 ///////////////////////////////////////////////////////////////////////////////
 // Constructor
 //////////////////////////////////////////////////////////////////////////////
-    QuadFrame() {
-
+    QuadFrame(float setPosX, float setPosY, float setPosZ, float setAngleX, float setAngleY, float setAngleZ) {
+        posX = setPosX;
+        posY = setPosY;
+        posZ = setPosZ;
+        angleX = setAngleX;
+        angleY = setAngleY;
+        angleZ = setAngleZ;
         calculateParameters();
-        
+
     }
 
     private void calculateParameters() {
@@ -43,5 +54,52 @@ private float density = 2700;
 
     }
 
+///////////////////////////////////////////////////////////////////////////////
+// UPDATE
+//////////////////////////////////////////////////////////////////////////////
+    void update(float timeStep) {
+        calculateForces();
+        calculateMovement(timeStep);
+
+    }
+
+
+    private void calculateForces() {
+
+        forceX = (motor1.force() + motor2.force() + motor3.force() + motor4.force()) * sin(angleX) * cos(angleZ);
+        forceY = (motor1.force() + motor2.force() + motor3.force() + motor4.force()) * sin(angleY) * cos(angleZ);
+        forceY = (motor1.force() + motor2.force() + motor3.force() + motor4.force()) * cos(angleX) * cos(angleY);
+
+        momentX = (-motor1.force() - motor2.force() + motor3.force() + motor4.force()) * (rodLength + frameOuterRadius) * cos(radians(45));
+        momentY = (motor1.force() - motor2.force() - motor3.force() + motor4.force()) * (rodLength + frameOuterRadius) * cos(radians(45));
+        momentZ = (motor1.force() - motor2.force() + motor3.force() - motor4.force()) * (rodLength + frameOuterRadius) * cos(radians(45)) * motorTorqueConstant;
+
+    }
+
+// TODO: calulating angle and position changes due to forces and moments
+    private void calculateMovement(float time) {
+
+        accelX = forceX / mass;
+        accelY = forceY / mass;
+        accelZ = forceZ / mass;
+        angleAccelX = momentX / inertiaX;
+        angleAccelY = momentY / inertiaY;
+        angleAccelZ = momentZ / inertiaZ;
+
+        velocityX += (accelX/time);
+        velocityY += (accelY/time);
+        velocityZ += (accelZ/time);
+        angleVelocityX += (angleAccelX/time);
+        angleVelocityY += (angleAccelY/time);
+        angleVelocityZ += (angleAccelZ/time);
+
+        posX += (velocityX/time);
+        posY += (velocityY/time);
+        posZ += (velocityZ/time);
+        angleX += (angleVelocityX/time);
+        angleY += (angleVelocityY/time);
+        angleZ += (angleVelocityZ/time);
+
+    }
 
 }

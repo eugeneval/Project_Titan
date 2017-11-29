@@ -14,8 +14,6 @@ Motor motor2 = new Motor(motorMinForce, motorMaxForce);
 Motor motor3 = new Motor(motorMinForce, motorMaxForce);
 Motor motor4 = new Motor(motorMinForce, motorMaxForce);
 
-float externalXForce, externalYForce, externalZForce;
-
 ///////////////////////////////////////////////////////////////////////////////
 // Constructor
 //////////////////////////////////////////////////////////////////////////////
@@ -90,6 +88,10 @@ float externalXForce, externalYForce, externalZForce;
         momentX = (-motor1.force() - motor2.force() + motor3.force() + motor4.force()) * (rodLength + frameOuterRadius) * cos(radians(45));
         momentY = (motor1.force() - motor2.force() - motor3.force() + motor4.force()) * (rodLength + frameOuterRadius) * cos(radians(45));
         momentZ = (motor1.force() - motor2.force() + motor3.force() - motor4.force()) * (rodLength + frameOuterRadius) * cos(radians(45)) * motorTorqueConstant;
+
+        momentX += externalXMoment;
+        momentY += externalYMoment;
+        momentZ += externalZMoment;
 
     }
 

@@ -69,10 +69,14 @@ void draw() {
     plot(quad.posZ, control.posZ.setPoint);
 
     // Testing response to a disturbance
-    if (currentTime > 10)
+    if (currentTime > 10) {
         quad.externalZForce = -1000;
-    if (currentTime > 10.01)
-        quad.externalZForce = 0;
+        // quad.externalXMoment = 1000;
+        // quad.externalYMoment = 1000;
+    }
+    if (currentTime > 10.01) {
+        quad.noForces();
+    }
 
     currentTime += timeStep;
     if (currentTime >= runTime) {

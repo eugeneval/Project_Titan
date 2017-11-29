@@ -4,15 +4,17 @@ class QuadFrame extends PhysicalObject {
 // Parameters
 //////////////////////////////////////////////////////////////////////////////
 
-private float frameInnerRadius = 0.18, frameOuterRadius = 0.2, frameHeight = 0.02, rodLength = 0.2, rodRadius = 0.005;
-private float frameMass, rodMass, motorMass = 0.05;
-private float density = 2700;
+final private float frameInnerRadius = 0.18, frameOuterRadius = 0.2, frameHeight = 0.005, rodLength = 0.1, rodRadius = 0.002;
+final private float density = 2700;
+float frameMass, rodMass, motorMass = 0.05;
 
-private float motorMinForce = 0, motorMaxForce = 40, motorTorqueConstant = 1;
+final private float motorMinForce = 0, motorMaxForce = 10, motorTorqueConstant = 1;
 Motor motor1 = new Motor(motorMinForce, motorMaxForce);
 Motor motor2 = new Motor(motorMinForce, motorMaxForce);
 Motor motor3 = new Motor(motorMinForce, motorMaxForce);
 Motor motor4 = new Motor(motorMinForce, motorMaxForce);
+
+float externalXForce, externalYForce, externalZForce;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constructor
@@ -68,7 +70,12 @@ Motor motor4 = new Motor(motorMinForce, motorMaxForce);
 
         forceX = (motor1.force() + motor2.force() + motor3.force() + motor4.force()) * sin(angleX) * cos(angleZ);
         forceY = (motor1.force() + motor2.force() + motor3.force() + motor4.force()) * sin(angleY) * cos(angleZ);
-        forceY = (motor1.force() + motor2.force() + motor3.force() + motor4.force()) * cos(angleX) * cos(angleY);
+        forceZ = (motor1.force() + motor2.force() + motor3.force() + motor4.force()) * cos(angleX) * cos(angleY);
+        forceZ -= (9.81 * mass); // Don't forget about gravity!
+
+        forceX += externalXForce;
+        forceY += externalYForce;
+        forceZ += externalZForce;
 
         momentX = (-motor1.force() - motor2.force() + motor3.force() + motor4.force()) * (rodLength + frameOuterRadius) * cos(radians(45));
         momentY = (motor1.force() - motor2.force() - motor3.force() + motor4.force()) * (rodLength + frameOuterRadius) * cos(radians(45));
@@ -76,7 +83,6 @@ Motor motor4 = new Motor(motorMinForce, motorMaxForce);
 
     }
 
-// TODO: calulating angle and position changes due to forces and moments
     private void calculateMovement(float time) {
 
         accelX = forceX / mass;
@@ -86,20 +92,24 @@ Motor motor4 = new Motor(motorMinForce, motorMaxForce);
         angleAccelY = momentY / inertiaY;
         angleAccelZ = momentZ / inertiaZ;
 
-        velocityX += (accelX/time);
-        velocityY += (accelY/time);
-        velocityZ += (accelZ/time);
-        angleVelocityX += (angleAccelX/time);
-        angleVelocityY += (angleAccelY/time);
-        angleVelocityZ += (angleAccelZ/time);
+        velocityX += (accelX*time);
+        velocityY += (accelY*time);
+        velocityZ += (accelZ*time);
+        angleVelocityX += (angleAccelX*time);
+        angleVelocityY += (angleAccelY*time);
+        angleVelocityZ += (angleAccelZ*time);
 
-        posX += (velocityX/time);
-        posY += (velocityY/time);
-        posZ += (velocityZ/time);
-        angleX += (angleVelocityX/time);
-        angleY += (angleVelocityY/time);
-        angleZ += (angleVelocityZ/time);
+        posX += (velocityX*time);
+        posY += (velocityY*time);
+        posZ += (velocityZ*time);
+        angleX += (angleVelocityX*time);
+        angleY += (angleVelocityY*time);
+        angleZ += (angleVelocityZ*time);
 
+        // Cannot go below ground level
+        if (posZ < 0) {
+            posZ = 0;
+        }
     }
 
 }

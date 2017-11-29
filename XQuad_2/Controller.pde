@@ -1,8 +1,9 @@
 class Controller {
 
-    private float integralZ, prevErrorZ;
-    private float kPZ = 1.6, kIZ = 0.01, kDZ = 1;
-    float setZ;
+    PID_Values posZ = new PID_Values(1.6, 0.01, 1);
+
+    float setX, setY, setZ;
+    float setXAngle, setYAngle, setZAngle;
 
     QuadFrame quad;
 
@@ -11,11 +12,11 @@ class Controller {
     }
 
     void setAlt(float desiredAlt) {
-        setZ = desiredAlt;
+        posZ.setPoint = desiredAlt;
     }
 
     void update(float time) {
-        float correctionZ = posZPID(time);
+        float correctionZ = posZ.calculate(time, quad.posZ);
 
         changeAllMotors(correctionZ);
     }
@@ -26,14 +27,6 @@ class Controller {
         quad.motor3.setThrottle(correctionZ);
         quad.motor4.setThrottle(correctionZ);
 
-    }
-
-    private float posZPID(float time) {
-        float errorZ = setZ - quad.posZ;
-        integralZ += (errorZ*time);
-        float derivativeZ = (errorZ - prevErrorZ)/time;
-        prevErrorZ = errorZ;
-        return (kPZ*errorZ + kIZ*integralZ + kDZ*derivativeZ);
     }
 
 }

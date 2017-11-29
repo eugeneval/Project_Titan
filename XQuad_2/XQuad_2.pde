@@ -66,7 +66,7 @@ void draw() {
     // println(quad.posX + "\t" + quad.posY + "\t" + quad.posZ + "\t" + quad.angleX + "\t" + quad.angleY + "\t" + quad.angleZ);
     println(nf(currentTime, 3, 2) + "\t" + nf(quad.posZ, 2, 2) + "\t\t" + quad.motor1.throttle + "\t" + quad.motor2.throttle + "\t" + quad.motor3.throttle + "\t" + quad.motor4.throttle);
 
-    plot(quad.posZ, control.setZ);
+    plot(quad.posZ, control.posZ.setPoint);
 
     // Testing response to a disturbance
     if (currentTime > 10)

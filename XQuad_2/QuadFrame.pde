@@ -59,10 +59,20 @@ float externalXForce, externalYForce, externalZForce;
 ///////////////////////////////////////////////////////////////////////////////
 // UPDATE
 //////////////////////////////////////////////////////////////////////////////
-    void update(float timeStep) {
+    void update(float timeStep, TableRow row) {
         calculateForces();
         calculateMovement(timeStep);
 
+        row.setFloat("posX", posX);
+        row.setFloat("posY", posY);
+        row.setFloat("posZ", posZ);
+        row.setFloat("angleX", angleX);
+        row.setFloat("angleY", angleY);
+        row.setFloat("angleZ", angleZ);
+        row.setFloat("m1", motor1.throttle);
+        row.setFloat("m2", motor2.throttle);
+        row.setFloat("m3", motor3.throttle);
+        row.setFloat("m4", motor4.throttle);
     }
 
 

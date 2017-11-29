@@ -15,16 +15,34 @@ float maxLoops = runTime/timeStep;
 // Plotting
 int xPos;
 
+//Saving data
+Table log = new Table();
+String fileName = "movement";
+
 void setup() {
 
     frameRate(1/timeStep);
 
-    size(360, 240);
+    size(720, 240);
     background(0);
 
+    log.addColumn("time");
+    log.addColumn("posX");
+    log.addColumn("posY");
+    log.addColumn("posZ");
+    log.addColumn("angleX");
+    log.addColumn("angleY");
+    log.addColumn("angleZ");
+    log.addColumn("m1");
+    log.addColumn("m2");
+    log.addColumn("m3");
+    log.addColumn("m4");
 }
 
 void draw() {
+
+    TableRow logRow = log.addRow();
+    logRow.setFloat("time", currentTime);
 
     if (start) {
         // Testing - check inertias
@@ -42,13 +60,13 @@ void draw() {
         delay(1000);
     }
 
-    quad.update(timeStep);
+    quad.update(timeStep, logRow);
     control.update(timeStep);
 
     // println(quad.posX + "\t" + quad.posY + "\t" + quad.posZ + "\t" + quad.angleX + "\t" + quad.angleY + "\t" + quad.angleZ);
     println(nf(currentTime, 3, 2) + "\t" + nf(quad.posZ, 2, 2) + "\t\t" + quad.motor1.throttle + "\t" + quad.motor2.throttle + "\t" + quad.motor3.throttle + "\t" + quad.motor4.throttle);
 
-    plot(quad.posZ);
+    plot(quad.posZ, control.setZ);
 
     // Testing response to a disturbance
     if (currentTime > 10)
@@ -58,21 +76,22 @@ void draw() {
 
     currentTime += timeStep;
     if (currentTime >= runTime) {
+        saveTable(log, "data/" + fileName + ".csv");
         exit();
     }
 }
 
-private void plot(float y) {
+private void plot(float y, float setPoint) {
 
     stroke(127, 34, 255);
     line(xPos, height, xPos, height-(y*10));
+    stroke(255, 5, 5);
+    line(0, height-setPoint*10, width, height-setPoint*10);
 
     // at the edge of the screen, go back to the beginning:
     if (xPos >= width) {
       xPos = 0;
       background(0);
-      stroke(255, 5, 5);
-      line(0, height-control.setZ*10, width, height-control.setZ*10);
     } else {
       xPos++;
     }

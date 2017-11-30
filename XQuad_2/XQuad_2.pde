@@ -5,19 +5,26 @@ PeasyCam cam;
 // Run in which mode?
 // Accepted inputs: PLOT, 3D
 final String simRunMode = "PLOT";
-// Accepted inputs: HEIGHT, XANGLE
-final String plottedVariable = "HEIGHT";
-final float startingHeight = 0;
+// Accepted inputs: HEIGHT, XANGLE, YANGLE
+final String plottedVariable = "YANGLE";
+final float startingHeight = 10;
 
 // Saving data
+// WARNING will overwrite old data if given same name
 Table log = new Table();
 String fileName = "X and Y angle disturbance";
 final boolean save = false;
 
 // Timing
 final float timeStep = 0.005;
-final float runTime = 20;
+final float runTime = 15;
+final float eventTime = 5; // when the disturbance is applied
+final float eventLength = 0.01;
 float currentTime = 0;
+
+// Plotting
+int xPos;
+final int plotSensitivity = 30; // pixel height = value*plotSensitivity
 
 // Objects
 QuadFrame quad = new QuadFrame(0, 0, startingHeight, 0, 0, 0);
@@ -27,9 +34,6 @@ Controller control = new Controller(quad);
 // Loop control
 int loopNumber = 0;
 final float maxLoops = runTime/timeStep;
-
-// Plotting
-int xPos;
 
 void setup() {
 
@@ -99,6 +103,10 @@ void draw() {
             plot(quad.angleX, control.angleX.setPoint);
             break;
 
+            case "YANGLE":
+            plot(quad.angleY, control.angleY.setPoint);
+            break;
+
             default:
             println("PLOTTED VARIABLE SELECTION ERROR");
             exit();
@@ -128,12 +136,12 @@ void draw() {
     }
 
 ///// Testing response to a disturbance /////
-    if (currentTime > 10) {
+    if (currentTime > eventTime) {
         // quad.externalZForce = -1000;
-        // quad.externalXMoment = 100;
-        // quad.externalYMoment = 100;
+        quad.externalXMoment = 100;
+        quad.externalYMoment = 100;
     }
-    if (currentTime > 10.01) {
+    if (currentTime > (eventTime + eventLength)) {
         quad.noForces();
     }
 
@@ -149,7 +157,7 @@ void draw() {
 private void plot(float y, float setPoint) {
 
     stroke(127, 34, 255);
-    line(xPos, height/2, xPos, height/2-(y*10));
+    line(xPos, height/2, xPos, height/2-(y*plotSensitivity));
     stroke(255, 5, 5);
     line(0, (height/2)-setPoint*10, width, (height/2)-setPoint*10);
 

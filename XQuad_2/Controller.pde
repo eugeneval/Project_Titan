@@ -1,9 +1,9 @@
 class Controller {
 
     PID_Values posZ = new PID_Values(1.6, 0.01, 1);
-    PID_Values angleX = new PID_Values(1, 0.01, 1);
-    PID_Values angleY = new PID_Values(1, 0.01, 1);
-    PID_Values angleZ = new PID_Values(1, 0.01, 1);
+    PID_Values angleX = new PID_Values(3, 0.01, 1);
+    PID_Values angleY = new PID_Values(3, 0.01, 1);
+    PID_Values angleZ = new PID_Values(3, 0.01, 1);
 
     QuadFrame quad;
 

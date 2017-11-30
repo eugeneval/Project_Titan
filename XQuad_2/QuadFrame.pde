@@ -79,7 +79,9 @@ Motor motor4 = new Motor(motorMinForce, motorMaxForce);
         forceX = (motor1.force() + motor2.force() + motor3.force() + motor4.force()) * sin(angleX) * cos(angleZ);
         forceY = (motor1.force() + motor2.force() + motor3.force() + motor4.force()) * sin(angleY) * cos(angleZ);
         forceZ = (motor1.force() + motor2.force() + motor3.force() + motor4.force()) * cos(angleX) * cos(angleY);
-        forceZ -= (9.81 * mass); // Don't forget about gravity!
+
+        // Gravity
+        forceZ -= (9.81 * mass);
 
         forceX += externalXForce;
         forceY += externalYForce;

@@ -3,17 +3,17 @@ import peasy.*;
 PeasyCam cam;
 
 // Run in which mode?
-// Accepted inputs: PLOT, 3D
+// Accepted inputs: PLOT, 3D, DATAONLY
 final String simRunMode = "PLOT";
-// Accepted inputs: HEIGHT, XANGLE, YANGLE
-final String plottedVariable = "YANGLE";
-final float startingHeight = 10;
+// Accepted inputs: HEIGHT, XANGLE, YANGLE, XPOS
+final String plottedVariable = "XPOS";
+final float startingHeight = 0;
 
 // Saving data
 // WARNING will overwrite old data if given same name
 Table log = new Table();
-String fileName = "X and Y angle disturbance";
-final boolean save = false;
+String fileName = "X and Y position controllers 2";
+final boolean save = true;
 
 // Timing
 final float timeStep = 0.005;
@@ -24,7 +24,7 @@ float currentTime = 0;
 
 // Plotting
 int xPos;
-final int plotSensitivity = 30; // pixel height = value*plotSensitivity
+final int plotSensitivity = 10; // pixel height = value*plotSensitivity
 
 // Objects
 QuadFrame quad = new QuadFrame(0, 0, startingHeight, 0, 0, 0);
@@ -107,6 +107,10 @@ void draw() {
             plot(quad.angleY, control.angleY.setPoint);
             break;
 
+            case "XPOS":
+            plot(quad.posX, control.posX.setPoint);
+            break;
+
             default:
             println("PLOTTED VARIABLE SELECTION ERROR");
             exit();
@@ -159,7 +163,7 @@ private void plot(float y, float setPoint) {
     stroke(127, 34, 255);
     line(xPos, height/2, xPos, height/2-(y*plotSensitivity));
     stroke(255, 5, 5);
-    line(0, (height/2)-setPoint*10, width, (height/2)-setPoint*10);
+    line(0, (height/2)-setPoint*plotSensitivity, width, (height/2)-setPoint*plotSensitivity);
 
     // at the edge of the screen, go back to the beginning:
     if (xPos >= width) {

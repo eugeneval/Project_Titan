@@ -8,7 +8,7 @@ final private float frameInnerRadius = 0.18, frameOuterRadius = 0.2, frameHeight
 final private float density = 2700;
 float frameMass, rodMass, motorMass = 0.05;
 
-final private float motorMinForce = 0, motorMaxForce = 10, motorTorqueConstant = 1;
+final private float motorMinForce = 0, motorMaxForce = 15, motorTorqueConstant = 1;
 Motor motor1 = new Motor(motorMinForce, motorMaxForce);
 Motor motor2 = new Motor(motorMinForce, motorMaxForce);
 Motor motor3 = new Motor(motorMinForce, motorMaxForce);

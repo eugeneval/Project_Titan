@@ -3,7 +3,7 @@ class PID_Values {
     private float kP, kI, kD, integralWindUp = 250;
     private float integral, prevError, maxSetPoint;
     float setPoint = 0;
-    private boolean existsMaxSetPoint = false, isPositionController = false;
+    private boolean existsMaxSetPoint = false;
 
     PID_Values(float setKP, float setKI, float setKD) {
         kP = setKP;
@@ -18,12 +18,6 @@ class PID_Values {
         kD = setKD;
         maxSetPoint = setMaxSetPoint;
         existsMaxSetPoint = true;
-    }
-    PID_Values(float setKP, float setKI, float setKD, boolean setIsPositionController) {
-        kP = setKP;
-        kI = setKI;
-        kD = setKD;
-        isPositionController = setIsPositionController;
     }
 
     void set(float newSetPoint) {
@@ -46,11 +40,7 @@ class PID_Values {
         }
         float derivative = (error - prevError)/time;
         prevError = error;
-        if (isPositionController) {
-            return (kP*error + kI*integral + kD*derivative);
-        } else {
-            return (kP*error + kI*integral + kD*derivative);
-        }
+        return (kP*error + kI*integral + kD*derivative);
     }
 
 }

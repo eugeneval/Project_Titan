@@ -113,17 +113,22 @@ Motor motor4 = new Motor(motorMinForce, motorMaxForce);
         angleVelocityY += (angleAccelY*time);
         angleVelocityZ += (angleAccelZ*time);
 
+        posZ += (velocityZ*time);
+        // Cannot go below ground level, if at ground level cannot move other than up
+        if (posZ < 0) {
+            posZ = 0;
+            velocityX = 0;
+            velocityY = 0;
+            angleVelocityX = 0;
+            angleVelocityY = 0;
+            angleVelocityZ = 0;
+        }
+
         posX += (velocityX*time);
         posY += (velocityY*time);
-        posZ += (velocityZ*time);
         angleX += (angleVelocityX*time);
         angleY += (angleVelocityY*time);
         angleZ += (angleVelocityZ*time);
-
-        // Cannot go below ground level
-        if (posZ < 0) {
-            posZ = 0;
-        }
     }
 
 }

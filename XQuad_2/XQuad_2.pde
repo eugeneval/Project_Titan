@@ -7,17 +7,17 @@ PeasyCam cam;
 final String simRunMode = "PLOT";
 // Accepted inputs: HEIGHT, XANGLE, YANGLE, XPOS
 final String plottedVariable = "XPOS";
-final float startingHeight = 0;
+final float startingHeight = 10;
 
 // Saving data
 // WARNING will overwrite old data if given same name
 Table log = new Table();
-String fileName = "Basic square flight 2";
+String fileName = "Basic square flight 3";
 final boolean save = true;
 
 // Timing
 final float timeStep = 0.005;
-final float runTime = 45;
+final float runTime = 35;
 final float eventTime = 5; // when the disturbance is applied
 final float eventLength = 0.01;
 float currentTime = 0;
@@ -28,7 +28,7 @@ final int plotSensitivity = 10; // pixel height = value*plotSensitivity
                                 // use ~10 for pos, ~500 for angle
 
 // Objects
-QuadFrame quad = new QuadFrame(0, 0, startingHeight, 0, 0, 0);
+QuadFrame quad = new QuadFrame(10, 10, startingHeight, 0, 0, 0);
 Jet jet = new Jet(0, 0, 0, 0, 0, 0);
 Controller control = new Controller(quad);
 
@@ -59,11 +59,17 @@ void setup() {
 
     log.addColumn("time");
     log.addColumn("posX");
+    log.addColumn("setPosX");
     log.addColumn("posY");
+    log.addColumn("setPosY");
     log.addColumn("posZ");
+    log.addColumn("setPosZ");
     log.addColumn("angleX");
+    log.addColumn("setAngleX");
     log.addColumn("angleY");
+    log.addColumn("setAngleY");
     log.addColumn("angleZ");
+    log.addColumn("setAngleZ");
     log.addColumn("m1");
     log.addColumn("m2");
     log.addColumn("m3");
@@ -89,7 +95,7 @@ void draw() {
     TableRow logRow = log.addRow();
     logRow.setString("time", nf(currentTime, 3, 3));
     quad.update(timeStep, logRow);
-    control.update(timeStep);
+    control.update(timeStep, logRow);
     finish = control.waypointNavigation();
 
     // if (currentTime > 5)

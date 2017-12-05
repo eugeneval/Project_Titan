@@ -47,7 +47,7 @@ class PID_Values {
         float derivative = (error - prevError)/time;
         prevError = error;
         if (isPositionController) {
-            return (-kP*error + kI*integral + kD*derivative);
+            return (kP*error + kI*integral + kD*derivative);
         } else {
             return (kP*error + kI*integral + kD*derivative);
         }

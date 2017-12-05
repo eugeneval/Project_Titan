@@ -5,9 +5,9 @@ class Controller {
     PID_Values posZ = new PID_Values(150, 0.03, 100);
     PID_Values angleX = new PID_Values(50, 0.01, 10, radians(25));
     PID_Values angleY = new PID_Values(50, 0.01, 10, radians(25));
-    PID_Values angleZ = new PID_Values(3, 0.01, 1);
+    PID_Values angleZ = new PID_Values(50, 0.01, 10);
 
-    final float accuracy = 0.5;
+    final float accuracy = 0.1;
 
     final float[] wpStart = {0, 0, 0}, wp1 = {0, 0, 10}, wp2 = {10, 0, 10}, wp3 = {10, 10, 10}, wp4 = {0, 10, 10}, wp5 = {0, 0, 10}, wpFinal = {0, 0, 0};
     final float[][] wayPoints = {wpStart, wp1, wp2, wp3, wp4, wp5, wpFinal};

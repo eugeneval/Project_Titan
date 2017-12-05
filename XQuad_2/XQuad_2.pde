@@ -17,7 +17,7 @@ final boolean save = true;
 
 // Timing
 final float timeStep = 0.005;
-final float runTime = 80;
+final float runTime = 45;
 final float eventTime = 5; // when the disturbance is applied
 final float eventLength = 0.01;
 float currentTime = 0;
@@ -90,18 +90,20 @@ void draw() {
     logRow.setString("time", nf(currentTime, 3, 3));
     quad.update(timeStep, logRow);
     control.update(timeStep);
-    // finish = control.waypointNavigation();
+    finish = control.waypointNavigation();
 
-    if (currentTime > 5)
-        control.posX.set(10);
-    if (currentTime > 20)
-        control.posX.set(-10);
-    if (currentTime > 35)
-        control.posX.set(10);
-    if (currentTime > 50)
-        control.posX.set(-10);
-    if (currentTime > 65)
-        control.posX.set(0);
+    // if (currentTime > 5)
+    //     control.posX.set(10);
+    // if (currentTime > 20)
+    //     control.posX.set(-10);
+    // if (currentTime > 35)
+    //     control.posX.set(10);
+    // if (currentTime > 50)
+    //     control.posX.set(-10);
+    // if (currentTime > 65)
+    //     control.posX.set(0);
+    // if (currentTime > 80)
+    //     control.setAlt(10);
 
 /////Display Data /////
     println(nf(currentTime, 3, 2) + "\t" + quad.posX + "\t" + quad.posY + "\t" + quad.posZ + "\t" + quad.angleX + "\t" + quad.angleY + "\t" + quad.angleZ);

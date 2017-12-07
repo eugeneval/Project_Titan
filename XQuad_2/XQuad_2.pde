@@ -7,7 +7,7 @@ PeasyCam cam;
 final String simRunMode = "PLOT";
 // Accepted inputs: HEIGHT, XANGLE, YANGLE, XPOS
 final String plottedVariable = "XPOS";
-final float startingHeight = 10;
+final float startingHeight = 0;
 
 // Saving data
 // WARNING will overwrite old data if given same name
@@ -17,7 +17,7 @@ final boolean save = true;
 
 // Timing
 final float timeStep = 0.005;
-final float runTime = 35;
+final float runTime = 60;
 final float eventTime = 5; // when the disturbance is applied
 final float eventLength = 0.01;
 float currentTime = 0;
@@ -28,7 +28,7 @@ final int plotSensitivity = 10; // pixel height = value*plotSensitivity
                                 // use ~10 for pos, ~500 for angle
 
 // Objects
-QuadFrame quad = new QuadFrame(10, 10, startingHeight, 0, 0, 0);
+QuadFrame quad = new QuadFrame(0, 0, startingHeight, 0, 0, 0);
 Jet jet = new Jet(0, 0, 0, 0, 0, 0);
 Controller control = new Controller(quad);
 

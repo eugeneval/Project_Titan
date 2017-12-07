@@ -7,7 +7,7 @@ class Controller {
     PID_Values angleY = new PID_Values(50, 0.01, 10, radians(25));
     PID_Values angleZ = new PID_Values(50, 0.01, 10);
 
-    final float accuracy = 0.1;
+    final float accuracy = 0.2;
 
     final float[] wpStart = {0, 0, 0}, wp1 = {0, 0, 10}, wp2 = {10, 0, 10}, wp3 = {10, 10, 10}, wp4 = {0, 10, 10}, wp5 = {0, 0, 10}, wpFinal = {0, 0, 0};
     final float[][] wayPoints = {wpStart, wp1, wp2, wp3, wp4, wp5, wpFinal};
@@ -15,9 +15,9 @@ class Controller {
     // final float[][] wayPoints = {wp1, wp2};
     int currentWP = 0;
 
-    QuadFrame quad;
+    Quad quad;
 
-    Controller(QuadFrame newQuad) {
+    Controller(Quad newQuad) {
         quad = newQuad;
     }
 
@@ -29,9 +29,9 @@ class Controller {
         angleX.set(posX.calculate(time, quad.posX));
         angleY.set(posY.calculate(time, quad.posY));
         float z = posZ.calculate(time, quad.posZ);
-        float xAngle = angleX.calculate(time, quad.angleX);
-        float yAngle = angleY.calculate(time, quad.angleY);
-        float zAngle = angleZ.calculate(time, quad.angleZ);
+        float xAngle = angleX.calculate(time, quad.quad.angleX);
+        float yAngle = angleY.calculate(time, quad.quad.angleY);
+        float zAngle = angleZ.calculate(time, quad.quad.angleZ);
 
         logRow.setFloat("setPosX", posX.setPoint);
         logRow.setFloat("setPosY", posY.setPoint);
@@ -40,10 +40,10 @@ class Controller {
         logRow.setFloat("setAngleY", angleY.setPoint);
         logRow.setFloat("setAngleZ", angleZ.setPoint);
 
-        quad.motor1.setThrottle(z - xAngle + yAngle + zAngle);
-        quad.motor2.setThrottle(z - xAngle - yAngle - zAngle);
-        quad.motor3.setThrottle(z + xAngle - yAngle + zAngle);
-        quad.motor4.setThrottle(z + xAngle + yAngle - zAngle);
+        quad.quad.motor1.setThrottle(z - xAngle + yAngle + zAngle);
+        quad.quad.motor2.setThrottle(z - xAngle - yAngle - zAngle);
+        quad.quad.motor3.setThrottle(z + xAngle - yAngle + zAngle);
+        quad.quad.motor4.setThrottle(z + xAngle + yAngle - zAngle);
     }
 
     boolean waypointNavigation() {

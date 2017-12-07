@@ -14,25 +14,38 @@ Motor motor2 = new Motor(motorMinForce, motorMaxForce);
 Motor motor3 = new Motor(motorMinForce, motorMaxForce);
 Motor motor4 = new Motor(motorMinForce, motorMaxForce);
 
+GimbalServo gimbalX, gimbalY;
+Jet jet;
+
 ///////////////////////////////////////////////////////////////////////////////
 // Constructor
 //////////////////////////////////////////////////////////////////////////////
-    QuadFrame(float setPosX, float setPosY, float setPosZ, float setAngleX, float setAngleY, float setAngleZ) {
+    QuadFrame(float setPosX, float setPosY, float setPosZ, float setAngleX, float setAngleY, float setAngleZ, GimbalServo x, GimbalServo y) {
         posX = setPosX;
         posY = setPosY;
         posZ = setPosZ;
         angleX = setAngleX;
         angleY = setAngleY;
         angleZ = setAngleZ;
+        connectServos(x, y);
         calculateParameters();
 
+    }
+
+    void connectServos(GimbalServo x, GimbalServo y) {
+        gimbalX = x;
+        gimbalY = y;
+    }
+
+    void connectJet(Jet newJet) {
+        jet = newJet;
     }
 
     private void calculateParameters() {
 
         frameMass = density * frameHeight * PI * (frameOuterRadius - frameInnerRadius);
         rodMass = density * rodLength * PI * rodRadius;
-        mass = frameMass + rodMass + motorMass;
+        mass = frameMass + rodMass + motorMass + 2*gimbalX.mass; // TODO needs to be 4* rods and motors
 
         float frameInertiaX = ((PI*density*frameHeight)/12) * ((3*(pow(frameOuterRadius, 4) - pow(frameInnerRadius, 4))) + pow(frameHeight, 2)*(pow(frameOuterRadius, 2) - pow(frameInnerRadius, 2)));
         float frameInertiaY = frameInertiaX;
@@ -46,9 +59,13 @@ Motor motor4 = new Motor(motorMinForce, motorMaxForce);
         float motorInertiaY = motorInertiaX;
         float motorInertiaZ = motorMass * pow((frameOuterRadius + rodLength), 2);
 
-        inertiaX = frameInertiaX + 4*rodInertiaX + 4*motorInertiaX;
-        inertiaY = frameInertiaY + 4*rodInertiaY + 4*motorInertiaY;
-        inertiaZ = frameInertiaZ + 4*rodInertiaZ + 4*motorInertiaZ;
+        float servoInertiaX = (gimbalX.mass * frameInnerRadius * sin(45));
+        float servoInertiaY = (gimbalX.mass * frameInnerRadius * sin(45));
+        float servoInertiaZ = (gimbalX.mass * frameInnerRadius);
+
+        inertiaX = frameInertiaX + 4*rodInertiaX + 4*motorInertiaX + 2*servoInertiaX;
+        inertiaY = frameInertiaY + 4*rodInertiaY + 4*motorInertiaY + 2*servoInertiaY;
+        inertiaZ = frameInertiaZ + 4*rodInertiaZ + 4*motorInertiaZ + 2* servoInertiaZ;
 
         return;
 
@@ -59,11 +76,8 @@ Motor motor4 = new Motor(motorMinForce, motorMaxForce);
 //////////////////////////////////////////////////////////////////////////////
     void update(float timeStep, TableRow row) {
         calculateForces();
-        calculateMovement(timeStep);
+        calculateRotation(timeStep);
 
-        row.setFloat("posX", posX);
-        row.setFloat("posY", posY);
-        row.setFloat("posZ", posZ);
         row.setFloat("angleX", angleX);
         row.setFloat("angleY", angleY);
         row.setFloat("angleZ", angleZ);
@@ -80,16 +94,12 @@ Motor motor4 = new Motor(motorMinForce, motorMaxForce);
         forceY = (motor1.force() + motor2.force() + motor3.force() + motor4.force()) * sin(angleY) * cos(angleZ);
         forceZ = (motor1.force() + motor2.force() + motor3.force() + motor4.force()) * cos(angleX) * cos(angleY);
 
-        // Gravity
-        forceZ -= (9.81 * mass);
-
-        forceX += externalXForce;
-        forceY += externalYForce;
-        forceZ += externalZForce;
-
         momentX = (-motor1.force() - motor2.force() + motor3.force() + motor4.force()) * (rodLength + frameOuterRadius) * cos(radians(45));
         momentY = (motor1.force() - motor2.force() - motor3.force() + motor4.force()) * (rodLength + frameOuterRadius) * cos(radians(45));
         momentZ = (motor1.force() - motor2.force() + motor3.force() - motor4.force()) * (rodLength + frameOuterRadius) * cos(radians(45)) * motorTorqueConstant;
+
+        momentZ += gimbalX.torque * frameInnerRadius;
+        momentZ += gimbalY.torque * frameInnerRadius;
 
         momentX += externalXMoment;
         momentY += externalYMoment;
@@ -97,35 +107,26 @@ Motor motor4 = new Motor(motorMinForce, motorMaxForce);
 
     }
 
-    private void calculateMovement(float time) {
+    private void calculateRotation(float time) {
 
-        accelX = forceX / mass;
-        accelY = forceY / mass;
-        accelZ = forceZ / mass;
         angleAccelX = momentX / inertiaX;
         angleAccelY = momentY / inertiaY;
         angleAccelZ = momentZ / inertiaZ;
 
-        velocityX += (accelX*time);
-        velocityY += (accelY*time);
-        velocityZ += (accelZ*time);
         angleVelocityX += (angleAccelX*time);
         angleVelocityY += (angleAccelY*time);
         angleVelocityZ += (angleAccelZ*time);
 
-        posZ += (velocityZ*time);
         // Cannot go below ground level, if at ground level cannot move other than up
-        if (posZ < 0) {
-            posZ = 0;
-            velocityX = 0;
-            velocityY = 0;
-            angleVelocityX = 0;
-            angleVelocityY = 0;
-            angleVelocityZ = 0;
-        }
+        // if (posZ < 0) {
+        //     posZ = 0;
+        //     velocityX = 0;
+        //     velocityY = 0;
+        //     angleVelocityX = 0;
+        //     angleVelocityY = 0;
+        //     angleVelocityZ = 0;
+        // } // TODO: is this needed?
 
-        posX += (velocityX*time);
-        posY += (velocityY*time);
         angleX += (angleVelocityX*time);
         angleY += (angleVelocityY*time);
         angleZ += (angleVelocityZ*time);

@@ -1,5 +1,8 @@
 \documentclass[11pt]{article}
 \usepackage{textcomp}
+\usepackage{longtable}
+\usepackage{graphicx}
+\graphicspath{ {Images/}{Graphs/} }
 \author{Eugene Valetsky}
 \title{Project Titan} % TODO: real title
 
@@ -9,6 +12,7 @@
 \begin{document}
 \maketitle
 \tableofcontents
+\newpage
 
 \section{Introduction}
 The Unmanned Aerial System (UAS) Challenge was launched by the Institution of Mechanical Engineers (IMechE) in 2014 `with the key objectives of developing professional engineers and inspiring the next generation'\cite{IMechE_about_uas}. The main goal is to design and build a UAS in order to autonomously deliver humanitarian aid such as medical supplies in a disaster zone. This requires a broad range of skills, from project management to airframe design to avionics system programming. To add to the challenge there is a strict weight limit and stringent safety regulations. Working together with another student, Ismail Ahmad, our goal is to follow the design and build cycle all the way through to competing at the IMechE UAS competition in July 2018.
@@ -16,13 +20,13 @@ The Unmanned Aerial System (UAS) Challenge was launched by the Institution of Me
 One of the greatest individual challenges as part of the project is creating an autonomous flight system. The UAS must be capable of quickly and safely navigating to and locating a target using computer vision, dropping a payload accurately, and returning to base. This requires an understanding of the UAS’s flight dynamics as well as good programming and wiring capabilities. This is the aspect that I will be focusing on for my individual project, although I will be assisting with many parts of the project.
 
 \section{Design}
-\subsection{Mechanical Design}
+\subsection{Concept}
 The concept for our UAS uses a hybrid symbioisis between a \emph{Micro Jet Engine}, henceforth refered to as MJE, and an external multi-rotor. The MJE is gimballed to always remain vertical and only provides lift, while the multirotor rotates around it providing stabilisation and control. This configuration means that standard quadcopter flight control software can be used rather than needing to come up with custom architecture.
 
-The MJE provides a higher thrust to weight ratio than the equivalent electric motors and batteries (see \ref{thrust_to_weight}). It does this without introducing the vibration issues of a piston engine, which would seriously impact stability and control on such a lightweight design. With the current MJE and electric motors we hope to lift a payload of 3kg while remaining under the 6.9kg weight limit.
+The MJE provides a higher thrust to weight ratio than the equivalent electric motors and batteries (see Appendix \ref{thrust_to_weight}). It does this without introducing the vibration issues of a piston engine, which would seriously impact stability and control on such a lightweight design. With the current MJE and electric motors we hope to lift a payload of 3kg while remaining under the 6.9kg weight limit.
 % TODO: 3 or 4 kg?
-\subsection{Control Design}
-Flight control will be handled with a Pixhawk running the PX4 flight stack. This will be coupled to a companion computer running software based on the DroneKit SDK, communicating with the PixHawk using the MAVLink protocol. The companio
+
+Flight control will be handled with a Pixhawk running the PX4 flight stack. This will be coupled to a companion computer running software based on the DroneKit SDK, communicating with the PixHawk using the MAVLink protocol. The companion computer is responsible for communication, waypoint navigation, and target location and tracking using computer vision. It then communicates where to go to the PixHawk.
 
 \section{Simulation}
 \subsection{Concept}
@@ -33,35 +37,218 @@ Being able to use PX4 firmware running on a Pixhawk is crucial. The UAS will com
 Therefore, it was decided to build a simulation to test the validity of the concept that the MJE can be ignored.
 
 \subsection{Equations of Motion}
-The vehicle is split into two sections, the outer quadcopter frame, \emph{Quad}, and the gimballed section containing the MJE, \emph{Jet}. A cartesian reference frame was chosen, with the xy plane being the horizontal plane and z being height. +x is forward, +y is right, +z is up. A rotation about the x axis is roll, about the y axis is pitch, and about the z axis is yaw.
+The vehicle is split into two sections, the outer quadcopter frame, \emph{Quad}, and the gimballed section containing the MJE, \emph{Jet}. A cartesian reference frame was chosen, with the xy plane being the horizontal plane and z being height. +x is right, +y is forward, +z is up. A rotation about the x axis is pitch, about the y axis is roll, and about the z axis is yaw. These are labelled $\theta_x, \theta_y,$ and $\theta_z$ for the quad and $\phi_x, \phi_y,$ and $\phi_z$ for the jet respectively.
 
-The gimbal is controlled by two servos, one moving the gimbal in roll and one in pitch. (There is no need for yaw control of the jet.)
-\subsubsection{Inertia}
-The quad is modeled as an inner thin, hollow cylinder with four cyclindrical rods extending outwards as the quad arms. The motors are point masses on the ends of the frames. This results in the following inertias about the three defined axes:
-\begin{eqnarray}
-    % TODO: seperate symbols for quad and jet inertia
-    I_x = I_y & = & \underbrace{\frac{\pi \rho h}{12}(3(r_2^4-r_1^4) + h^2(r_2^2-r_1^2))}_{Frame} \nonumber \\ & + & 4 \cdot \underbrace{\sin 45 \cdot (\frac{M_R L^2}{12}+M_R(r_2+\frac{L}{2})^2)}_{Rods} \nonumber \\ & + & 4 \cdot \underbrace{\sin 45 \cdot M_M(r_2+L)^2}_{Motors} \\
-    I_z & = & \underbrace{\frac{\pi \rho h}{2}(r_2^4-r_1^4)}_{Frame} \nonumber \\ & + & 4 \cdot \underbrace{\frac{M_RL^2}{12} + M_R(r_2+\frac{L}{2})^2}_{Rods} \nonumber \\ & + & 4 \cdot \underbrace{M_M(r_2+L)^2}_{Motors}
-\end{eqnarray}
+The gimbal is controlled by two servos, one moving the gimbal in roll and one in pitch. (There is no need for yaw control of the jet.)  Note that this means $\theta_z = \phi_z$.
 
-The jet is modelled as a cylinder. However, it does not rotate about its origin in x and y, but about the appropriate servo. Including the inertia of the servos themselves (see Appendix \ref{servo_info}) results in the following inertias:
-\begin{eqnarray}
-    I_x = I_y & = & 3.89\times10^{-4} + M_J*3r_J^2 + h_J^2 + M_Jl_c^2 \\
-    I_z & = & M_J*r_J^2
-\end{eqnarray}
+The multirotor uses the 'quad-x' configuration, as shown below. Note that motors 1 and 3 spin clockwise, and motors 2 and 4 spin anticlockwise.
+% TODO: add a diagram here.
 
 \subsubsection{Forces}
 Our gimbal design will transmit forces, but not moments. Thus, from a forces perspective, the vehicle is treated as a single unit. The total mass is
 \begin{equation}
-    M_{TOT} = \underbrace{\rho\pi h (r_2-r_1)}_{Frame} + 4*\underbrace{\rho\pi L r_r}_{Rods} + 4*\underbrace{M_M}_{Motors} + 2*\underbrace{M_G}_{Servos} + \underbrace{M_J}_{Jet}
+    M_{TOT} = \underbrace{\rho\pi h (r_2-r_1)}_{Frame} + 4\cdot\underbrace{\rho\pi L r_r}_{Rods} + 4\cdot\underbrace{M_M}_{Motors} + 2\cdot\underbrace{M_G}_{Servos} + \underbrace{M_J}_{Jet}
 \end{equation}
+The forces acting on the system are:
+\begin{eqnarray}
+    F_x = (F_{M1} + F_{M2} + F_{M3} + F_{M4})\cdot\sin{\theta_x}\cdot\cos{\theta_z} +  F_J\cdot\sin{\phi_x}\cdot\cos{\phi_z} \\
+    F_y = (F_{M1} + F_{M2} + F_{M3} + F_{M4})\cdot\sin{\theta_y}\cdot\cos{\theta_z} +  F_J\cdot\sin{\phi_y}\cdot\cos{\phi_z} \\
+    F_z = (F_{M1} + F_{M2} + F_{M3} + F_{M4})\cdot\cos{\theta_x}\cdot\cos{\theta_y} +  F_J\cdot\cos{\phi_x}\cdot\cos{\phi_y}
+\end{eqnarray}
+
+\subsubsection{Quad Rotation}
+The quad is modeled as an inner thin, hollow cylinder, the \emph{frame}, with four cyclindrical rods, the \emph{arms}, extending outwards. The motors are point masses on the ends of the arms. It is assumed to be constructed of aircraft-grade aluminium. This results in the following inertias about the three defined axes:
+\begin{eqnarray}
+    % TODO: seperate symbols for quad and jet inertia
+    I_{Qx} = I_{Qy} & = & \underbrace{\frac{\pi \rho h_F}{12}(3(r_2^4-r_1^4) + h_F^2(r_2^2-r_1^2))}_{Frame} \nonumber \\ & + & 4 \cdot \underbrace{\sin 45 \cdot (\frac{M_R L_R^2}{12}+M_R(r_2+\frac{L_R}{2})^2)}_{Rods} \nonumber \\ & + & 4 \cdot \underbrace{\sin 45 \cdot M_M(r_2+L)^2}_{Motors} \\
+    I_{Qz} & = & \underbrace{\frac{\pi \rho h_F}{2}(r_2^4-r_1^4)}_{Frame} \nonumber \\ & + & 4 \cdot \underbrace{\frac{M_RL_R^2}{12} + M_R(r_2+\frac{L_R}{2})^2}_{Rods} \nonumber \\ & + & 4 \cdot \underbrace{M_M(r_2+L)^2}_{Motors}
+\end{eqnarray}
+% TODO: add a diagram here
+
+On the quad, the gimbal servos exert offset moments about the z-axis. This results in the following equations:
+\begin{eqnarray}
+    \tau_{Qx} = (-F_{M1} - F_{M2} + F_{M3} + F_{M4})\cdot(L_R + r_2)\cdot \cos{45} \\
+    \tau_{Qy} = (F_{M1} - F_{M2} - F_{M3} + F_{M4})\cdot(L_R + r_2)\cdot \cos{45} \\
+    \tau_{Qz} = (F_{M1} - F_{M2} + F_{M3} - F_{M4})\cdot(L_R + r_2)\cdot \cos{45} + \tau_{Gx}\cdot r_1 + \tau_{Gy}\cdot r_1
+\end{eqnarray}
+
+\subsubsection{Jet Rotation}
+Since $\theta_z = \phi_z$, we are only interested in the rotation of the jet about the x and y axes. Since there is a rigid linkage between the servo and the gimbal, the position of the servo is proportional to the rotation of the jet.
+
+The jet is modelled as a cylinder. However, it does not rotate about its origin in x and y, but about the appropriate servo. Including the inertia of the servos themselves (see Appendix \ref{servo_info}) results in the following inertias:
+\begin{equation}
+    I_{Jx} = I_{Jy} = 3.89\times10^{-4} + M_J\cdot3r_J^2 + h_J^2 + M_Jl_c^2
+\end{equation}
+
+We know from Appendix \ref{servo_info} the maximum torque the servo can exert is 0.34 kg-m. The actual torque exerted is controlled by a PID controller in order to keep the jet vertical.
+
+\subsection{PID Control}
+8 PID controllers are needed in total: 3 position and 3 angle controllers for the quad, and 2 angle controllers for the jet gimbal. These controllers use the standard PID control logic:
+\begin{eqnarray*}
+    error = setpoint - actual\ value \\
+    integral = integral + (error \times time\ period) \\
+    derivative = (error - previous\ error)/time \\
+    output = kP \times error + kI \times integral + kD \times derivative
+\end{eqnarray*}
+where kP, kI, and kD are constants to be optimised.
+
+\subsubsection{Quad Control}
+In a real quadcopter, the controller sends a signal to an \emph{electronic speed control} (ESC), which in turn sends a \emph{pulse width modulation} (PWM) signal to the motor, controlling its speed. In this model this has been simplified, such that the controller output directly controls the force exerted by the motors.
+
+\begin{center}
+\begin{tabular}{cc}
+    $SP_x$ & Quad X position controller setpoint \\
+    $SP_y$ & Quad Y position controller setpoint \\
+    $SP_z$ & Quad Z position controller setpoint \\
+    $SP_{\theta_x}$ & Quad X angle controller setpoint \\
+    $SP_{\theta_y}$ & Quad Y angle controller setpoint \\
+    $SP_{\theta_z}$ & Quad Z angle controller setpoint \\
+    $O_x$ & Quad X position controller output \\
+    $O_y$ & Quad Y position controller output \\
+    $O_z$ & Quad Z position controller output \\
+    $O_{\theta_x}$ & Quad X angle controller output \\
+    $O_{\theta_y}$ & Quad Y angle controller output \\
+    $O_{\theta_z}$ & Quad Z angle controller output \\
+\end{tabular}
+\end{center}
+
+The controllers work in sequence, with the x and y position controllers determing the setpoint of the x and y angle controllers. Z axis controllers are independent.
+\begin{eqnarray}
+     O_x = SP_{\theta_x} \nonumber \\
+     O_y = SP_{\theta_y} \nonumber \\
+     F_{M1} = O_z - O_{\theta_x} + O_{\theta_y} + O_{\theta_z} \\
+     F_{M2} = O_z - O_{\theta_x} - O_{\theta_y} - O_{\theta_z} \\
+     F_{M3} = O_z + O_{\theta_x} - O_{\theta_y} + O_{\theta_z} \\
+     F_{M4} = O_z + O_{\theta_x} + O_{\theta_y} - O_{\theta_z}
+\end{eqnarray}
+
+\subsubsection{Jet Gimbal Control}
+Servos are controlled by sending an electronic signal to tell them what position to rotate to.
+% TODO: Redo servo code. You can't direcly control torque like my code currently does
+
+\begin{center}
+\begin{tabular}{cc}
+    $SP_{\phi_x}$ & Jet X angle controller setpoint \\
+    $SP_{\phi_y}$ & Jet Y angle controller setpoint \\
+    $O_{\phi_x}$ & Jet X angle controller output \\
+    $O_{\phi_y}$ & Jet Y angle controller output \\
+\end{tabular}
+\end{center}
+
+\subsection{Programming}
+The simulation itself was written in Processing. This is a language originally based on Java that is designed for ease of programming, especially with regards to displaying graphical elements. It was chosen over using MATLAB due to the author's increased familiarity with it, and the fact that this simulation has no need of advanced mathematical capability - there are no complex differential equations or matrix operations.
+
+The program was built up in stages, with the physics of each stage checked before adding complexity. As far as possible, good object-oriented programming practice has been followed.
+
+The quad section was implemented first. A controller was first tested solely in the z direction, and the response was used to calibrate PID values for the z controller. Angular controllers were then implemented, tested, and calibrated, before finally introducing x and y position controllers.
+
+Testing involved flying a simple path: takeoff to 10m, a square path (10m north, 10m east, 10m south, 10m west), and then landing. This gave the following results:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{square_path_quad_only}
+    \caption{Square Path - Quad Only}
+    \label{fig:square_path_quad_only}
+\end{figure}
+
+It can be seen that there is an oscilliation in x and y position. It proved difficult to eliminate, due to the not straightforward interaction of position and angle PID values. This, however proved not to be a problem.
+% TODO: insert jet graph here
+The addition of the jet has, likely due to the added mass ()
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % APPENDIX
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
 \appendix
+\section{Table of All Symbol Definitions}
+\begin{center}
+\begin{longtable}{|ccc|}
+    \hline
+    \emph{Symbol} & \emph{Definition} & \emph{Value(where appropriate)} \\
+    \hline \endhead
+    & \emph{Positions and Angles} & \\
+    \hline
+    $\theta_x$ & Quad Pitch & \\
+    $\theta_y$ & Quad Roll & \\
+    $\theta_z$ & Quad Yaw & \\
+    $\phi_x$ & Jet Pitch & \\
+    $\phi_y$ & Jet Roll & \\
+    $\phi_z$ & Jet Yaw & \\
+    \hline
+    & \emph{Dimensions} & \\
+    \hline
+    $h_f$ & Quad frame height & 5 mm \\
+    $r_1$ & Quad frame inner radius & 180 mm \\
+    $r_2$ & Quad frame outer radius & 200 mm \\
+    $L_R$ & Quad arm length & 100 mm \\
+    $r_r$ & Quad arm radius & 2 mm \\
+    $r_J$ & Jet radius & 41 mm \\
+    $h_J$ & Jet height & 150 mm \\
+    $l_c$ & Gimbal servo connecting rod length & 100 mm \\
+    \hline
+    & \emph{Masses} & \\
+    \hline
+    $M_{TOT}$ & Total Mass & \\
+    $\rho$ & Density of Quad & 2700 kg/m^3 & \\
+    $M_F$ & Quad frame mass & \\
+    $M_R$ & Quad rod mass & \\
+    $M_M$ & Motor mass & 50 g \\
+    $M_G$ & Gimbal servo mass & 79 g \\
+    $M_J$ & Jet mass & \\
+    % TODO: add jet mass, explain better
+    \hline
+    & \emph{Inertias} & \\
+    \hline
+    $I_{Qx}$ & Quad inertia about x axis & \\
+    $I_{Qy}$ & Quad inertia about y axis & \\
+    $I_{Qz}$ & Quad inertia about z axis & \\
+    $I_{Jx}$ & Quad inertia about x axis & \\
+    $I_{Jy}$ & Quad inertia about y axis & \\
+    $I_{Jz}$ & Quad inertia about z axis & \\
+    \hline
+    & \emph{Forces} & \\
+    \hline
+    $F_x$ & Sum of forces in x direction & \\
+    $F_y$ & Sum of forces in y direction & \\
+    $F_z$ & Sum of forces in z direction & \\
+    $F_{M1}$ & Force from motor 1 & \\
+    $F_{M2}$ & Force from motor 2 & \\
+    $F_{M3}$ & Force from motor 3 & \\
+    $F_{M4}$ & Force from motor 4 & \\
+    $F_J$ & Force from jet & \\
+    \hline
+    & \emph{Torques and Moments} & \\
+    \hline
+    $\tau_{Qx}$ & Sum of moments on quad about x axis & \\
+    $\tau_{Qy}$ & Sum of moments on quad about y axis & \\
+    $\tau_{Qz}$ & Sum of moments on quad about z axis & \\
+    $\tau_{Gx}$ & Torque of jet gimbal servo about x axis & \\
+    $\tau_{Gy}$ & Torque of jet gimbal servo about y axis & \\
+    \hline
+    & \emph{PID Controllers} & \\
+    \hline
+    $SP_x$ & Quad X position controller setpoint & \\
+    $SP_y$ & Quad Y position controller setpoint & \\
+    $SP_z$ & Quad Z position controller setpoint & \\
+    $SP_{\theta_x}$ & Quad X angle controller setpoint & \\
+    $SP_{\theta_y}$ & Quad Y angle controller setpoint & \\
+    $SP_{\theta_z}$ & Quad Z angle controller setpoint & \\
+    $O_x$ & Quad X position controller output & \\
+    $O_y$ & Quad Y position controller output & \\
+    $O_z$ & Quad Z position controller output & \\
+    $O_{\theta_x}$ & Quad X angle controller output & \\
+    $O_{\theta_y}$ & Quad Y angle controller output & \\
+    $O_{\theta_z}$ & Quad Z angle controller output & \\
+    $SP_{\phi_x}$ & Jet X angle controller setpoint & \\
+    $SP_{\phi_y}$ & Jet Y angle controller setpoint & \\
+    $O_{\phi_x}$ & Jet X angle controller output & \\
+    $O_{\phi_y}$ & Jet Y angle controller output & \\
+    \hline
+\end{longtable}
+\end{center}
+
 \section{Servo Information} \label{servo_info}
 Servo information was based on a sample servo that may well end up being used on the vehicle, the Futaba BLS177SV.
 
@@ -84,6 +271,7 @@ We can see from the datasheet that it takes the servo 0.12 seconds to rotate 60\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % BIBLIOGRAPHY
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
 \begin{thebibliography}{11}
 
 \bibitem{IMechE_about_uas}

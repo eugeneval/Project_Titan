@@ -18,6 +18,7 @@ class GimbalServo {
 
     void update(float time, float error) {
         torque = angle.calculate(time, error);
+        // TODO: max torque
         calculateMovement(time, torque);
     }
 

@@ -45,7 +45,7 @@ Jet jet;
 
         frameMass = density * frameHeight * PI * (frameOuterRadius - frameInnerRadius);
         rodMass = density * rodLength * PI * pow(rodRadius, 2);
-        mass = frameMass + rodMass + motorMass + 2*gimbalX.mass; // TODO needs to be 4* rods and motors
+        mass = frameMass + 4*rodMass + 4*motorMass + 2*gimbalX.mass; 
 
         float frameInertiaX = ((PI*density*frameHeight)/12) * ((3*(pow(frameOuterRadius, 4) - pow(frameInnerRadius, 4))) + pow(frameHeight, 2)*(pow(frameOuterRadius, 2) - pow(frameInnerRadius, 2)));
         float frameInertiaY = frameInertiaX;

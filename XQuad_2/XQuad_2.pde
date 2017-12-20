@@ -11,11 +11,11 @@ final float startingHeight = 0;
 // WARNING will overwrite old data if given same name
 Table log = new Table();
 String fileName = "Jet gimbal square path 4";
-final boolean save = false;
+final boolean save = true;
 
 // Timing
 final float timeStep = 0.005;
-final float runTime = 60;
+final float runTime = 90;
 final float eventTime = 5; // when the disturbance is applied
 final float eventLength = 0.01;
 float currentTime = 0;
@@ -70,8 +70,8 @@ void setup() {
     // println("Jet Inertias:\t" + jet.inertiaX + "\t" + jet.inertiaY + "\t" + jet.inertiaZ);
 
     // Testing - check quad frame mass
-    // println("Quad Frame Mass: " + quad.frameMass + " " + quad.rodMass + " " + (quad.motorMass*4) + " " + quad.mass);
-    // exit();
+    println("Quad Frame Mass: " + quad.quad.frameMass + " " + quad.quad.rodMass + " " + (quad.quad.motorMass*4) + " " + quad.mass);
+    exit();
 
     println("Time (s)\tHeight\t\tMotor1\tMotor2\tMotor3\tMotor4");
 

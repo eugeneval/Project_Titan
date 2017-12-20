@@ -1,7 +1,38 @@
-\documentclass[11pt]{article}
+\documentclass[10pt]{article}
 \usepackage{textcomp}
 \usepackage{longtable}
 \usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+
 \graphicspath{ {Images/}{Graphs/} }
 \author{Eugene Valetsky}
 \title{Project Titan} % TODO: real title
@@ -28,7 +59,7 @@ The MJE provides a higher thrust to weight ratio than the equivalent electric mo
 
 Flight control will be handled with a Pixhawk running the PX4 flight stack. This will be coupled to a companion computer running software based on the DroneKit SDK, communicating with the PixHawk using the MAVLink protocol. The companion computer is responsible for communication, waypoint navigation, and target location and tracking using computer vision. It then communicates where to go to the PixHawk.
 
-\section{Simulation}
+\section{Simulation: System Plausibility}
 \subsection{Concept}
 One of the main concepts behind the UAS concept is the idea that, if the MJE is gimballed to remain vertical, and its thrust vector is through the center of gravity of the vehicle, it exerts no horizontal forces or moments on the rest of the vehicle. This means its effect on the stability and control of the vehicle can be ignored. In turn, this means that regular quadcopter flight control software can be used, such as the PX4 flight stack.
 
@@ -47,7 +78,7 @@ The multirotor uses the 'quad-x' configuration, as shown below. Note that motors
 \subsubsection{Forces}
 Our gimbal design will transmit forces, but not moments. Thus, from a forces perspective, the vehicle is treated as a single unit. The total mass is
 \begin{equation}
-    M_{TOT} = \underbrace{\rho\pi h (r_2-r_1)}_{Frame} + 4\cdot\underbrace{\rho\pi L r_r}_{Rods} + 4\cdot\underbrace{M_M}_{Motors} + 2\cdot\underbrace{M_G}_{Servos} + \underbrace{M_J}_{Jet}
+    M_{TOT} = \underbrace{\rho\pi h (r_2-r_1)}_{Frame} + 4\cdot\underbrace{\rho\pi L r_r^2}_{Rods} + 4\cdot\underbrace{M_M}_{Motors} + 2\cdot\underbrace{M_G}_{Servos} + \underbrace{M_J}_{Jet}
 \end{equation}
 The forces acting on the system are:
 \begin{eqnarray}
@@ -112,7 +143,7 @@ In a real quadcopter, the controller sends a signal to an \emph{electronic speed
 \end{tabular}
 \end{center}
 
-The controllers work in sequence, with the x and y position controllers determing the setpoint of the x and y angle controllers. Z axis controllers are independent.
+The controllers work in sequence, with the x and y position controllers determing the setpoint of the x and y angle controllers. The Z axis controller is independent.
 \begin{eqnarray}
      O_x = SP_{\theta_x} \nonumber \\
      O_y = SP_{\theta_y} \nonumber \\
@@ -124,7 +155,6 @@ The controllers work in sequence, with the x and y position controllers determin
 
 \subsubsection{Jet Gimbal Control}
 Servos are controlled by sending an electronic signal to tell them what position to rotate to.
-% TODO: Redo servo code. You can't direcly control torque like my code currently does
 
 \begin{center}
 \begin{tabular}{cc}
@@ -133,7 +163,14 @@ Servos are controlled by sending an electronic signal to tell them what position
     $O_{\phi_x}$ & Jet X angle controller output \\
     $O_{\phi_y}$ & Jet Y angle controller output \\
 \end{tabular}
+
+\begin{eqnarray}
+    \tau_{Jx} = O_{\phi x} \\
+    \tau_{Jy} = O_{\phi y}
+\end{eqnarray}
 \end{center}
+
+% NOTE: need to check if this is correct, can a simplify a servo this way?
 
 \subsection{Programming}
 The simulation itself was written in Processing. This is a language originally based on Java that is designed for ease of programming, especially with regards to displaying graphical elements. It was chosen over using MATLAB due to the author's increased familiarity with it, and the fact that this simulation has no need of advanced mathematical capability - there are no complex differential equations or matrix operations.
@@ -142,20 +179,152 @@ The program was built up in stages, with the physics of each stage checked befor
 
 The quad section was implemented first. A controller was first tested solely in the z direction, and the response was used to calibrate PID values for the z controller. Angular controllers were then implemented, tested, and calibrated, before finally introducing x and y position controllers.
 
-Testing involved flying a simple path: takeoff to 10m, a square path (10m north, 10m east, 10m south, 10m west), and then landing. This gave the following results:
+Testing involved flying a simple path: takeoff to 10m, a square path (10m north, 10m east, 10m south, 10m west), and then landing. This gave the results seen in Figure \ref{fig:square_path_quad_only}. It can be seen that there is an oscilliation in x and y position. It proved difficult to eliminate, due to the not straightforward interaction of position and angle PID values. This, however proved not to be a problem. It can be seen in Figure \ref{fig:square_path_w_jet} that the addition of the jet has, likely due to the added mass, damped out the oscillations in x and y position. It has also added an overshoot in z and a steady state error in x and y, but this can be corrected by fine-tuning of PID values. The flight time has also increased but this is to be expected with greater mass. In Figure \ref{fig:square_path_w_jet_angle} we can see how the quadcopter changes angle about the x axis, and how the jet initially starts to move in that direction but is quickly brought back to the vertical by the servo.
 
-\begin{figure}[h]
+\begin{figure}[p]
     \centering
-    \includegraphics[width=\textwidth]{square_path_quad_only}
-    \caption{Square Path - Quad Only}
-    \label{fig:square_path_quad_only}
+    \begin{subfigure}{0.72\textwidth}
+        \includegraphics[width=\textwidth]{square_path_quad_only}
+        \caption{Square Path - Quad Only}
+        \label{fig:square_path_quad_only}
+    \end{subfigure}
+
+    \begin{subfigure}{0.72\textwidth}
+        \includegraphics[width=\textwidth]{square_path_w_jet}
+        \caption{Square Path - With Jet}
+        \label{fig:square_path_w_jet}
+    \end{subfigure}
+
+    \begin{subfigure}{0.72\textwidth}
+        \includegraphics[width=\textwidth]{square_path_w_jet_angle}
+        \caption{Square Path - With Jet}
+        \label{fig:square_path_w_jet_angle}
+    \end{subfigure}
+    \caption{}
 \end{figure}
+\newpage
 
-It can be seen that there is an oscilliation in x and y position. It proved difficult to eliminate, due to the not straightforward interaction of position and angle PID values. This, however proved not to be a problem.
-% TODO: insert jet graph here
-The addition of the jet has, likely due to the added mass ()
+\subsection{Conclusion}
+It can be seen that the addition of a gimballed jet to a quadcopter does not destabilise it. The extremely simple PID controllers used in our simulation are able to cope without any difficulty, implying that a significantly more advanced flight stack such as the PX4 should have no problems. Our initial assumption that the jet can simply be ignored is, indeed, valid.
 
+\section{Simulation: Control Software}
+We will be controlling the PixHawk flight controller using offboard commands from an external companion computer, henceforth refered to as Pete (since CC is a rather ambigous acronym). Pete will consist of three main components: communication with the PixHawk, communication with a ground station, and target-finding computer vision.
 
+PX4 is fully capable of Software-in-the-Loop (SITL) simulation, using either the jMAVSim or Gazebo enviroments. This is crucial, as it allows code to be tested with no danger to the real vehicle. Pete can commicate with the simulated vehicle using MAVLink through a UDP port; this is exactly the same as how it would connect to a real vehicle. As far as Pete's code is concerned, there is no difference between a real and a simulated vehicle except for the UDP address.
+
+\subsection{PX4 Control}
+Communication with the PX4 flight stack on the PixHawk is based on the DroneKit SDK. This is a platform for devoloping apps written in Python that run on a drone's companion computer. It communicates with the PixHawk using the MAVLink communication protocol.\cite{dronekit} The DroneCore API was also experimented with but proved significantly harder to implement and hence was abandoned.
+
+PX4 has 12 flight modes when employed on a multirotor. We are interested in the autonomous modes, which include Hold, Return(RTL), Takeoff, Land, Mission, Follow Me, and Offboard. Of particular interest are Mission, in which `the vehicle follows a programmed mission', and Offboard, where `the vehicle obeys a position, velocity or attitude setpoint provided over MAVLink'.\cite{PX4_user_guide}
+
+\subsubsection{Implementation}
+The available documentation and examples for DroneKit mostly make use of the \lstinline[language=Python]|simple_goto()| command. Unfortunately, as DroneKit is primarily designed to work with APM, the predecessor of PX4, this command does not work. Neither does \lstinline[language=Python]|arm_and_takeoff()|, or the \lstinline|vehicle.groundspeed| and \lstinline|vehicle.airspeed| attributes, among others.
+
+Additionally, it is usually assumed that one is operating in the \lstinline|global_relative_frame|. There are three frames of reference availible:
+\begin{center}
+\begin{tabular}{cc}
+    \lstinline|global_frame| & GPS coordinates, with 0 altitude at sea level \\
+    \lstinline|global_relative_frame| & GPS coordinates, with 0 altidue as ground level at the starting location \\
+    \lstinline|local_frame| & Cartesian coordinates relative to the starting location
+\end{tabular}
+\end{center}
+\lstinline|local_frame| is the most immediately useful to us, as it is simpler and more intuitive to use. Note that this is the North East Down (NED) frame, i.e. -10m altitude is 10m above the ground.
+
+Custom code has had to be written to take the place of these defunct commands and allow the vehicle to be controlled in the desired manner. First of all, we want to be able to directly send a position waypoint to PX4. This is a feature that is not fully implemented in DroneKit, and so a custom command with a custom MAVLink message has been created:
+\begin{lstlisting}[language=Python]
+def send_ned_position(pos_x, pos_y, pos_z):
+    """
+    Move vehicle in direction based on specified velocity vectors.
+    """
+
+    msg = vehicle.message_factory.set_position_target_local_ned_encode(
+        0,       # time_boot_ms (not used)
+        0, 0,    # target system, target component
+        mavutil.mavlink.MAV_FRAME_LOCAL_NED, # frame
+        0b0000111111111000, # type_mask
+        pos_x, pos_y, pos_z, # x, y, z positions
+        0, 0, 0, # x, y, z velocity in m/s
+        0, 0, 0, # x, y, z acceleration (not supported yet)
+        0, 0)    # yaw, yaw_rate (not supported yet)
+
+    vehicle.send_mavlink(msg)
+\end{lstlisting}
+
+Similarly, other commands have been created to suit our purposes. Some of these have been adapted from examples in the DroneKit and PX4 documentation.\cite{dronekit}\cite{PX4_dev_guide}
+
+\begin{lstlisting}[language=Python]
+def arm_and_takeoff(targetAlt, accuracy=0.5):
+    wp = get_location_offset_meters(home, 0, 0, targetAlt)
+    cmds.add(PX4Command(wp, "TO"))
+    cmds.upload()
+    time.sleep(1)
+
+    vehicle.mode = VehicleMode("MISSION")
+    time.sleep(1)
+    print("Vehicle mode should be MISSION: %s" % vehicle.mode.name)
+    vehicle.armed = True
+    while True:
+        print " Altitude: ", vehicle.location.global_relative_frame.alt
+        #Break and return from function just below target altitude.
+        if vehicle.location.global_relative_frame.alt>=targetAlt-accuracy:
+            print "Reached target altitude"
+            break
+        time.sleep(1)
+
+def goto_absolute(pos_x, pos_y, pos_z, accuracy=0.5):
+# Go to a position relative to the home position
+
+    targetLocation = LocationLocal(pos_x, pos_y, -pos_z)
+
+    send_ned_position(pos_x, pos_y, -pos_z)
+    vehicle.mode = VehicleMode("OFFBOARD")
+    print("Vehicle mode should be OFFBOARD: %s" % vehicle.mode.name)
+
+    while True:
+        send_ned_position(pos_x, pos_y, -pos_z)
+        remainingDistance = get_distance_metres_local(vehicle.location.local_frame, targetLocation)
+        if remainingDistance<=accuracy:
+            print("Arrived at target")
+            break
+        print "Distance to target: ", remainingDistance
+        time.sleep(0.1)
+
+def goto_relative(pos_x, pos_y, pos_z, accuracy=0.5):
+# Go to a position relative to the current posotion
+
+    currentLocation = vehicle.location.local_frame
+    targetLocation = get_location_metres_local(currentLocation, pos_x, pos_y, -pos_z)\
+
+    send_ned_position(targetLocation.north, targetLocation.east, targetLocation.down)
+    vehicle.mode = VehicleMode("OFFBOARD")
+    print("Vehicle mode should be OFFBOARD: %s" % vehicle.mode.name)
+
+    while True:
+        send_ned_position(targetLocation.north, targetLocation.east, targetLocation.down)
+        remainingDistance = get_distance_metres_local(vehicle.location.local_frame, targetLocation)
+        if remainingDistance<=accuracy:
+            print("Arrived at target")
+            break
+        print "Distance to target: ", remainingDistance
+        time.sleep(0.1)
+
+def setMaxXYSpeed(speed):
+    vehicle.parameters['MPC_XY_VEL_MAX']=speed
+    print("Set max speed to: %s" % vehicle.parameters['MPC_XY_VEL_MAX'])
+    time.sleep(0.5)
+
+def returnToLand():
+    vehicle.mode = VehicleMode("RTL")
+    time.sleep(1)
+    print("Vehicle mode should be RTL: %s" % vehicle.mode.name)
+    while vehicle.armed == True:
+        print("Waiting for landing...")
+        time.sleep(3)
+\end{lstlisting}
+
+\lstinline|arm_and_takeoff()| replaces the command provided in DroneKit, and performs the same function. \lstinline|goto_absolute()| and \lstinline|goto_relative()| allow us to navigate to a position waypoint, simply defined as X meters north, Y meters east, and Z meters up from either the starting location or the current location. The \lstinline|accuracy| attribute optionally allows us to change how close the vehicle must get to the waypoint to consider it to have reached it. \lstinline|setMaxXYSpeed()| is a replacement for the \lstinline|vehicle.groundspeed| attribute present in DroneKit, which does not work as intended with PX4, and allows us to set a maximum groundspeed for the vehicle. Finally, \lstinline|returnToLand()| has the vehicle return to it's starting location and land safely.
+
+Altogether, this means that the communication with the PixHawk has been simplified down to a few basic commands. An example mission could consist of the following: arming and taking off, following a series of GPS coordinates, locating a target using computer vision, calculating it's offset from directly underneath the drone, using \lstinline|goto_relative()| to position itself precisely over the target, droping the payload, and returning to base and landing.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % APPENDIX
@@ -164,6 +333,7 @@ The addition of the jet has, likely due to the added mass ()
 \appendix
 \section{Table of All Symbol Definitions}
 \begin{center}
+    \emph{Note: values in normal text are constants, values in italics are values derived from constants. Where no value is given, that variable is a dynamic variable which changes continously.}
 \begin{longtable}{|ccc|}
     \hline
     \emph{Symbol} & \emph{Definition} & \emph{Value(where appropriate)} \\
@@ -191,7 +361,7 @@ The addition of the jet has, likely due to the added mass ()
     & \emph{Masses} & \\
     \hline
     $M_{TOT}$ & Total Mass & \\
-    $\rho$ & Density of Quad & 2700 kg/m^3 & \\
+    $\rho$ & Density of Quad & 2700 kg/m^3 \\
     $M_F$ & Quad frame mass & \\
     $M_R$ & Quad rod mass & \\
     $M_M$ & Motor mass & 50 g \\
@@ -274,8 +444,21 @@ We can see from the datasheet that it takes the servo 0.12 seconds to rotate 60\
 \newpage
 \begin{thebibliography}{11}
 
+\bibitem{WEBPAGE_TEMPLATE}
+    Author/s or corporate body. Title [Internet]. Date of publication/last update or copyright. [Accessed date]; Available from: URL.
+
 \bibitem{IMechE_about_uas}
-  https://www.imeche.org/events/challenges/uas-challenge/about-uas-challenge
+    IMechE. About UAS Challenge - IMechE [Internet]. [Accessed 20 December 2017]; Availible from: https://www.imeche.org/events/challenges/uas-challenge/about-uas-challenge.
+
+\bibitem{PX4_user_guide}
+    DroneCode. PX4 Autopilot User Guide [Internet]. Updated 20 December 2017. [Last accessed 20 December 2017]; Availible from: https://docs.px4.io/en/.
+
+\bibitem{PX4_dev_guide}
+    DroneCode. PX4 Development Guide [Internet]. Updated 15 December 2017. [Last accessed 20 December 2017]; Availible from: https://dev.px4.io/en/.
+
+\bibitem{dronekit}
+    3D Robotics. DroneKit-Python Documentation [Internet]. Updated 21 April 2017. [Accessed 20 December 2017]; Available from: http://python.dronekit.io.
+
 
 \end{thebibliography}
 

@@ -78,7 +78,7 @@ The multirotor uses the 'quad-x' configuration, as shown below. Note that motors
 \subsubsection{Forces}
 Our gimbal design will transmit forces, but not moments. Thus, from a forces perspective, the vehicle is treated as a single unit. The total mass is
 \begin{equation}
-    M_{TOT} = \underbrace{\rho\pi h (r_2-r_1)}_{Frame} + 4\cdot\underbrace{\rho\pi L r_r^2}_{Rods} + 4\cdot\underbrace{M_M}_{Motors} + 2\cdot\underbrace{M_G}_{Servos} + \underbrace{M_J}_{Jet}
+    M_{TOT} = \underbrace{\rho\pi h (r_2-r_1)}_{Frame} + 4\cdot\underbrace{\rho\pi L r_r^2}_{Rods} + 4\cdot\underbrace{M_M}_{Motors} + 2\cdot\underbrace{M_G}_{Servos} + \underbrace{M_J}_{Jet} \label{eqn:total_mass}
 \end{equation}
 The forces acting on the system are:
 \begin{eqnarray}
@@ -203,6 +203,10 @@ Testing involved flying a simple path: takeoff to 10m, a square path (10m north,
     \caption{}
 \end{figure}
 \newpage
+
+\subsection{Refiment}
+It was realised that the mass of the quad had been implemented incorrectly ($r_r$ had not been squared and the rod mass and motor mass had not been multiplied by 4 in equation \ref{eqn:total_mass}}).
+% TODO follow up with new graphs 
 
 \subsection{Conclusion}
 It can be seen that the addition of a gimballed jet to a quadcopter does not destabilise it. The extremely simple PID controllers used in our simulation are able to cope without any difficulty, implying that a significantly more advanced flight stack such as the PX4 should have no problems. Our initial assumption that the jet can simply be ignored is, indeed, valid.
@@ -419,7 +423,7 @@ Altogether, this means that the communication with the PixHawk has been simplifi
 \end{longtable}
 \end{center}
 
-\section{Servo Information} \label{servo_info}
+\section{Servo Information} \label{app:servo_info}
 Servo information was based on a sample servo that may well end up being used on the vehicle, the Futaba BLS177SV.
 
 \begin{center}
@@ -433,7 +437,7 @@ Servo information was based on a sample servo that may well end up being used on
 We can see from the datasheet that it takes the servo 0.12 seconds to rotate 60\textdegree{}. Assuming it takes 0.01 of those seconds to accelerate to full speed, this gives an acceleration of $873rad/s^2$. Since we know it exerts a torque of 0.34kgm, this means its inertia must be $3.89\times10^{-4}$.
 % TODO: perhaps follow this up experimentally?
 
-\section{Thrust to Weight Ratio Calculations} \label{thrust_to_weight}
+\section{Thrust to Weight Ratio Calculations} \label{app:thrust_to_weight}
 % TODO: add stuff here
 
 

@@ -10,7 +10,7 @@ final float startingHeight = 0;
 // Saving data
 // WARNING will overwrite old data if given same name
 Table log = new Table();
-String fileName = "Jet gimbal square path 4";
+String fileName = "Jet gimbal square path 5";
 final boolean save = true;
 
 // Timing
@@ -27,8 +27,7 @@ final int plotSensitivity = 10; // pixel height = value*plotSensitivity
 
 // Objects
 Quad quad = new Quad(0, 0, startingHeight, 0, 0, 0);
-
-Controller control = new Controller(quad); // TODO update with new objects
+Controller control = new Controller(quad);
 
 // Loop control
 int loopNumber = 0;
@@ -70,8 +69,8 @@ void setup() {
     // println("Jet Inertias:\t" + jet.inertiaX + "\t" + jet.inertiaY + "\t" + jet.inertiaZ);
 
     // Testing - check quad frame mass
-    println("Quad Frame Mass: " + quad.quad.frameMass + " " + quad.quad.rodMass + " " + (quad.quad.motorMass*4) + " " + quad.mass);
-    exit();
+    // println("Quad Frame Mass: " + quad.quad.frameMass + " " + quad.quad.rodMass + " " + (quad.quad.motorMass*4) + " " + quad.mass);
+    // exit();
 
     println("Time (s)\tHeight\t\tMotor1\tMotor2\tMotor3\tMotor4");
 

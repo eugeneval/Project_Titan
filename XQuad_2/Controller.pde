@@ -1,8 +1,8 @@
 class Controller {
 
-    PID_Values posX = new PID_Values(1.7, 0.01, 3.5);
-    PID_Values posY = new PID_Values(1.7, 0.01, 3.5);
-    PID_Values posZ = new PID_Values(5, 0.05, 3);
+    PID_Values posX = new PID_Values(2, 0.01, 5);
+    PID_Values posY = new PID_Values(2, 0.01, 5);
+    PID_Values posZ = new PID_Values(20, 0.05, 10);
     PID_Values angleX = new PID_Values(50, 0.01, 10, radians(25));
     PID_Values angleY = new PID_Values(50, 0.01, 10, radians(25));
     PID_Values angleZ = new PID_Values(50, 0.01, 10);

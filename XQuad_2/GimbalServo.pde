@@ -20,6 +20,8 @@ class GimbalServo {
         torque = angle.calculate(time, error);
         if (torque > 0.34) {
             torque = 0.34;
+        } else if (torque < -0.34) {
+            torque = -0.34;
         }
         calculateMovement(time, torque);
     }

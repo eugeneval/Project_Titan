@@ -12,8 +12,8 @@ class Quad extends PhysicalObject {
         angleY = setAngleY;
         angleZ = setAngleZ;
 
-        gimbalX = new GimbalServo(1, 0.01, 1, radians(45));
-        gimbalY = new GimbalServo(1, 0.01, 1, radians(45));
+        gimbalX = new GimbalServo(0.8, 0.01, 1, radians(45));
+        gimbalY = new GimbalServo(0.8, 0.01, 1, radians(45));
         quad = new QuadFrame(posX, posY, posZ, angleX, angleY, angleZ, gimbalX, gimbalY);
         jet = new Jet(posX, posY, posZ, angleX, angleY, angleZ, gimbalX, gimbalY);
 

@@ -205,8 +205,13 @@ Testing involved flying a simple path: takeoff to 10m, a square path (10m north,
 \newpage
 
 \subsection{Refiment}
-It was realised that the mass of the quad had been implemented incorrectly ($r_r$ had not been squared and the rod mass and motor mass had not been multiplied by 4 in equation \ref{eqn:total_mass}}).
-% TODO follow up with new graphs 
+It was realised that the mass of the quad had been implemented incorrectly ($r_r$ had not been squared and the rod mass and motor mass had not been multiplied by 4 in equation \ref{eqn:total_mass}}). Additionally, the maximum torque of the servo had not been limited to 0.34kgm.
+
+These refiments decreased the stability of the drone. It is still well within acceptable parameters for rotation, and for x and y positioning, but height now has considerable steady state error and oscillation.
+% TODO height fucked up graphs
+
+With sufficient PID tuning, height could be stabilised, but not without a massive initial overshoot, and slightly increasing instability in x and y. This is because as the proportion of motor control that comes from height control increases (due to increasing $k_p$ and $k_i$ terms), the proportion of motor control left availible for the other controllers decreases.
+% TODO finish this off, add graphs
 
 \subsection{Conclusion}
 It can be seen that the addition of a gimballed jet to a quadcopter does not destabilise it. The extremely simple PID controllers used in our simulation are able to cope without any difficulty, implying that a significantly more advanced flight stack such as the PX4 should have no problems. Our initial assumption that the jet can simply be ignored is, indeed, valid.

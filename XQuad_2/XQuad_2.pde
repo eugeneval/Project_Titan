@@ -4,13 +4,13 @@ PeasyCam cam;
 
 // Run in which mode?
 // Accepted inputs: HEIGHT, XANGLE, YANGLE, XPOS, JETX
-final String plottedVariable = "XPOS";
+final String plottedVariable = "HEIGHT";
 final float startingHeight = 0;
 
 // Saving data
 // WARNING will overwrite old data if given same name
 Table log = new Table();
-String fileName = "Jet gimbal square path 5";
+String fileName = "Jet gimbal square path 11";
 final boolean save = true;
 
 // Timing

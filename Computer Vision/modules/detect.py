@@ -11,11 +11,22 @@ def squares(img):
 
     squares = []
     for c in contours:
-        # approximate the contour
         contour_length = cv2.arcLength(c, True)
-        c = cv2.approxPolyDP(c, 0.02 * contour_length, True)
+        approx = cv2.approxPolyDP(c, 0.02 * contour_length, True)
 
-        if 4 <= len(c) <= 6 and cv2.contourArea(c) > 1000:
-            squares.append(c)
+        if 4 <= len(approx) <= 6:
+            (x, y, w, h) = cv2.boundingRect(approx)
+            aspectRatio = w / float(h)
+
+            area = cv2.contourArea(c)
+            hullArea = cv2.contourArea(cv2.convexHull(c))
+            solidity = area / float(hullArea)
+
+            checkDimensions = w > 25 and h > 25
+            checkSolidity = solidity > 0.9
+            checkAspectRatio = 0.8 <= aspectRatio <= 1.2
+
+            if checkDimensions and checkSolidity and checkAspectRatio:
+                squares.append(c)
 
     return squares

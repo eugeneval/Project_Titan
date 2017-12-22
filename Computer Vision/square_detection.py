@@ -5,16 +5,18 @@ import modules.detect as detect
 
 # ARGUMENTS
 ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--image", help="path to image")
-ap.add_argument("-v", "--video", help="path to video (0 to use camera)")
-ap.add_argument("-s", "--size", help="factor to scale image by")
+ap.add_argument("-i", "--image", type=str,help="path to image")
+ap.add_argument("-v", "--video", type=str, help="path to video (0 to use camera)")
+ap.add_argument("-s", "--size", type=float, help="factor to scale image by")
+ap.add_argument("-o", "--ocr", action='store_true', help="whether OCR should be run")
+ap.add_argument("-p", "--preprocess", type=str, default="thresh", help="type of preprocessing to be done for OCR")
 args = vars(ap.parse_args())
 
 
 if not args["size"]:
     scaleFactor = 1
 else:
-    scaleFactor = float(args["size"])
+    scaleFactor = args["size"]
 
 if not args["image"]:
     image = None
@@ -31,6 +33,11 @@ else:
 
 if image != None:
     img = cv2.imread(image, -1)
+
+    if args["ocr"] == True:
+        text = detect.text(img, args["preprocess"])
+        print text
+    
     squares = detect.squares(img)
     cv2.drawContours(img, squares, -1, (0, 255, 0), 3)
 
@@ -38,7 +45,6 @@ if image != None:
     cv2.imshow('Target', img)
 
     cv2.waitKey(0)
-    cv2.destroyAllWindows()
 
 elif video != None:
     camera = cv2.VideoCapture(video)
@@ -58,4 +64,7 @@ elif video != None:
             break
 
     camera.release()
-    cv2.destroyAllWindows()
+
+
+
+cv2.destroyAllWindows()

@@ -1,4 +1,7 @@
 import cv2
+from PIL import Image
+import pytesseract
+import os
 
 def squares(img):
     # Edge detection
@@ -30,3 +33,17 @@ def squares(img):
                 squares.append(c)
 
     return squares
+
+def text(img, preprocess):
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    if preprocess == "thresh":
+    	img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+    elif preprocess == "blur":
+    	img = cv2.medianBlur(img, 3)
+
+    filename = "{}.png".format(os.getpid())
+    cv2.imwrite(filename, img)
+
+    text = pytesseract.image_to_string(Image.open(filename))
+    os.remove(filename)
+    return(text)

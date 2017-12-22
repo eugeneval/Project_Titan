@@ -1,6 +1,6 @@
 import cv2
 
-def findSquares(img):
+def squares(img):
     # Edge detection
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img = cv2.GaussianBlur(img, (5, 5), 0)

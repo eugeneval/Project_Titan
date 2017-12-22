@@ -12,7 +12,6 @@ def send_ned_position(pos_x, pos_y, pos_z):
     """
     Move vehicle in direction based on specified velocity vectors.
     """
-    # vehicle.mode = VehicleMode("OFFBOARD")
 
     msg = vehicle.message_factory.set_position_target_local_ned_encode(
         0,       # time_boot_ms (not used)

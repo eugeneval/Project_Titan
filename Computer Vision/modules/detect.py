@@ -27,7 +27,7 @@ def squares(img):
 
             checkDimensions = w > 25 and h > 25
             checkSolidity = solidity > 0.9
-            checkAspectRatio = 0.8 <= aspectRatio <= 1.2
+            checkAspectRatio = 0.5 <= aspectRatio <= 1.5
 
             if checkDimensions and checkSolidity and checkAspectRatio:
                 squares.append(c)

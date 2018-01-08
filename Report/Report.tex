@@ -5,6 +5,7 @@
 \usepackage{subcaption}
 \usepackage{listings}
 \usepackage{color}
+\usepackage[hyphens]{url}
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
@@ -34,8 +35,8 @@
 
 
 \graphicspath{ {Images/}{Graphs/} }
-\author{Eugene Valetsky}
-\title{Project Titan} % TODO: real title
+\author{Eugene Valetsky\\ \and Supervisor: Dr Tim Baker}
+\title{Unmanned Aerial Systems}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DOCUMENT
@@ -54,7 +55,7 @@ One of the greatest individual challenges as part of the project is creating an 
 \subsection{Concept}
 The concept for our UAS uses a hybrid symbioisis between a \emph{Micro Jet Engine}, henceforth refered to as MJE, and an external multi-rotor. The MJE is gimballed to always remain vertical and only provides lift, while the multirotor rotates around it providing stabilisation and control. This configuration means that standard quadcopter flight control software can be used rather than needing to come up with custom architecture.
 
-The MJE provides a higher thrust to weight ratio than the equivalent electric motors and batteries (see Appendix \ref{thrust_to_weight}). It does this without introducing the vibration issues of a piston engine, which would seriously impact stability and control on such a lightweight design. With the current MJE and electric motors we hope to lift a payload of 3kg while remaining under the 6.9kg weight limit.
+The MJE provides a higher thrust to weight ratio than the equivalent electric motors and batteries (see Appendix \ref{app:thrust_to_weight}). It does this without introducing the vibration issues of a piston engine, which would seriously impact stability and control on such a lightweight design. With the current MJE and electric motors we hope to lift a payload of 3kg while remaining under the 6.9kg weight limit.
 % TODO: 3 or 4 kg?
 
 Flight control will be handled with a Pixhawk running the PX4 flight stack. This will be coupled to a companion computer running software based on the DroneKit SDK, communicating with the PixHawk using the MAVLink protocol. The companion computer is responsible for communication, waypoint navigation, and target location and tracking using computer vision. It then communicates where to go to the PixHawk.
@@ -106,12 +107,12 @@ On the quad, the gimbal servos exert offset moments about the z-axis. This resul
 \subsubsection{Jet Rotation}
 Since $\theta_z = \phi_z$, we are only interested in the rotation of the jet about the x and y axes. Since there is a rigid linkage between the servo and the gimbal, the position of the servo is proportional to the rotation of the jet.
 
-The jet is modelled as a cylinder. However, it does not rotate about its origin in x and y, but about the appropriate servo. Including the inertia of the servos themselves (see Appendix \ref{servo_info}) results in the following inertias:
+The jet is modelled as a cylinder. However, it does not rotate about its origin in x and y, but about the appropriate servo. Including the inertia of the servos themselves (see Appendix \ref{app:servo_info}) results in the following inertias:
 \begin{equation}
     I_{Jx} = I_{Jy} = 3.89\times10^{-4} + M_J\cdot3r_J^2 + h_J^2 + M_Jl_c^2
 \end{equation}
 
-We know from Appendix \ref{servo_info} the maximum torque the servo can exert is 0.34 kg-m. The actual torque exerted is controlled by a PID controller in order to keep the jet vertical.
+We know from Appendix \ref{app:servo_info} the maximum torque the servo can exert is 0.34 kg-m. The actual torque exerted is controlled by a PID controller in order to keep the jet vertical.
 
 \subsection{PID Control}
 8 PID controllers are needed in total: 3 position and 3 angle controllers for the quad, and 2 angle controllers for the jet gimbal. These controllers use the standard PID control logic:
@@ -205,7 +206,7 @@ Testing involved flying a simple path: takeoff to 10m, a square path (10m north,
 \newpage
 
 \subsection{Refiment}
-It was realised that the mass of the quad had been implemented incorrectly ($r_r$ had not been squared and the rod mass and motor mass had not been multiplied by 4 in equation \ref{eqn:total_mass}}). Additionally, the maximum torque of the servo had not been limited to 0.34kgm.
+It was realised that the mass of the quad had been implemented incorrectly ($r_r$ had not been squared and the rod mass and motor mass had not been multiplied by 4 in equation \ref{eqn:total_mass}). Additionally, the maximum torque of the servo had not been limited to 0.34kgm.
 
 These refiments decreased the stability of the drone. It is still well within acceptable parameters for rotation, and for x and y positioning, but height now has considerable steady state error and oscillation.
 % TODO height fucked up graphs
@@ -335,6 +336,18 @@ def returnToLand():
 
 Altogether, this means that the communication with the PixHawk has been simplified down to a few basic commands. An example mission could consist of the following: arming and taking off, following a series of GPS coordinates, locating a target using computer vision, calculating it's offset from directly underneath the drone, using \lstinline|goto_relative()| to position itself precisely over the target, droping the payload, and returning to base and landing.
 
+
+\section{Computer Vision}
+The last component of the control system is a comouter vision system capable of identifying the target. This takes the form of a red 1x1m square, incoporating an alphanumeric code in white, within a larger 2x2m white square\cite{IMechE_rules}. The system would have to locate the target, calculate the offset from being centered underneath the vehicle, and to indentify the alphanumeric code.
+
+Since an interface had already been programmed in Python, it was decided to program the computer vision in Python as well to allow for them to easily work in conjucntion. To this end the OpenCV-Python library was chosen.
+
+\subsection{Square Detection}
+The target consists of two concentric squares and a central leter. Therefore, a good way of identifying the
+
+\subsection{Optical Character Recognition}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % APPENDIX
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -370,7 +383,7 @@ Altogether, this means that the communication with the PixHawk has been simplifi
     & \emph{Masses} & \\
     \hline
     $M_{TOT}$ & Total Mass & \\
-    $\rho$ & Density of Quad & 2700 kg/m^3 \\
+    $\rho$ & Density of Quad & $2700 kgm^3$ \\
     $M_F$ & Quad frame mass & \\
     $M_R$ & Quad rod mass & \\
     $M_M$ & Motor mass & 50 g \\
@@ -457,25 +470,28 @@ We can see from the datasheet that it takes the servo 0.12 seconds to rotate 60\
     Author/s or corporate body. Title [Internet]. Date of publication/last update or copyright. [Accessed date]; Available from: URL.
 
 \bibitem{IMechE_about_uas}
-    IMechE. About UAS Challenge - IMechE [Internet]. [Accessed 20 December 2017]; Availible from: https://www.imeche.org/events/challenges/uas-challenge/about-uas-challenge.
+    IMechE. About UAS Challenge - IMechE [Internet]. [Accessed 20 December 2017]; Availible from: \url{https://www.imeche.org/events/challenges/uas-challenge/about-uas-challenge}.
+
+\bibitem{IMechE_rules}
+    Institution of Mechanical Engineers. University UAS Challenge 2018 Competition Rules [Internet]. Issue 7.1. [Accessed 27 December 2017]; Available from: \url{https://www.imeche.org/docs/default-source/1-oscar/uas-challenge/uas-challenge--competition-rules.pdf?sfvrsn=2}.
 
 \bibitem{PX4_user_guide}
-    DroneCode. PX4 Autopilot User Guide [Internet]. Updated 20 December 2017. [Last accessed 20 December 2017]; Availible from: https://docs.px4.io/en/.
+    DroneCode. PX4 Autopilot User Guide [Internet]. Updated 20 December 2017. [Last accessed 20 December 2017]; Availible from: \url{https://docs.px4.io/en/}.
 
 \bibitem{PX4_dev_guide}
-    DroneCode. PX4 Development Guide [Internet]. Updated 15 December 2017. [Last accessed 20 December 2017]; Availible from: https://dev.px4.io/en/.
+    DroneCode. PX4 Development Guide [Internet]. Updated 15 December 2017. [Last accessed 20 December 2017]; Availible from: \url{https://dev.px4.io/en/}.
 
 \bibitem{dronekit}
-    3D Robotics. DroneKit-Python Documentation [Internet]. Updated 21 April 2017. [Accessed 20 December 2017]; Available from: http://python.dronekit.io.
+    3D Robotics. DroneKit-Python Documentation [Internet]. Updated 21 April 2017. [Accessed 20 December 2017]; Available from: \url{http://python.dronekit.io}.
 
 \bibitem{opencv_tutorials}
-    OpenCV. OpenCV-Python Tutorials — OpenCV 3.0.0-dev documentation [Internet]. Last updated 10 Novemeber 2014. [Accessed 22 December 2017]; Available from: https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_tutorials.html.
+    OpenCV. OpenCV-Python Tutorials — OpenCV 3.0.0-dev documentation [Internet]. Last updated 10 Novemeber 2014. [Accessed 22 December 2017]; Available from: \url{https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_tutorials.html}.
 
 \bibitem{pyimagesearch_squares}
-    Adrian Rosebrock. Target acquired: Finding targets in drone and quadcopter video streams using Python and OpenCV [Internet]. 4 May 2015. [Accessed 22 Decemeber 2017]; Available from: https://www.pyimagesearch.com/2015/05/04/target-acquired-finding-targets-in-drone-and-quadcopter-video-streams-using-python-and-opencv/.
+    Adrian Rosebrock. Target acquired: Finding targets in drone and quadcopter video streams using Python and OpenCV [Internet]. 4 May 2015. [Accessed 22 Decemeber 2017]; Available from: \url{https://www.pyimagesearch.com/2015/05/04/target-acquired-finding-targets-in-drone-and-quadcopter-video-streams-using-python-and-opencv/}.
 
 \bibitem{pyimagesearch_ocr}
-    Adrian Rosebrock. Using Tesseract OCR with Python [Internet]. 10 July 2017. [Accessed 22 December 2017]; Available from: https://www.pyimagesearch.com/2017/07/10/using-tesseract-ocr-python/.
+    Adrian Rosebrock. Using Tesseract OCR with Python [Internet]. 10 July 2017. [Accessed 22 December 2017]; Available from: \url{https://www.pyimagesearch.com/2017/07/10/using-tesseract-ocr-python/}.
 
 
 \end{thebibliography}

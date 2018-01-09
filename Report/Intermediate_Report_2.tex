@@ -47,6 +47,7 @@
 \begin{document}
 \maketitle
 
+\emph{Note: referenced figures can be found on the last page.}
 \section{Introduction}
 \subsection{Background}
 The Unmanned Aerial System (UAS) Challenge was launched by the Institution of Mechanical Engineers (IMechE) in 2014 `with the key objectives of developing professional engineers and inspiring the next generation'\cite{IMechE_about_uas}. The main goal is to design and build a UAS in order to autonomously deliver humanitarian aid such as medical supplies in a disaster zone. This requires a broad range of skills, from project management to airframe design to avionics system programming. To add to the challenge there is a strict weight limit and stringent safety regulations. Working together with another student, Ismail Ahmad, our goal is to follow the design and build cycle all the way through to competing at the IMechE UAS competition in July 2018.
@@ -149,35 +150,14 @@ The quad section was implemented first. A controller was first tested solely in 
 
 Testing involved flying a simple path: takeoff to 10m, a square path (10m north, 10m east, 10m south, 10m west), and then landing. This gave the results seen in Figure \ref{fig:square_path_quad_only}. It can be seen that there is an oscilliation in x and y position. It proved difficult to eliminate, due to the not straightforward interaction of position and angle PID values. This, however proved not to be a problem. It can be seen in Figure \ref{fig:square_path_w_jet} that the addition of the jet has, likely due to the added mass, damped out the oscillations in x and y position. It has also added an overshoot in z and a steady state error in x and y, but this can be corrected by fine-tuning of PID values. The flight time has also increased but this is to be expected with greater mass. In Figure \ref{fig:square_path_w_jet_angle} we can see how the quadcopter changes angle about the x axis, and how the jet initially starts to move in that direction but is quickly brought back to the vertical by the servo.
 
-\begin{figure}[p]
-    \centering
-    \begin{subfigure}{0.72\textwidth}
-        \includegraphics[width=\textwidth]{square_path_quad_only}
-        \caption{Square Path - Quad Only}
-        \label{fig:square_path_quad_only}
-    \end{subfigure}
-
-    \begin{subfigure}{0.72\textwidth}
-        \includegraphics[width=\textwidth]{square_path_w_jet}
-        \caption{Square Path - With Jet}
-        \label{fig:square_path_w_jet}
-    \end{subfigure}
-
-    \begin{subfigure}{0.72\textwidth}
-        \includegraphics[width=\textwidth]{square_path_w_jet_angle}
-        \caption{Square Path - With Jet}
-        \label{fig:square_path_w_jet_angle}
-    \end{subfigure}
-    \caption{}
-\end{figure}
-
 \subsubsection{Refiment}
 It was realised that the mass of the quad had been implemented incorrectly. Additionally, the maximum torque of the servo had not been limited.
 
 These refiments decreased the stability of the drone. It is still well within acceptable parameters for rotation, and for x and y positioning, but height now has considerable steady state error and oscillation.
-% TODO height fucked up graphs
 
 With sufficient PID tuning, height could be stabilised, but not without a massive initial overshoot, and slightly increasing instability in x and y. This is because as the proportion of motor control that comes from height control increases (due to increasing $k_p$ and $k_i$ terms), the proportion of motor control left available for the other controllers decreases.
+
+The result of these refiments can be seen in figures \ref{fig:square_path_limited_servos} and \ref{fig:square_path_limited_servos_angle}.
 
 \subsection{Software: PX4 Control}
 Communication with the PX4 flight stack on the PixHawk is based on the DroneKit SDK. This is a platform for devoloping apps written in Python that run on a drone's companion computer. It communicates with the PixHawk using the MAVLink communication protocol.\cite{dronekit} The DroneCore API was also experimented with but proved significantly harder to implement and hence was abandoned.
@@ -221,12 +201,16 @@ The simulation can be improved further, but for now seems to indicate that our c
 
 Once the control software is complete, it is hoped to create a new simulation using Gazebo. Gazebo is an advanced physics simulator for robots, and crucially can integrate with the PX4 SITL simulation. Such a simulation would be the most accurate way of determing the validity of both the design concept and control software.
 
-
+\vfil
+\begin{quote}
+    \emph{I, Eugene Valetsky, confirm that the work presented in this report is my own. Where information has been derived from other sources, I confirm that this has been indicated in the report.}
+\end{quote}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % BIBLIOGRAPHY
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 {\small
+\newpage
 \begin{thebibliography}{11}
 
     \bibitem{IMechE_about_uas}
@@ -255,9 +239,46 @@ Once the control software is complete, it is hoped to create a new simulation us
 
 \end{thebibliography}}
 
-\begin{quote}
-    \emph{I, Eugene Valetsky, confirm that the work presented in this report is my own. Where information has been derived from other sources, I confirm that this has been indicated in the report.}
-\end{quote}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FIGURES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[p]
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\linewidth]{square_path_quad_only}
+        \caption{Quad Only}
+        \label{fig:square_path_quad_only}
+    \end{subfigure}\hspace*{\fill}
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\linewidth]{square_path_w_jet}
+        \caption{With Jet}
+        \label{fig:square_path_w_jet}
+    \end{subfigure}
+    \medskip
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\linewidth]{square_path_w_jet_angle}
+        \caption{With Jet}
+        \label{fig:square_path_w_jet_angle}
+    \end{subfigure}\hspace*{\fill}
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\linewidth]{square_path_limited_servos}
+        \caption{With Refiments}
+        \label{fig:square_path_limited_servos}
+    \end{subfigure}
+    \medskip
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\linewidth]{square_path_limited_servos_angle}
+        \caption{With Refiments}
+        \label{fig:square_path_limited_servos_angle}
+    \end{subfigure}\hspace*{\fill}
+    \begin{subfigure}{0.48\textwidth}
+        % \includegraphics[width=\linewidth]{pic6.pdf}
+        % \caption{Sixth subfigure}
+        % \label{fig:f}
+    \end{subfigure}
+
+    \caption{Simulation of a Square Path}
+    \label{fig:Square Path}
+\end{figure}
 
 
 \end{document}

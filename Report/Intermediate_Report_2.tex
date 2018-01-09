@@ -127,14 +127,37 @@ The quad is modeled as an inner thin, hollow cylinder, the \emph{frame}, with fo
 
 The gimbal is controlled by two servos, one moving the gimbal in roll and one in pitch. (There is no need for yaw control of the jet.) The multirotor uses the 'quad-x' configuration.
 
-From these initial assumptions, equations of motion were determined. These consist of:
-\begin{compactenum}
-    \item The total mass of the vehicle.
-    \item Sum of forces on the vehicle in x, y, and z directions.
-    \item Inertia of the quad.
-    \item Sum of torques on the quad.
-    \item Inertia of the jet.
-\end{compactenum}
+% From these initial assumptions, equations of motion were determined. These consist of:
+% \begin{compactenum}
+%     \item The total mass of the vehicle.
+%     \item Sum of forces on the vehicle in x, y, and z directions.
+%     \item Inertia of the quad.
+%     \item Sum of torques on the quad.
+%     \item Inertia of the jet.
+% \end{compactenum}
+
+From these initial assumptions, the folowing equations were determined:
+\begin{equation}
+    M_{TOT} = \underbrace{\rho\pi h (r_2-r_1)}_{Frame} + 4\cdot\underbrace{\rho\pi L r_r^2}_{Rods} + 4\cdot\underbrace{M_M}_{Motors} + 2\cdot\underbrace{M_G}_{Servos} + \underbrace{M_J}_{Jet} \label{eqn:total_mass}
+\end{equation}
+\begin{eqnarray}
+    F_x = (F_{M1} + F_{M2} + F_{M3} + F_{M4})\cdot\sin{\theta_x}\cdot\cos{\theta_z} +  F_J\cdot\sin{\phi_x}\cdot\cos{\phi_z} \\
+    F_y = (F_{M1} + F_{M2} + F_{M3} + F_{M4})\cdot\sin{\theta_y}\cdot\cos{\theta_z} +  F_J\cdot\sin{\phi_y}\cdot\cos{\phi_z} \\
+    F_z = (F_{M1} + F_{M2} + F_{M3} + F_{M4})\cdot\cos{\theta_x}\cdot\cos{\theta_y} +  F_J\cdot\cos{\phi_x}\cdot\cos{\phi_y}
+\end{eqnarray}
+\begin{eqnarray}
+    % TODO: seperate symbols for quad and jet inertia
+    I_{Qx} = I_{Qy} & = & \underbrace{\frac{\pi \rho h_F}{12}(3(r_2^4-r_1^4) + h_F^2(r_2^2-r_1^2))}_{Frame} \nonumber \\ & + & 4 \cdot \underbrace{\sin 45 \cdot (\frac{M_R L_R^2}{12}+M_R(r_2+\frac{L_R}{2})^2)}_{Rods} \nonumber \\ & + & 4 \cdot \underbrace{\sin 45 \cdot M_M(r_2+L)^2}_{Motors} \\
+    I_{Qz} & = & \underbrace{\frac{\pi \rho h_F}{2}(r_2^4-r_1^4)}_{Frame} \nonumber \\ & + & 4 \cdot \underbrace{\frac{M_RL_R^2}{12} + M_R(r_2+\frac{L_R}{2})^2}_{Rods} \nonumber \\ & + & 4 \cdot \underbrace{M_M(r_2+L)^2}_{Motors}
+\end{eqnarray}
+\begin{eqnarray}
+    \tau_{Qx} = (-F_{M1} - F_{M2} + F_{M3} + F_{M4})\cdot(L_R + r_2)\cdot \cos{45} \\
+    \tau_{Qy} = (F_{M1} - F_{M2} - F_{M3} + F_{M4})\cdot(L_R + r_2)\cdot \cos{45} \\
+    \tau_{Qz} = (F_{M1} - F_{M2} + F_{M3} - F_{M4})\cdot(L_R + r_2)\cdot \cos{45} + \tau_{Gx}\cdot r_1 + \tau_{Gy}\cdot r_1
+\end{eqnarray}
+\begin{equation}
+    I_{Jx} = I_{Jy} = 3.89\times10^{-4} + M_J\cdot3r_J^2 + h_J^2 + M_Jl_c^2
+\end{equation}
 
 \subsubsection{PID Control}
 8 PID controllers are needed in total: 3 position and 3 angle controllers for the quad, and 2 angle controllers for the jet gimbal. The controllers work in sequence, with the x and y position controllers determing the setpoint of the x and y angle controllers. The Z axis controllers are independent, as are the servo controllers.
@@ -151,7 +174,7 @@ The quad section was implemented first. A controller was first tested solely in 
 Testing involved flying a simple path: takeoff to 10m, a square path (10m north, 10m east, 10m south, 10m west), and then landing. This gave the results seen in Figure \ref{fig:square_path_quad_only}. It can be seen that there is an oscilliation in x and y position. It proved difficult to eliminate, due to the not straightforward interaction of position and angle PID values. This, however proved not to be a problem. It can be seen in Figure \ref{fig:square_path_w_jet} that the addition of the jet has, likely due to the added mass, damped out the oscillations in x and y position. It has also added an overshoot in z and a steady state error in x and y, but this can be corrected by fine-tuning of PID values. The flight time has also increased but this is to be expected with greater mass. In Figure \ref{fig:square_path_w_jet_angle} we can see how the quadcopter changes angle about the x axis, and how the jet initially starts to move in that direction but is quickly brought back to the vertical by the servo.
 
 \subsubsection{Refiment}
-It was realised that the mass of the quad had been implemented incorrectly. Additionally, the maximum torque of the servo had not been limited.
+It was realised that the mass of the quad had been implemented incorrectly ($r_r$ had not been squared and the rod mass and motor mass had not been multiplied by 4 in equation \ref{eqn:total_mass}). Additionally, the maximum torque of the servo had not been limited to 0.34kgm (the maximum torque of a chosen example servo, the Futuba BLS177SV).
 
 These refiments decreased the stability of the drone. It is still well within acceptable parameters for rotation, and for x and y positioning, but height now has considerable steady state error and oscillation.
 
@@ -201,7 +224,6 @@ The simulation can be improved further, but for now seems to indicate that our c
 
 Once the control software is complete, it is hoped to create a new simulation using Gazebo. Gazebo is an advanced physics simulator for robots, and crucially can integrate with the PX4 SITL simulation. Such a simulation would be the most accurate way of determing the validity of both the design concept and control software.
 
-\vfil
 \begin{quote}
     \emph{I, Eugene Valetsky, confirm that the work presented in this report is my own. Where information has been derived from other sources, I confirm that this has been indicated in the report.}
 \end{quote}
@@ -210,7 +232,6 @@ Once the control software is complete, it is hoped to create a new simulation us
 % BIBLIOGRAPHY
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 {\small
-\newpage
 \begin{thebibliography}{11}
 
     \bibitem{IMechE_about_uas}

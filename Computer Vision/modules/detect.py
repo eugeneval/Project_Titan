@@ -61,7 +61,7 @@ def targets(img):
             solidity = area / float(hullArea)
 
             checkDimensions = w > 25 and h > 25
-            checkSolidity = solidity > 0.9
+            checkSolidity = solidity > 0.95
             checkAspectRatio = 0.5 <= aspectRatio <= 1.5
 
             if checkDimensions and checkSolidity and checkAspectRatio:
@@ -70,7 +70,6 @@ def targets(img):
                     squares.append(s)
                     # print "Added %s" %s
 
-    print "Squares before rejection: %s" %len(squares)
     # Reject similar squares
     for s1, s2 in itertools.combinations(squares, 2):
         if s1.similar(s2) and s2 in squares:

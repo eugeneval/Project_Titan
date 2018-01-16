@@ -113,7 +113,10 @@ class Square:
             return "Square: (x,y,w,h) = (%s,%s,%s,%s)" % (self.x, self.y, self.h, self.w)
 
         def __gt__(self, other):
-            return self.w > other.w
+            return self.w + self.h > other.w + other.h
+
+        def __lt__(self, other):
+            return self.w + self.h < other.w + other.h
 
         def similar(self, other, tolerance=0.05):
             tolerance = tolerance * ((self.w + self.h)/2)

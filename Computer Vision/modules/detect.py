@@ -39,12 +39,12 @@ def squares(img):
 
 def targets(img):
     # Edge detection
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    img = cv2.GaussianBlur(img, (5, 5), 0)
-    img = cv2.Canny(img, 100, 200)
+    modimg = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    modimg = cv2.GaussianBlur(img, (5, 5), 0)
+    modimg = cv2.Canny(img, 100, 200)
 
     # Find contours
-    contImg, contours, _ = cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    contImg, contours, _ = cv2.findContours(modimg, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
     # Find squares
     squares = []
@@ -85,8 +85,15 @@ def targets(img):
                 targets.append(t)
                 # print "Found %s" %t
 
+    # Read text inside targets
+    for t in targets:
+        t.readText(img)
+
     print "Total number of squares: %s" %(len(squares))
     print "Total number of targets: %s" %(len(targets))
+    for t in targets:
+        print t
+
     return targets
 
 class Square:
@@ -105,6 +112,9 @@ class Square:
         def __str__(self):
             return "Square: (x,y,w,h) = (%s,%s,%s,%s)" % (self.x, self.y, self.h, self.w)
 
+        def __gt__(self, other):
+            return self.w > other.w
+
         def similar(self, other, tolerance=0.05):
             tolerance = tolerance * ((self.w + self.h)/2)
             if - tolerance < self.x - other.x < tolerance and - tolerance < self.y - other.y < tolerance and - tolerance < self.w - other.w < tolerance and - tolerance < self.h - other.h < tolerance:
@@ -117,31 +127,43 @@ class Square:
                 return True
             else: return False
 
+        def readText(self, img):
+            roi = img[self.y:self.y+self.h, self.x:self.x+self.w]
+            self.text = text(roi)
+
 class Target:
 
     def __init__(self, s1, s2):
-        self.s1 = s1
-        self.s2 = s2
+        if s1 > s2:
+            self.outer = s1
+            self.inner = s2
+        else:
+            self.outer = s2
+            self.inner = s1
         self.contour = [s1.contour, s2.contour]
 
         self.cX = (s1.cX + s2.cX)/2
         self.cY = (s1.cY + s2.cY)/2
-        self.h = s1.h
-        self.w = s1.w
 
     def __str__(self):
-        return "Target: (x,y) = (%s,%s)" %(self.cX, self.cY)
+        if hasattr(self, 'text'):
+            return "Target: (x,y) = (%s,%s) Text: %s" %(self.cX, self.cY, self.text)
+        else:
+            return "Target: (x,y) = (%s,%s)" %(self.cX, self.cY)
 
     def draw(self, frame):
         cv2.drawContours(frame, self.contour, -1, (0, 255, 0), 3)
 
-        (startX, endX) = (int(self.cX - (self.w * 0.15)), int(self.cX + (self.w * 0.15)))
-        (startY, endY) = (int(self.cY - (self.h * 0.15)), int(self.cY + (self.h * 0.15)))
+        (startX, endX) = (int(self.cX - (self.inner.w * 0.15)), int(self.cX + (self.inner.w * 0.15)))
+        (startY, endY) = (int(self.cY - (self.inner.h * 0.15)), int(self.cY + (self.inner.h * 0.15)))
         cv2.line(frame, (startX, self.cY), (endX, self.cY), (0, 255, 0), 3)
         cv2.line(frame, (self.cX, startY), (self.cX, endY), (0, 255, 0), 3)
 
+    def readText(self, img):
+        self.text = self.inner.readText(img)
 
-def text(img, preprocess):
+
+def text(img, preprocess="thresh"):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     if preprocess == "thresh":
     	img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]

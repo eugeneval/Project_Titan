@@ -37,7 +37,7 @@ def squares(img):
     print "Total number of squares: %s" % len(squares)
     return squares
 
-def targets(img):
+def targets(img, readText=False):
     # Edge detection
     modimg = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     modimg = cv2.GaussianBlur(img, (5, 5), 0)
@@ -86,57 +86,67 @@ def targets(img):
                 # print "Found %s" %t
 
     # Read text inside targets
-    for t in targets:
-        t.readText(img)
+    if readText:
+        for t in targets:
+            t.readText(img)
 
     print "Total number of squares: %s" %(len(squares))
     print "Total number of targets: %s" %(len(targets))
-    for t in targets:
-        print t
 
     return targets
 
 class Square:
+    id = 0
 
-        def __init__(self, c, x, y, w, h):
-            self.contour = c
-            self.x = x
-            self.y = y
-            self.w = w
-            self.h = h
+    def __init__(self, c, x, y, w, h):
+        self.id = Square.id
+        Square.id += 1
 
-            M = cv2.moments(c)
-            self.cX = int(M['m10']/M['m00'])
-            self.cY = int(M['m01']/M['m00'])
+        self.contour = c
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
 
-        def __str__(self):
-            return "Square: (x,y,w,h) = (%s,%s,%s,%s)" % (self.x, self.y, self.h, self.w)
+        M = cv2.moments(c)
+        self.cX = int(M['m10']/M['m00'])
+        self.cY = int(M['m01']/M['m00'])
 
-        def __gt__(self, other):
-            return self.w + self.h > other.w + other.h
+    def __str__(self):
+        return "Square %s: (x,y,w,h) = (%s,%s,%s,%s)" % (self.id, self.x, self.y, self.h, self.w)
 
-        def __lt__(self, other):
-            return self.w + self.h < other.w + other.h
+    def __gt__(self, other):
+        return self.w + self.h > other.w + other.h
 
-        def similar(self, other, tolerance=0.05):
-            tolerance = tolerance * ((self.w + self.h)/2)
-            if - tolerance < self.x - other.x < tolerance and - tolerance < self.y - other.y < tolerance and - tolerance < self.w - other.w < tolerance and - tolerance < self.h - other.h < tolerance:
-                return True
-            else: return False
+    def __lt__(self, other):
+        return self.w + self.h < other.w + other.h
 
-        def concentric(self, other, accuracy=0.05):
-            accuracy = accuracy * ((self.w + self.h)/2)
-            if - accuracy < (self.cX - other.cX) < accuracy and - accuracy < (self.cY - other.cY) < accuracy:
-                return True
-            else: return False
+    def similar(self, other, tolerance=0.05):
+        """Used for filtering out squares that are similar to each other."""
+        tolerance = tolerance * ((self.w + self.h)/2)
+        if - tolerance < self.x - other.x < tolerance and - tolerance < self.y - other.y < tolerance and - tolerance < self.w - other.w < tolerance and - tolerance < self.h - other.h < tolerance:
+            return True
+        else: return False
 
-        def readText(self, img):
-            roi = img[self.y:self.y+self.h, self.x:self.x+self.w]
-            self.text = text(roi)
+    def concentric(self, other, accuracy=0.05):
+        """Checks if two squares are concentric.s"""
+        accuracy = accuracy * ((self.w + self.h)/2)
+        if - accuracy < (self.cX - other.cX) < accuracy and - accuracy < (self.cY - other.cY) < accuracy:
+            return True
+        else: return False
+
+    def readText(self, img):
+        """WARNING: this is a slow operation, taking ~0.3 seconds per square. Do not use if it is not required."""
+        roi = img[self.y:self.y+self.h, self.x:self.x+self.w]
+        self.text = text(roi)
 
 class Target:
+    id = 0
 
     def __init__(self, s1, s2):
+        self.id = Target.id
+        Target.id += 1
+
         if s1 > s2:
             self.outer = s1
             self.inner = s2
@@ -150,9 +160,9 @@ class Target:
 
     def __str__(self):
         if hasattr(self, 'text'):
-            return "Target: (x,y) = (%s,%s) Text: %s" %(self.cX, self.cY, self.text)
+            return "Target %s: (x,y) = (%s,%s) Text: %s" %(self.id, self.cX, self.cY, self.text)
         else:
-            return "Target: (x,y) = (%s,%s)" %(self.cX, self.cY)
+            return "Target %s: (x,y) = (%s,%s)" %(self.id, self.cX, self.cY)
 
     def draw(self, frame):
         cv2.drawContours(frame, self.contour, -1, (0, 255, 0), 3)

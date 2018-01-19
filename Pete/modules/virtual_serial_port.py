@@ -1,6 +1,6 @@
 import os, pty, serial
 
-def createVirtualPort():
+def open():
     master, slave = pty.openpty()
     m = MasterPort(master)
     s = SlavePort(slave)
@@ -15,8 +15,8 @@ class MasterPort:
         str = str + "\r\n"
         os.write(self.pty, str)
 
-    def read(self):
-        return os.read(self.pty,1000)
+    def read(self, length=1000):
+        return os.read(self.pty,length)
 
 class SlavePort:
     def __init__(self, pty):
@@ -27,5 +27,5 @@ class SlavePort:
     def write(self, str):
         self.port.write(str)
 
-    def read(self):
-        return self.port.readlaine()
+    def readline(self):
+        return self.port.readline()

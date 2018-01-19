@@ -86,7 +86,7 @@ def targets(img, readText=False):
                 # print "Found %s" %t
 
     # Read text inside targets
-    if readText:
+    if readText == True:
         for t in targets:
             t.readText(img)
 

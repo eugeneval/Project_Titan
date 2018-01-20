@@ -1,31 +1,11 @@
-import os, pty, serial
+import serial
 
 def open():
-    master, slave = pty.openpty()
-    m = MasterPort(master)
-    s = SlavePort(slave)
-    return m, s
-
-
-class MasterPort:
-    def __init__(self, pty):
-        self.pty = pty
-
-    def write(self, str):
-        str = str + "\r\n"
-        os.write(self.pty, str)
-
-    def read(self, length=1000):
-        return os.read(self.pty,length)
-
-class SlavePort:
-    def __init__(self, pty):
-        self.pty = pty
-        self.name = os.ttyname(pty)
-        self.port = serial.Serial(self.name)
-
-    def write(self, str):
-        self.port.write(str)
-
-    def readline(self):
-        return self.port.readline()
+    """
+    Run the following command in the command line before opening the ports:
+    'socat -d -d pty,raw,echo=0 pty,raw,echo=0'
+    Make sure to kill socat when you are done
+    """
+    ser1 = serial.Serial('/dev/ttys001')
+    ser2 = serial.Serial('/dev/ttys002')
+    return ser1, ser2

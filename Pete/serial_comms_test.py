@@ -1,13 +1,10 @@
-import cv2, pickle
+import serial
 import modules.virtual_serial_port as port
-import modules.detect as detect
 
-m,s = port.open()
-img = cv2.imread("Images/IMechE_Target/mid.png", -1)
+ser1, ser2 = port.open()
 
-targets = detect.targets(img)
-for t in targets:
-    t.draw(img)
-    data = pickle.dump(t, s)
-    received = pickle.load(m)
-    print received
+ser1.write('Hello World!\r\n')
+print ser2.readline()
+
+ser1.close()
+ser2.close()

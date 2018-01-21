@@ -31,7 +31,14 @@ def squares(img):
             checkAspectRatio = 0.5 <= aspectRatio <= 1.5
 
             if checkDimensions and checkSolidity and checkAspectRatio:
-                squares.append(c)
+                s = Square(c, x, y, w, h)
+                if s not in squares:
+                    squares.append(s)
+
+    # Reject similar squares
+    for s1, s2 in itertools.combinations(squares, 2):
+        if s1.similar(s2) and s2 in squares:
+            squares.remove(s2)
 
     print "Number of contours: %s" % len(contours)
     print "Total number of squares: %s" % len(squares)
@@ -102,7 +109,7 @@ class Square:
         self.id = Square.id
         Square.id += 1
 
-        self.contour = c
+        self.contour = [c]
         self.x = x
         self.y = y
         self.w = w
@@ -120,6 +127,9 @@ class Square:
 
     def __lt__(self, other):
         return self.w + self.h < other.w + other.h
+
+    def draw(self, frame):
+        cv2.drawContours(frame, self.contour, -1, (0, 255, 0), 3)
 
     def similar(self, other, tolerance=0.05):
         """Used for filtering out squares that are similar to each other."""

@@ -40,7 +40,8 @@ if image != None:
         print text
 
     squares = detect.squares(img)
-    cv2.drawContours(img, squares, -1, (0, 255, 0), 3)
+    for s in squares:
+        s.draw(img)
 
     img = cv2.resize(img, (0,0), fx=scaleFactor, fy=scaleFactor)
     cv2.imshow('Target', img)
@@ -57,7 +58,8 @@ elif video != None:
             break
 
         squares = detect.squares(img)
-        cv2.drawContours(img, squares, -1, (0, 255, 0), 3)
+        for s in squares:
+            s.draw(img)
         img = cv2.resize(img, (0,0), fx=scaleFactor, fy=scaleFactor)
         cv2.imshow('Target', img)
 

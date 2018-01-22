@@ -1,6 +1,6 @@
 import modules.virtual_serial_port as port
 import modules.detect as detect
-from modules.detect import Square
+import modules.square as square
 import cv2, json, serial
 
 drone = serial.Serial("/dev/ttys001")
@@ -14,7 +14,7 @@ for s in squares:
     drone.write(toSend+"\r\n")
     data = base.readline()
     data = json.loads(data)
-    sb = detect.square_from_json(data)
+    sb = square.square_from_json(data)
     print sb
     sb.draw(img)
 

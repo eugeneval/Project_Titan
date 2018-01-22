@@ -8,4 +8,13 @@ def open():
     """
     ser1 = serial.Serial('/dev/ttys001')
     ser2 = serial.Serial('/dev/ttys002')
+    # port1 = PortWrapper(ser1)
+    # port2 = PortWrapper(ser2)
     return ser1, ser2
+
+class PortWrapper:
+    def __init__(self, port):
+        self.port = port
+
+    def write(self, str):
+        self.port.write(str + "\r\n")

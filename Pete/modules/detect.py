@@ -105,16 +105,16 @@ def targets(img, readText=False):
 class Square:
     id = 0
 
-    def __init__(self, c, x, y, w, h):
+    def __init__(self, c, x, y, w, h, id=None, cX=None, cY=None):
         self.id = Square.id
         Square.id += 1
 
-        self.contour = [c]
         self.x = x
         self.y = y
         self.w = w
         self.h = h
 
+        self.contour = [c]
         M = cv2.moments(c)
         self.cX = int(M['m10']/M['m00'])
         self.cY = int(M['m01']/M['m00'])
@@ -127,6 +127,9 @@ class Square:
 
     def __lt__(self, other):
         return self.w + self.h < other.w + other.h
+
+    def to_json(self):
+        return {'id': self.id, 'x': self.x, 'y': self.y, 'w': self.w, 'h': self.h, 'cX': self.cX, 'cY': self.cY}
 
     def draw(self, frame):
         cv2.drawContours(frame, self.contour, -1, (0, 255, 0), 3)
@@ -149,6 +152,19 @@ class Square:
         """WARNING: this is a slow operation, taking ~0.3 seconds per square. Do not use if it is not required."""
         roi = img[self.y:self.y+self.h, self.x:self.x+self.w]
         self.text = text(roi)
+
+class Square2(Square):
+    def __init__(self, id, x, y, w, h, cX, cY):
+        self.id = id
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.cX = cX
+        self.cY = cY
+
+    def from_json(self, json):
+        return Square2(json['id'], json['x'], json['y'], json['w'], json['h'], json['cX'], json['cY'])
 
 class Target:
     id = 0

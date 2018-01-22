@@ -1,4 +1,4 @@
-import cv2
+import cv2, json
 import detect
 
 class Square:
@@ -28,7 +28,8 @@ class Square:
         return self.w + self.h < other.w + other.h
 
     def to_json(self):
-        return {'id': self.id, 'x': self.x, 'y': self.y, 'w': self.w, 'h': self.h, 'cX': self.cX, 'cY': self.cY}
+        data = {'id': self.id, 'x': self.x, 'y': self.y, 'w': self.w, 'h': self.h, 'cX': self.cX, 'cY': self.cY}
+        return json.dumps(data)
 
     def draw(self, frame):
         cv2.drawContours(frame, self.contour, -1, (0, 255, 0), 3)
@@ -65,5 +66,6 @@ class Square2(Square):
     def draw(self, img):
         cv2.rectangle(img, (self.x, self.y), (self.x+self.w, self.y+self.h), (0, 255, 0), 3)
 
-def square_from_json(json):
-        return Square2(json['id'], json['x'], json['y'], json['w'], json['h'], json['cX'], json['cY'])
+def square_from_json(data):
+    data = json.loads(data)
+    return Square2(data['id'], data['x'], data['y'], data['w'], data['h'], data['cX'], data['cY'])

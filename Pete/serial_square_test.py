@@ -16,6 +16,11 @@ for s in squares:
     data = json.loads(data)
     sb = detect.square_from_json(data)
     print sb
+    sb.draw(img)
+
+cv2.imshow('Image', img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 
 # drone.write("Hello World!\n")
 # print base.readline()

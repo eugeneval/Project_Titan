@@ -1,7 +1,7 @@
 import modules.virtual_serial_port as port
 import modules.detect as detect
 import modules.target as target
-import cv2, json, serial
+import cv2, serial
 
 drone = serial.Serial("/dev/ttys001")
 base = serial.Serial("/dev/ttys002")

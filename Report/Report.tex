@@ -5,6 +5,7 @@
 \usepackage{subcaption}
 \usepackage{listings}
 \usepackage{color}
+\usepackage{paralist}
 \usepackage[hyphens]{url}
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
@@ -343,7 +344,27 @@ The last component of the control system is a comouter vision system capable of 
 Since an interface had already been programmed in Python, it was decided to program the computer vision in Python as well to allow for them to easily work in conjucntion. To this end the OpenCV-Python library was chosen.
 
 \subsection{Square Detection}
-The target consists of two concentric squares and a central leter. Therefore, a good way of identifying the
+The target consists of two concentric squares and a central leter. Therefore, a good way of identifying the target is looking for concentric squares. This is called feature detection, and is the prefered computer vision approach when it is possible (which is rarely), as opposed to creating a cascade.
+
+First, squares are recognised. This is a multi-stage process:
+\begin{compactenum}
+    \item Convert image to grayscale
+    \item Gaussian Blur to blur the image slightly
+    \item Use Canny Edge Detection to find edges
+    \item Find complete contours
+    \item Find contours that have between 4 and 6 edges
+    \begin{compactitem}
+        \item \small An ideal square would have 4 edges, but images are rarely perfect.
+    \end{compactitem}
+    \item Check that the contour is above a minimum size
+    \item Check that the solidity of the contour is above a threshold
+    \begin{compactitem}
+        \item This is done by drawing a rectangle that encloses the entire contour, and comparing the area of the rectangle to the area of the contour
+        \item An ideal square would have a solidity of 1
+    \end{compactitem}
+    \item Check that the aspect ratio of the bounding rectangle is within thresholds
+    \item Contours that have passed all of these criteria must be squares
+\end{compactenum}
 
 \subsection{Optical Character Recognition}
 

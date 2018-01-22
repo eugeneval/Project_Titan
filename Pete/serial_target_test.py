@@ -11,10 +11,11 @@ img = cv2.imread("Images/IMechE_Target/mid.png", -1)
 squares = detect.squares(img)
 for s in squares:
     toSend = json.dumps(s.to_json())
-    print toSend
     drone.write(toSend+"\r\n")
     data = base.readline()
-    print data
+    data = json.loads(data)
+    sb = detect.square_from_json(data)
+    print sb
 
 # drone.write("Hello World!\n")
 # print base.readline()

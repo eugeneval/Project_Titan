@@ -163,8 +163,9 @@ class Square2(Square):
         self.cX = cX
         self.cY = cY
 
-    def from_json(self, json):
+def square_from_json(json):
         return Square2(json['id'], json['x'], json['y'], json['w'], json['h'], json['cX'], json['cY'])
+
 
 class Target:
     id = 0

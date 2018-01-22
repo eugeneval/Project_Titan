@@ -163,6 +163,9 @@ class Square2(Square):
         self.cX = cX
         self.cY = cY
 
+    def draw(self, img):
+        cv2.rectangle(img, (self.x, self.y), (self.x+self.w, self.y+self.h), (0, 255, 0), 3)
+
 def square_from_json(json):
         return Square2(json['id'], json['x'], json['y'], json['w'], json['h'], json['cX'], json['cY'])
 

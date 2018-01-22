@@ -10,10 +10,8 @@ base = serial.Serial("/dev/ttys002")
 img = cv2.imread("Images/IMechE_Target/mid.png", -1)
 targets = detect.targets(img)
 for t in targets:
-    toSend = json.dumps(t.to_json())
-    drone.write(toSend+"\r\n")
+    drone.write(t.to_json()+"\r\n")
     data = base.readline()
-    data = json.loads(data)
     tb = target.target_from_json(data)
     print tb
     tb.draw(img)

@@ -1,4 +1,4 @@
-import cv2
+import cv2, json
 from square import Square2
 
 class Target:
@@ -26,7 +26,8 @@ class Target:
             return "Target %s: (x,y) = (%s,%s)" %(self.id, self.cX, self.cY)
 
     def to_json(self):
-        return {'id': self.id, 'id1': self.inner.id, 'x1': self.inner.x, 'y1': self.inner.y, 'w1': self.inner.w, 'h1': self.inner.h, 'cX1': self.inner.cX, 'cY1': self.inner.cY, 'id2': self.outer.id, 'x2': self.outer.x, 'y2': self.outer.y, 'w2': self.outer.w, 'h2': self.outer.h, 'cX2': self.outer.cX, 'cY2': self.outer.cY}
+        data =  {'id': self.id, 'id1': self.inner.id, 'x1': self.inner.x, 'y1': self.inner.y, 'w1': self.inner.w, 'h1': self.inner.h, 'cX1': self.inner.cX, 'cY1': self.inner.cY, 'id2': self.outer.id, 'x2': self.outer.x, 'y2': self.outer.y, 'w2': self.outer.w, 'h2': self.outer.h, 'cX2': self.outer.cX, 'cY2': self.outer.cY}
+        return json.dumps(data)
 
     def draw(self, frame):
         self.inner.draw(frame)
@@ -50,7 +51,8 @@ class Target2(Target):
         self.cY = (inner.cY + outer.cY)/2
 
 
-def target_from_json(json):
-    inner = Square2(json['id1'], json['x1'], json['y1'], json['w1'], json['h1'], json['cX1'], json['cY1'])
-    outer = Square2(json['id2'], json['x2'], json['y2'], json['w2'], json['h2'], json['cX2'], json['cY2'])
-    return Target2(json['id'], inner, outer)
+def target_from_json(data):
+    data = json.loads(data)
+    inner = Square2(data['id1'], data['x1'], data['y1'], data['w1'], data['h1'], data['cX1'], data['cY1'])
+    outer = Square2(data['id2'], data['x2'], data['y2'], data['w2'], data['h2'], data['cX2'], data['cY2'])
+    return Target2(data['id'], inner, outer)

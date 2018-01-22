@@ -26,10 +26,11 @@ class Target:
             return "Target %s: (x,y) = (%s,%s)" %(self.id, self.cX, self.cY)
 
     def to_json(self):
-        return {'id': self.id, 'id1': self.s1.id, 'x1': self.s1.x, 'y1': self.s1.y, 'w1': self.s1.w, 'h1': self.s1.h, 'cX1': self.s1.cX, 'cY1': self.s1.cY, 'id2': self.s2.id, 'x2': self.s2.x, 'y2': self.s2.y, 'w2': self.s2.w, 'h2': self.s2.h, 'cX2': self.s2.cX, 'cY2': self.s2.cY}
+        return {'id': self.id, 'id1': self.inner.id, 'x1': self.inner.x, 'y1': self.inner.y, 'w1': self.inner.w, 'h1': self.inner.h, 'cX1': self.inner.cX, 'cY1': self.inner.cY, 'id2': self.outer.id, 'x2': self.outer.x, 'y2': self.outer.y, 'w2': self.outer.w, 'h2': self.outer.h, 'cX2': self.outer.cX, 'cY2': self.outer.cY}
 
     def draw(self, frame):
-        cv2.drawContours(frame, self.contour, -1, (0, 255, 0), 3)
+        self.inner.draw(frame)
+        self.outer.draw(frame)
 
         (startX, endX) = (int(self.cX - (self.inner.w * 0.15)), int(self.cX + (self.inner.w * 0.15)))
         (startY, endY) = (int(self.cY - (self.inner.h * 0.15)), int(self.cY + (self.inner.h * 0.15)))
@@ -40,15 +41,16 @@ class Target:
         self.text = self.inner.readText(img)
 
 class Target2(Target):
-    def __init__(self, id, s1, s2):
+    def __init__(self, id, inner, outer):
         self.id = id
-        self.s1 = s1
-        self.s2 = s2
+        self.inner = inner
+        self.outer = outer
 
-        self.cX = (s1.cX + s2.cX)/2
-        self.cY = (s1.cY + s2.cY)/2
+        self.cX = (inner.cX + outer.cX)/2
+        self.cY = (inner.cY + outer.cY)/2
+
 
 def target_from_json(json):
-    s1 = Square2(json['id1'], json['x1'], json['y1'], json['w1'], json['h1'], json['cX1'], json['cY1'])
-    s2 = Square2(json['id2'], json['x2'], json['y2'], json['w2'], json['h2'], json['cX2'], json['cY2'])
-    return Target2(json['id'], s1, s2)
+    inner = Square2(json['id1'], json['x1'], json['y1'], json['w1'], json['h1'], json['cX1'], json['cY1'])
+    outer = Square2(json['id2'], json['x2'], json['y2'], json['w2'], json['h2'], json['cX2'], json['cY2'])
+    return Target2(json['id'], inner, outer)

@@ -4,7 +4,7 @@ import detect
 class Square:
     id = 0
 
-    def __init__(self, c, x, y, w, h, id=None, cX=None, cY=None):
+    def __init__(self, c, x, y, w, h):
         self.id = Square.id
         Square.id += 1
 

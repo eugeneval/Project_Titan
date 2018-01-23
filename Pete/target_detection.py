@@ -32,7 +32,7 @@ else:
     video = None
 
 def process(img, (x,y), readText):
-    startTime = timeit.default_timer()
+    # startTime = timeit.default_timer()
     targets = detect.targets(img, readText)
     for t in targets:
         t.draw(img)
@@ -40,8 +40,8 @@ def process(img, (x,y), readText):
         print "Offset from center: (%s,%s)" % (t.cX - x, t.cY - y)
 
     img = cv2.resize(img, (0,0), fx=scaleFactor, fy=scaleFactor)
-    endTime = timeit.default_timer()
-    print "Elapsed time: %s" %(endTime-startTime)
+    # endTime = timeit.default_timer()
+    # print "Elapsed time: %s" %(endTime-startTime)
     return img
 
 def findCenter(img):
@@ -71,6 +71,7 @@ elif video != None:
     isFrame, img = camera.read()
     center = findCenter(img)
     while True:
+        # start = timeit.default_timer()
         isFrame, img = camera.read()
         if not isFrame:
             break
@@ -81,6 +82,8 @@ elif video != None:
         key = cv2.waitKey(1)
         if key == ord('q'):
             break
+        # end = timeit.default_timer()
+        # print "Time for this frame: %s" % (end-start)
 
     camera.release()
 

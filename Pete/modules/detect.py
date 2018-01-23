@@ -99,8 +99,8 @@ def targets(img, readText=False):
         for t in targets:
             t.readText(img)
 
-    print "Total number of squares: %s" %(len(squares))
-    print "Total number of targets: %s" %(len(targets))
+    # print "Total number of squares: %s" %(len(squares))
+    # print "Total number of targets: %s" %(len(targets))
 
     return targets
 

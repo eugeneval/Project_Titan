@@ -352,7 +352,7 @@ The target consists of two concentric squares and a central leter. Therefore, a 
 First, squares are recognised. This is a multi-stage process:
 \begin{compactenum}
     \item Convert image to grayscale
-    \item Gaussian Blur to blur the image slightly
+    \item Use a Gaussian Blur on the image
     \item Use Canny Edge Detection to find edges
     \item Find complete contours
     \item Find contours that have between 4 and 6 edges
@@ -368,8 +368,15 @@ First, squares are recognised. This is a multi-stage process:
     \item Check that the aspect ratio of the bounding rectangle is within thresholds
     \item Contours that have passed all of these criteria must be squares
 \end{compactenum}
+These contours are then drawn onto the image, showing us the squares. This method can be applied to images, or to video by applying it to each frame in the video. It is modified from examples availible online.\cite{opencv_tutorials}\cite{pyimagesearch_squares}
 
 \subsection{Optical Character Recognition}
+Reading the letter inside the target is also a requirement of our system. To this end, Optical Character Recognition (OCR) was added to our system. This is done using the freely availible Tesseract OCR library, in conjuction with the pytesseract library that adapts it to Python. A simple function was created that takes an image and puts it through Tesseract, printing all that is written on that page. Once again, it was adapted from examples available online.\cite{pyimagesearch_ocr}
+
+\subsection{Target Detection}
+The next step was to find the target by finding squares that are conenctric to each other. This was done by finding the coordinates of the center of the square, using OpenCV's \lstinline|moments()| function. This center was then compared to the centers of all other squares that had been found.
+
+At this point, a \lstinline|Square| class was made to improve the code under the concepts of object-oriented programming. A \lstinline|concentric()| method was made in this class that compares 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -76,6 +76,7 @@ while not home_position_set:
     time.sleep(1)
 print(" Home location: %s" % vehicle.home_location)
 home = vehicle.location.global_relative_frame
+# vehicle.wait_for_home()
 
 # Load commands
 cmds = vehicle.commands

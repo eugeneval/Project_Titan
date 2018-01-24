@@ -44,6 +44,7 @@ class Target:
     def calculate_offset(self, x, y):
         self.offX = self.cX - x
         self.offY = self.cY - y
+        return self.offX, self.offY
 
 class Target2(Target):
     def __init__(self, id, inner, outer):

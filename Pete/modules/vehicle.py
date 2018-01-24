@@ -6,7 +6,18 @@ import time
 
 class Vehicle(dronekit_Vehicle):
     def __init__(self, handler):
-      super(Vehicle, self).__init__(handler)
+        super(Vehicle, self).__init__(handler)
+
+    # def wait_for_home(self):
+    #     home_position_set = False
+    #     @self.on_message('HOME_POSITION')
+    #     def listener(self, name, home_position):
+    #         global home_position_set
+    #         home_position_set = True
+    #     while not home_position_set:
+    #         print "Waiting for home position..."
+    #         time.sleep(1)
+    #     print(" Home location: %s" % self.vehicle.home_location)
 
     def arm_and_takeoff(self, targetAlt, accuracy=0.5):
         wp = get_location_offset_meters(self.home_location, 0, 0, targetAlt)
@@ -28,25 +39,25 @@ class Vehicle(dronekit_Vehicle):
                 break
             time.sleep(1)
 
-    def goto_absolute(self, pos_x, pos_y, pos_z, accuracy=0.5):
+    def goto_absolute(self, pos_x, pos_y, pos_z, accuracy=0.5, text=True):
         """Go to a position relative to the home position"""
 
         targetLocation = LocationLocal(pos_x, pos_y, -pos_z)
 
         self.send_ned_position(pos_x, pos_y, -pos_z)
         self.mode = VehicleMode("OFFBOARD")
-        print("Vehicle mode should be OFFBOARD: %s" % self.mode.name)
+        if text: print("Vehicle mode should be OFFBOARD: %s" % self.mode.name)
 
         while True:
             self.send_ned_position(pos_x, pos_y, -pos_z)
             remainingDistance = get_distance_metres_local(self.location.local_frame, targetLocation)
             if remainingDistance<=accuracy:
-                print("Arrived at target")
+                if text: print("Arrived at target")
                 break
-            print "Distance to target: ", remainingDistance
+            if text: print "Distance to target: ", remainingDistance
             time.sleep(0.1)
 
-    def goto_relative(self, pos_x, pos_y, pos_z, accuracy=0.5, wait=True):
+    def goto_relative(self, pos_x, pos_y, pos_z, accuracy=0.5, wait=True, text=True):
         """Go to a position relative to the current posotion"""
 
         currentLocation = self.location.local_frame
@@ -54,16 +65,16 @@ class Vehicle(dronekit_Vehicle):
 
         self.send_ned_position(targetLocation.north, targetLocation.east, targetLocation.down)
         self.mode = VehicleMode("OFFBOARD")
-        print("Vehicle mode should be OFFBOARD: %s" % self.mode.name)
+        if text: print("Vehicle mode should be OFFBOARD: %s" % self.mode.name)
 
         while True:
             self.send_ned_position(targetLocation.north, targetLocation.east, targetLocation.down)
             remainingDistance = get_distance_metres_local(self.location.local_frame, targetLocation)
             if remainingDistance<=accuracy:
-                print("Arrived at target")
+                if text: print("Arrived at target")
                 break
             if wait == False: break
-            print "Distance to target: ", remainingDistance
+            if text: print "Distance to target: ", remainingDistance
             time.sleep(0.1)
 
     def setMaxXYSpeed(self, speed):

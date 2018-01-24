@@ -23,6 +23,8 @@ class Vehicle(dronekit_Vehicle):
             #Break and return from function just below target altitude.
             if self.location.global_relative_frame.alt>=targetAlt-accuracy:
                 print "Reached target altitude"
+                self.mode = VehicleMode("LOITER")
+                time.sleep(0.5)
                 break
             time.sleep(1)
 
@@ -44,8 +46,8 @@ class Vehicle(dronekit_Vehicle):
             print "Distance to target: ", remainingDistance
             time.sleep(0.1)
 
-    def goto_relative(self, pos_x, pos_y, pos_z, accuracy=0.5):
-    # Go to a position relative to the current posotion
+    def goto_relative(self, pos_x, pos_y, pos_z, accuracy=0.5, wait=True):
+        """Go to a position relative to the current posotion"""
 
         currentLocation = self.location.local_frame
         targetLocation = get_location_metres_local(currentLocation, pos_x, pos_y, -pos_z)\
@@ -60,6 +62,7 @@ class Vehicle(dronekit_Vehicle):
             if remainingDistance<=accuracy:
                 print("Arrived at target")
                 break
+            if wait == False: break
             print "Distance to target: ", remainingDistance
             time.sleep(0.1)
 

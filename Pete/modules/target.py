@@ -41,6 +41,10 @@ class Target:
     def readText(self, img):
         self.text = self.inner.readText(img)
 
+    def calculate_offset(self, x, y):
+        self.offX = self.cX - x
+        self.offY = self.cY - y
+
 class Target2(Target):
     def __init__(self, id, inner, outer):
         self.id = id

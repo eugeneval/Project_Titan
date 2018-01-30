@@ -187,41 +187,56 @@ The quad section was implemented first. A controller was first tested solely in 
 Testing involved flying a simple path: takeoff to 10m, a square path (10m north, 10m east, 10m south, 10m west), and then landing. This gave the results seen in Figure \ref{fig:square_path_quad_only}. It can be seen that there is an oscilliation in x and y position. It proved difficult to eliminate, due to the not straightforward interaction of position and angle PID values. This, however proved not to be a problem. It can be seen in Figure \ref{fig:square_path_w_jet} that the addition of the jet has, likely due to the added mass, damped out the oscillations in x and y position. It has also added an overshoot in z and a steady state error in x and y, but this can be corrected by fine-tuning of PID values. The flight time has also increased but this is to be expected with greater mass. In Figure \ref{fig:square_path_w_jet_angle} we can see how the quadcopter changes angle about the x axis, and how the jet initially starts to move in that direction but is quickly brought back to the vertical by the servo.
 
 \begin{figure}[p]
-    \centering
-    \begin{subfigure}{0.72\textwidth}
-        \includegraphics[width=\textwidth]{square_path_quad_only}
-        \caption{Square Path - Quad Only}
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\linewidth]{square_path_quad_only}
+        \caption{Quad Only}
         \label{fig:square_path_quad_only}
-    \end{subfigure}
-
-    \begin{subfigure}{0.72\textwidth}
-        \includegraphics[width=\textwidth]{square_path_w_jet}
-        \caption{Square Path - With Jet}
+    \end{subfigure}\hspace*{\fill}
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\linewidth]{square_path_w_jet}
+        \caption{With Jet}
         \label{fig:square_path_w_jet}
     \end{subfigure}
-
-    \begin{subfigure}{0.72\textwidth}
-        \includegraphics[width=\textwidth]{square_path_w_jet_angle}
-        \caption{Square Path - With Jet}
+    \medskip
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\linewidth]{square_path_w_jet_angle}
+        \caption{With Jet}
         \label{fig:square_path_w_jet_angle}
+    \end{subfigure}\hspace*{\fill}
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\linewidth]{square_path_limited_servos}
+        \caption{With Refiments}
+        \label{fig:square_path_limited_servos}
     \end{subfigure}
-    \caption{}
+    \medskip
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\linewidth]{square_path_limited_servos_angle}
+        \caption{With Refiments}
+        \label{fig:square_path_limited_servos_angle}
+    \end{subfigure}\hspace*{\fill}
+    \begin{subfigure}{0.48\textwidth}
+        % \includegraphics[width=\linewidth]{pic6.pdf}
+        % \caption{Sixth subfigure}
+        % \label{fig:f}
+    \end{subfigure}
+
+    \caption{Simulation of a Square Path}
+    \label{fig:Square Path}
 \end{figure}
-\newpage
+
 
 \subsection{Refiment}
-It was realised that the mass of the quad had been implemented incorrectly ($r_r$ had not been squared and the rod mass and motor mass had not been multiplied by 4 in equation \ref{eqn:total_mass}). Additionally, the maximum torque of the servo had not been limited to 0.34kgm.
+It was realised that the mass of the quad had been implemented incorrectly ($r_r$ had not been squared and the rod mass and motor mass had not been multiplied by 4 in equation \ref{eqn:total_mass}). Additionally, the maximum torque of the servo had not been limited to 0.34kgm. Correcting these resulted in Figures \ref{fig:square_path_limited_servos} and \ref{fig:square_path_limited_servos_angle}.
 
 These refiments decreased the stability of the drone. It is still well within acceptable parameters for rotation, and for x and y positioning, but height now has considerable steady state error and oscillation.
-% TODO height fucked up graphs
 
 With sufficient PID tuning, height could be stabilised, but not without a massive initial overshoot, and slightly increasing instability in x and y. This is because as the proportion of motor control that comes from height control increases (due to increasing $k_p$ and $k_i$ terms), the proportion of motor control left availible for the other controllers decreases.
 % TODO finish this off, add graphs
 
 \subsection{Conclusion}
-It can be seen that the addition of a gimballed jet to a quadcopter does not destabilise it. The extremely simple PID controllers used in our simulation are able to cope without any difficulty, implying that a significantly more advanced flight stack such as the PX4 should have no problems. Our initial assumption that the jet can simply be ignored is, indeed, valid.
+It can be seen that the addition of a gimballed jet to a quadcopter does not destabilise it. The extremely simple PID controllers used in our simulation are able to cope, implying that a significantly more advanced flight stack such as the PX4 should have no problems. Our initial assumption that the jet can simply be ignored is, indeed, valid.
 
-\section{Simulation: Control Software}
+\section{Control}
 We will be controlling the PixHawk flight controller using offboard commands from an external companion computer, henceforth refered to as Pete (since CC is a rather ambigous acronym). Pete will consist of three main components: communication with the PixHawk, communication with a ground station, and target-finding computer vision.
 
 PX4 is fully capable of Software-in-the-Loop (SITL) simulation, using either the jMAVSim or Gazebo enviroments. This is crucial, as it allows code to be tested with no danger to the real vehicle. Pete can commicate with the simulated vehicle using MAVLink through a UDP port; this is exactly the same as how it would connect to a real vehicle. As far as Pete's code is concerned, there is no difference between a real and a simulated vehicle except for the UDP address.
@@ -231,7 +246,7 @@ Communication with the PX4 flight stack on the PixHawk is based on the DroneKit 
 
 PX4 has 12 flight modes when employed on a multirotor. We are interested in the autonomous modes, which include Hold, Return(RTL), Takeoff, Land, Mission, Follow Me, and Offboard. Of particular interest are Mission, in which `the vehicle follows a programmed mission', and Offboard, where `the vehicle obeys a position, velocity or attitude setpoint provided over MAVLink'.\cite{PX4_user_guide}
 
-\subsubsection{Implementation}
+\subsubsection{Implementation}\label{control_implementation}
 The available documentation and examples for DroneKit mostly make use of the \lstinline[language=Python]|simple_goto()| command. Unfortunately, as DroneKit is primarily designed to work with APM, the predecessor of PX4, this command does not work. Neither does \lstinline[language=Python]|arm_and_takeoff()|, or the \lstinline|vehicle.groundspeed| and \lstinline|vehicle.airspeed| attributes, among others.
 
 Additionally, it is usually assumed that one is operating in the \lstinline|global_relative_frame|. There are three frames of reference availible:
@@ -368,15 +383,36 @@ First, squares are recognised. This is a multi-stage process:
     \item Check that the aspect ratio of the bounding rectangle is within thresholds
     \item Contours that have passed all of these criteria must be squares
 \end{compactenum}
-These contours are then drawn onto the image, showing us the squares. This method can be applied to images, or to video by applying it to each frame in the video. It is modified from examples availible online.\cite{opencv_tutorials}\cite{pyimagesearch_squares}
+These contours are then drawn onto the image, showing us the squares. This method can be applied to images, or to video by applying it to each frame in the video. It is modified from examples available online.\cite{opencv_tutorials}\cite{pyimagesearch_squares}
 
 \subsection{Optical Character Recognition}
-Reading the letter inside the target is also a requirement of our system. To this end, Optical Character Recognition (OCR) was added to our system. This is done using the freely availible Tesseract OCR library, in conjuction with the pytesseract library that adapts it to Python. A simple function was created that takes an image and puts it through Tesseract, printing all that is written on that page. Once again, it was adapted from examples available online.\cite{pyimagesearch_ocr}
+Reading the letter inside the target is also a requirement of our system. To this end, Optical Character Recognition (OCR) was added to our system. This is done using the freely available Tesseract OCR library, in conjuction with the pytesseract library that adapts it to Python. A simple function was created that takes an image and puts it through Tesseract, printing all that is written on that page. Once again, it was adapted from examples available online.\cite{pyimagesearch_ocr}
 
 \subsection{Target Detection}
 The next step was to find the target by finding squares that are conenctric to each other. This was done by finding the coordinates of the center of the square, using OpenCV's \lstinline|moments()| function. This center was then compared to the centers of all other squares that had been found.
 
-At this point, a \lstinline|Square| class was made to improve the code under the concepts of object-oriented programming. A \lstinline|concentric()| method was made in this class that compares 
+At this point, a \lstinline|Square| class was made to improve the code under the concepts of object-oriented programming. A \lstinline|concentric()| method was made in this class that compares squares against each other to see if their center points are within a certain distance of each other (by default, 5\% of the size of the square). Two squares that are concentric are added to a new intance of a \lstinline|Target| class. Repeated comparisons are avoided by using \lstinline|intertools.combinations()| to make a list of all the unique pairs of squares before comparing.
+
+Initially, it appeared that all squares were targets. The problem was discovered to be that there are in fact multiple, very similar squares being generated for each actual square on the image. For example, for a square whose border is a black line might have the outside of the line and the inside of the line counted as seperate squares. These squares are clearly concentric and thus all squares are targets. The problem was solved by creating a \lstinline|similar()| method for \lstinline|Square| and using it to eliminte squares that are too similar (again, 5\% by default), ensuring that all squares are unique before running the \lstinline|concentric()| method to find targets.
+
+From here, it is trivial to calculate the offset of the target from the center of the image or camera frame. This offset will be used as an input into a control system to move the drone above the target.
+
+\subsection{Integrating into Control}
+Using the code developed in Section \ref{control_implementation}, a program was created to integrate the newly-developed computer vision. This takes off to 10m, and once there the webcam on the computer is turned on. It looks for a target, and uses the offset of the target from the center of the camera as an input for the desired position of the drone. This was verified to work as intended, validating all the work we have done up to this point.
+
+\section{Communication}
+Communication from Pete to a base station to transmit information will, by necessity, be over a serial connection.
+
+The socat command line utility was used to establish two virtual serial ports which communicate with each other. These are then acessed using the pyserial library to write and read information from these serial ports.
+
+\subsection{Serialising Targets}
+It was quickly discovered that sending an entire image over a serial connection within a reasonable amount of time is not possible. Even sending the contours of a square does not work well, as this is a large set of points. Thus, it was decided to send only the most important information.
+
+A \lstinline|Square2| and \lstinline|Target2| class were created. These inherit from \lstinline|Square| and \lstinline|Target|. The only difference is that they are missing the contours of the squares. \lstinline|Square| and \lstinline|Target| gained a \lstinline|to_json()| method that converts their attributes to a string using JavaScript Object Notation (JSON), a standard for transmitting information. \lstinline|Square2| and \lstinline|Target2| have a function \lstinline|from_json()| which can recreate the squares from the JSON string.
+
+This was tested by sending the targets over the virtual serial connection, and drawing them on the image. With minor modifications to the way that squares and targets are drawn, this worked sucessfully. Notably, squares are now defined largely based on their bounding rectangle and not on their own contours, which for a square or rectangle makes little difference.
+
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

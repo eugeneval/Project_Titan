@@ -8,6 +8,7 @@
 \usepackage{paralist}
 \usepackage[hyphens]{url}
 \usepackage{geometry}
+\usepackage{wrapfig}
 
 \geometry{a4paper, left=25mm, top=25mm}
 
@@ -362,7 +363,15 @@ The last component of the control system is a comouter vision system capable of 
 Since an interface had already been programmed in Python, it was decided to program the computer vision in Python as well to allow for them to easily work in conjucntion. To this end the OpenCV-Python library was chosen.
 
 \subsubsection{Square Detection}
-The target consists of two concentric squares and a central leter. Therefore, a good way of identifying the target is looking for concentric squares. This is called feature detection, and is the prefered computer vision approach when it is possible (which is rarely), as opposed to creating a cascade.
+The target consists of two concentric squares and a central leter, as seen on Figure \ref{fig:target}. Therefore, a good way of identifying the target is looking for concentric squares. This is called feature detection, and is the prefered computer vision approach when it is possible (which is rarely), as opposed to creating a cascade.
+
+\begin{wrapfigure}{r}{0.5\textwidth}
+    \begin{center}
+        \includegraphics[width=0.48\linewidth]{IMechE_target}
+        \caption{Target \cite{IMechE_rules}}
+        \label{fig:target}
+    \end{center}
+\end{wrapfigure}
 
 First, squares are recognised. This is a multi-stage process:
 \begin{compactenum}

@@ -1,6 +1,6 @@
 import cv2, threading, time
 import modules.detect as detect
-from dronekit import connect
+from dronekit import connect, VehicleMode
 from modules.vehicle import Vehicle as MyVehicle
 
 scaleFactor = 0.6
@@ -37,10 +37,18 @@ class Fly(threading.Thread):
     def run(self, command, x=0, y=0, h=0):
         if command == "TAKEOFF":
             self.vehicle.arm_and_takeoff(h)
-        elif command == "GOTO":
+        elif command == "GOTO_REL":
             self.vehicle.goto_relative(x, y, h, wait=False, text=False)
+        elif command == "GOTO_ABS":
+            if x == 0 and y == 0:
+                self.vehicle.mode = VehicleMode("LOITER")
+            else:
+                self.vehicle.goto_absolute(x, y, 10, wait=False, text=False)
         elif command == "LAND":
             self.vehicle.returnToLand()
+
+    def close(self):
+        self.vehicle.close()
 
 camera = cv2.VideoCapture(0)
 
@@ -60,7 +68,7 @@ while True:
     img, offX, offY = process(img, center)
     img = cv2.resize(img, (0,0), fx=scaleFactor, fy=scaleFactor)
     cv2.imshow('Target', img)
-    drone.run('GOTO', offX/10, offY/10, 0)
+    drone.run('GOTO_ABS', offX/10, offY/10, 0)
 
     key = cv2.waitKey(1)
     if key == ord('q'):
@@ -71,3 +79,4 @@ while True:
 camera.release()
 cv2.destroyAllWindows()
 drone.run('LAND')
+drone.close()

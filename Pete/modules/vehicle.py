@@ -39,7 +39,7 @@ class Vehicle(dronekit_Vehicle):
                 break
             time.sleep(1)
 
-    def goto_absolute(self, pos_x, pos_y, pos_z, accuracy=0.5, text=True):
+    def goto_absolute(self, pos_x, pos_y, pos_z, accuracy=0.5, wait=True, text=True):
         """Go to a position relative to the home position"""
 
         targetLocation = LocationLocal(pos_x, pos_y, -pos_z)
@@ -54,6 +54,7 @@ class Vehicle(dronekit_Vehicle):
             if remainingDistance<=accuracy:
                 if text: print("Arrived at target")
                 break
+            if wait == False: break
             if text: print "Distance to target: ", remainingDistance
             time.sleep(0.1)
 

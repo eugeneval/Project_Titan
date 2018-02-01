@@ -236,17 +236,17 @@ With sufficient PID tuning, height could be stabilised, but not without a massiv
 \subsection{Conclusion}
 It can be seen that the addition of a gimballed jet to a quadcopter does not destabilise it. The extremely simple PID controllers used in our simulation are able to cope, implying that a significantly more advanced flight stack such as the PX4 should have no problems. Our initial assumption that the jet can simply be ignored is, indeed, valid.
 
-\section{Control}
+\section{Companion Computer Software}
+\subsection{PX4 Control}
 We will be controlling the PixHawk flight controller using offboard commands from an external companion computer, henceforth refered to as Pete (since CC is a rather ambigous acronym). Pete will consist of three main components: communication with the PixHawk, communication with a ground station, and target-finding computer vision.
 
 PX4 is fully capable of Software-in-the-Loop (SITL) simulation, using either the jMAVSim or Gazebo enviroments. This is crucial, as it allows code to be tested with no danger to the real vehicle. Pete can commicate with the simulated vehicle using MAVLink through a UDP port; this is exactly the same as how it would connect to a real vehicle. As far as Pete's code is concerned, there is no difference between a real and a simulated vehicle except for the UDP address.
 
-\subsection{PX4 Control}
 Communication with the PX4 flight stack on the PixHawk is based on the DroneKit SDK. This is a platform for devoloping apps written in Python that run on a drone's companion computer. It communicates with the PixHawk using the MAVLink communication protocol.\cite{dronekit} The DroneCore API was also experimented with but proved significantly harder to implement and hence was abandoned.
 
 PX4 has 12 flight modes when employed on a multirotor. We are interested in the autonomous modes, which include Hold, Return(RTL), Takeoff, Land, Mission, Follow Me, and Offboard. Of particular interest are Mission, in which `the vehicle follows a programmed mission', and Offboard, where `the vehicle obeys a position, velocity or attitude setpoint provided over MAVLink'.\cite{PX4_user_guide}
 
-\subsubsection{Implementation}\label{control_implementation}
+\label{control_implementation}
 The available documentation and examples for DroneKit mostly make use of the \lstinline[language=Python]|simple_goto()| command. Unfortunately, as DroneKit is primarily designed to work with APM, the predecessor of PX4, this command does not work. Neither does \lstinline[language=Python]|arm_and_takeoff()|, or the \lstinline|vehicle.groundspeed| and \lstinline|vehicle.airspeed| attributes, among others.
 
 Additionally, it is usually assumed that one is operating in the \lstinline|global_relative_frame|. There are three frames of reference availible:
@@ -356,12 +356,12 @@ def returnToLand():
 Altogether, this means that the communication with the PixHawk has been simplified down to a few basic commands. An example mission could consist of the following: arming and taking off, following a series of GPS coordinates, locating a target using computer vision, calculating it's offset from directly underneath the drone, using \lstinline|goto_relative()| to position itself precisely over the target, droping the payload, and returning to base and landing.
 
 
-\section{Computer Vision}
+\subsection{Computer Vision}
 The last component of the control system is a comouter vision system capable of identifying the target. This takes the form of a red 1x1m square, incoporating an alphanumeric code in white, within a larger 2x2m white square\cite{IMechE_rules}. The system would have to locate the target, calculate the offset from being centered underneath the vehicle, and to indentify the alphanumeric code.
 
 Since an interface had already been programmed in Python, it was decided to program the computer vision in Python as well to allow for them to easily work in conjucntion. To this end the OpenCV-Python library was chosen.
 
-\subsection{Square Detection}
+\subsubsection{Square Detection}
 The target consists of two concentric squares and a central leter. Therefore, a good way of identifying the target is looking for concentric squares. This is called feature detection, and is the prefered computer vision approach when it is possible (which is rarely), as opposed to creating a cascade.
 
 First, squares are recognised. This is a multi-stage process:
@@ -385,10 +385,10 @@ First, squares are recognised. This is a multi-stage process:
 \end{compactenum}
 These contours are then drawn onto the image, showing us the squares. This method can be applied to images, or to video by applying it to each frame in the video. It is modified from examples available online.\cite{opencv_tutorials}\cite{pyimagesearch_squares}
 
-\subsection{Optical Character Recognition}
+\subsubsection{Optical Character Recognition}
 Reading the letter inside the target is also a requirement of our system. To this end, Optical Character Recognition (OCR) was added to our system. This is done using the freely available Tesseract OCR library, in conjuction with the pytesseract library that adapts it to Python. A simple function was created that takes an image and puts it through Tesseract, printing all that is written on that page. Once again, it was adapted from examples available online.\cite{pyimagesearch_ocr}
 
-\subsection{Target Detection}
+\subsubsection{Target Detection}
 The next step was to find the target by finding squares that are conenctric to each other. This was done by finding the coordinates of the center of the square, using OpenCV's \lstinline|moments()| function. This center was then compared to the centers of all other squares that had been found.
 
 At this point, a \lstinline|Square| class was made to improve the code under the concepts of object-oriented programming. A \lstinline|concentric()| method was made in this class that compares squares against each other to see if their center points are within a certain distance of each other (by default, 5\% of the size of the square). Two squares that are concentric are added to a new intance of a \lstinline|Target| class. Repeated comparisons are avoided by using \lstinline|intertools.combinations()| to make a list of all the unique pairs of squares before comparing.
@@ -397,20 +397,25 @@ Initially, it appeared that all squares were targets. The problem was discovered
 
 From here, it is trivial to calculate the offset of the target from the center of the image or camera frame. This offset will be used as an input into a control system to move the drone above the target.
 
-\subsection{Integrating into Control}
+\subsubsection{Integrating into Control}
 Using the code developed in Section \ref{control_implementation}, a program was created to integrate the newly-developed computer vision. This takes off to 10m, and once there the webcam on the computer is turned on. It looks for a target, and uses the offset of the target from the center of the camera as an input for the desired position of the drone. This was verified to work as intended, validating all the work we have done up to this point.
 
-\section{Communication}
+\subsection{Communication}
 Communication from Pete to a base station to transmit information will, by necessity, be over a serial connection.
 
 The socat command line utility was used to establish two virtual serial ports which communicate with each other. These are then acessed using the pyserial library to write and read information from these serial ports.
 
-\subsection{Serialising Targets}
+\subsubsection{Serialising Targets}
 It was quickly discovered that sending an entire image over a serial connection within a reasonable amount of time is not possible. Even sending the contours of a square does not work well, as this is a large set of points. Thus, it was decided to send only the most important information.
 
 A \lstinline|Square2| and \lstinline|Target2| class were created. These inherit from \lstinline|Square| and \lstinline|Target|. The only difference is that they are missing the contours of the squares. \lstinline|Square| and \lstinline|Target| gained a \lstinline|to_json()| method that converts their attributes to a string using JavaScript Object Notation (JSON), a standard for transmitting information. \lstinline|Square2| and \lstinline|Target2| have a function \lstinline|from_json()| which can recreate the squares from the JSON string.
 
 This was tested by sending the targets over the virtual serial connection, and drawing them on the image. With minor modifications to the way that squares and targets are drawn, this worked sucessfully. Notably, squares are now defined largely based on their bounding rectangle and not on their own contours, which for a square or rectangle makes little difference.
+
+\subsection{Choosing a Computer}
+A comparison was made of availible companion computers on the market. The Intel Edison, Raspberry Pi3, Nvidia TX2, Odroid XU4, and Snapdragon Flight were compared on criteria such as processing power, weight, and cost. The full comparison can be seen in Appendix \ref{app:cc_selection}.
+
+Of these, the Raspberry Pi3 was the preffered choice, as it is cheap and light, and has the greatest amount of community support and available documentation. It is, however, borderline as to whether it is powerful to run the required computer vision computation. The Nvidia TX2 is a close second. It is definetely powerful enough to meet our needs, but is significantly more expensive and has less support available. It was therefore decided to buy a Raspberry Pi, and to upgrade to the TX2 if it turns out to not be powerful enough.
 
 
 
@@ -525,6 +530,11 @@ We can see from the datasheet that it takes the servo 0.12 seconds to rotate 60\
 \section{Thrust to Weight Ratio Calculations} \label{app:thrust_to_weight}
 % TODO: add stuff here
 
+\section{Companion Computer Selection} \label{app:cc_selection}
+\begin{figure}[h]
+    \includegraphics[width=\linewidth]{companion_computer_comparison}
+    \caption{}
+\end{figure}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

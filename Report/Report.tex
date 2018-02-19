@@ -51,6 +51,8 @@
 \tableofcontents
 \newpage
 
+\section{Abstract}
+
 \section{Introduction}
 The Unmanned Aerial System (UAS) Challenge was launched by the Institution of Mechanical Engineers (IMechE) in 2014 `with the key objectives of developing professional engineers and inspiring the next generation'\cite{IMechE_about_uas}. The main goal is to design and build a UAS in order to autonomously deliver humanitarian aid such as medical supplies in a disaster zone. This requires a broad range of skills, from project management to airframe design to avionics system programming. To add to the challenge there is a strict weight limit and stringent safety regulations. Working together with another student, Ismail Ahmad, our goal is to follow the design and build cycle all the way through to competing at the IMechE UAS competition in June 2018.
 
@@ -358,7 +360,7 @@ Altogether, this means that the communication with the PixHawk has been simplifi
 
 
 \subsection{Computer Vision}
-The last component of the control system is a comouter vision system capable of identifying the target. This takes the form of a red 1x1m square, incoporating an alphanumeric code in white, within a larger 2x2m white square\cite{IMechE_rules}. The system would have to locate the target, calculate the offset from being centered underneath the vehicle, and to indentify the alphanumeric code.
+The last component of the control system is a computer vision system capable of identifying the target. This takes the form of a red 1x1m square, incoporating an alphanumeric code in white, within a larger 2x2m white square\cite{IMechE_rules}. The system would have to locate the target, calculate the offset from being centered underneath the vehicle, and to indentify the alphanumeric code.
 
 Since an interface had already been programmed in Python, it was decided to program the computer vision in Python as well to allow for them to easily work in conjucntion. To this end the OpenCV-Python library was chosen.
 
@@ -551,9 +553,6 @@ We can see from the datasheet that it takes the servo 0.12 seconds to rotate 60\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \begin{thebibliography}{11}
-
-\bibitem{WEBPAGE_TEMPLATE}
-    Author/s or corporate body. Title [Internet]. Date of publication/last update or copyright. [Accessed date]; Available from: URL.
 
 \bibitem{IMechE_about_uas}
     IMechE. About UAS Challenge - IMechE [Internet]. [Accessed 20 December 2017]; Availible from: \url{https://www.imeche.org/events/challenges/uas-challenge/about-uas-challenge}.

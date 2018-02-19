@@ -23,6 +23,7 @@ class GimbalServo {
         } else if (torque < -0.34) {
             torque = -0.34;
         }
+        torque = 0;
         calculateMovement(time, torque);
     }
 

@@ -10,7 +10,7 @@ final float startingHeight = 0;
 // Saving data
 // WARNING will overwrite old data if given same name
 Table log = new Table();
-String fileName = "Jet gimbal square path 12";
+String fileName = "No gimbal 1";
 final boolean save = true;
 
 // Timing

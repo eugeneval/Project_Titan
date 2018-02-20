@@ -1,0 +1,17 @@
+\section{Abstract}
+
+The goal of this project is to design and test the control system for a vehicle to compete in the Institution of Mechanical Engineers (\emph{IMechE}) Unmanned Aerial Systems (\emph{UAS}) Challenge. This vehicle must be capable of autonomous flight, which will include GPS waypoint navigation, location of a ground target, and the accurate delivery onto a payload onto said target.
+
+The UAS design uses a novel concept – a traditional quadcopter built around a central micro jet engine. The control system will consist of a PixHawk flight controller running the PX4 flight stack, augmented by a companion computer running custom-made software to handle the duties of control, communication, and computer vision.
+
+A simulation was built to test the feasability of the chosen configuration, using a simplified model. Results showed that while stability was significantly impacted over a pure quadcopter, especially in height, it was still within acceptable margins. It was also found that stability is significantly improved with more powerful servo motors for the jet gimbal.
+
+The three main modules for the companion computer software were built and tested: control of the PixHawk, communication with a ground station, and target-finding computer vision. Python was chosen as a programming language due to its simplicity and available libraries.
+
+PixHawk control was tested using a software-in-the-loop (\emph{SITL}) PX4 simulation and jMAVSim. The DroneKit SDK was used as the basis for the module, but it had to be modified, as it was originally designed to work with APM, the predecessor of PX4. Commands for connecting to the PX4, taking off, navigating it both using GPS coordinates and in the local frame of reference, navigating it using both absolute and relative coordinates, and returning to base were all created and tested thoroughly within the simulation enviroment of jAVSim.
+
+Computer vision is done using the OpenCV-Python library. The target is recognised by searching for concentric squares in the image. Optical Character Recognition (\emph{OCR}) is possible using the Tesseract and pytesseract libraries.
+
+Communication will be by radio, and so will be limited to a serial connection. Functions were created which allowed the transfer of crucial information, such as the coordinates of a located target, over said serial connection using the JSON format. The socat command line utility was used to establish two virtual serial ports to allow testing.
+
+These disparate modules were brought together, and allow a simulated drone to navigate to a target, by using the offset of the target from the center of the frame as an input for a command navigating to a target relative to the current position. Although modifications will need to be made before deployment on the real vehicle, the basis for an autonomous flight control system has been proven.

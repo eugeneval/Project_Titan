@@ -20,8 +20,10 @@ class Vehicle(dronekit_Vehicle):
     #     print(" Home location: %s" % self.vehicle.home_location)
 
     def arm_and_takeoff(self, targetAlt, accuracy=0.5):
+        """Overrides DroneKit command. Takeoff to a target altitude, then loiter."""
+
         wp = get_location_offset_meters(self.home_location, 0, 0, targetAlt)
-        self.commands.add(PX4Command(wp, "TO"))
+        self.commands.add(__PX4Command(wp, "TO"))
         self.commands.upload()
         time.sleep(1)
 
@@ -31,7 +33,6 @@ class Vehicle(dronekit_Vehicle):
         self.armed = True
         while True:
             print " Altitude: ", self.location.global_relative_frame.alt
-            #Break and return from function just below target altitude.
             if self.location.global_relative_frame.alt>=targetAlt-accuracy:
                 print "Reached target altitude"
                 self.mode = VehicleMode("LOITER")
@@ -44,12 +45,12 @@ class Vehicle(dronekit_Vehicle):
 
         targetLocation = LocationLocal(pos_x, pos_y, -pos_z)
 
-        self.send_ned_position(pos_x, pos_y, -pos_z)
+        self.__send_ned_position(pos_x, pos_y, -pos_z)
         self.mode = VehicleMode("OFFBOARD")
         if text: print("Vehicle mode should be OFFBOARD: %s" % self.mode.name)
 
         while True:
-            self.send_ned_position(pos_x, pos_y, -pos_z)
+            self.__send_ned_position(pos_x, pos_y, -pos_z)
             remainingDistance = get_distance_metres_local(self.location.local_frame, targetLocation)
             if remainingDistance<=accuracy:
                 if text: print("Arrived at target")
@@ -64,12 +65,12 @@ class Vehicle(dronekit_Vehicle):
         currentLocation = self.location.local_frame
         targetLocation = get_location_metres_local(currentLocation, pos_x, pos_y, -pos_z)\
 
-        self.send_ned_position(targetLocation.north, targetLocation.east, targetLocation.down)
+        self.__send_ned_position(targetLocation.north, targetLocation.east, targetLocation.down)
         self.mode = VehicleMode("OFFBOARD")
         if text: print("Vehicle mode should be OFFBOARD: %s" % self.mode.name)
 
         while True:
-            self.send_ned_position(targetLocation.north, targetLocation.east, targetLocation.down)
+            self.__send_ned_position(targetLocation.north, targetLocation.east, targetLocation.down)
             remainingDistance = get_distance_metres_local(self.location.local_frame, targetLocation)
             if remainingDistance<=accuracy:
                 if text: print("Arrived at target")
@@ -79,11 +80,15 @@ class Vehicle(dronekit_Vehicle):
             time.sleep(0.1)
 
     def setMaxXYSpeed(self, speed):
+        """Required due to DroneKit's vehicle.groundspeed not working with PX4"""
+
         self.parameters['MPC_XY_VEL_MAX']=speed
         print("Set max speed to: %s" % self.parameters['MPC_XY_VEL_MAX'])
         time.sleep(0.5)
 
     def returnToLand(self):
+        """RTL and wait for auto disarm on land"""
+
         self.mode = VehicleMode("RTL")
         time.sleep(1)
         print("Vehicle mode should be RTL: %s" % self.mode.name)
@@ -92,10 +97,8 @@ class Vehicle(dronekit_Vehicle):
             time.sleep(3)
 
 
-    def send_ned_position(self, pos_x, pos_y, pos_z):
-        """
-        Move vehicle in direction based on specified velocity vectors.
-        """
+    def __send_ned_position(self, pos_x, pos_y, pos_z):
+        """Custom message for sending an OFFBOARD position."""
 
         msg = self.message_factory.set_position_target_local_ned_encode(
             0,       # time_boot_ms (not used)
@@ -117,7 +120,7 @@ def PX4setMode(vehicle, mavMode):
                                                0, 0, 0, 0, 0, 0)
 
 
-def PX4Command(wp, type):
+def __PX4Command(wp, type):
     """Builds a command based on a LocationGlobal waypoint and a type (takeoff, waypoint, or land)"""
     if type == "TO":
         cmd = Command(0,0,0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 1, 0, 0, 0, 0, wp.lat, wp.lon, wp.alt)

@@ -42,14 +42,14 @@ class Square:
         else: return False
 
     def concentric(self, other, accuracy=0.05):
-        """Checks if two squares are concentric.s"""
+        """Checks if two squares are concentric."""
         accuracy = accuracy * ((self.w + self.h)/2)
         if - accuracy < (self.cX - other.cX) < accuracy and - accuracy < (self.cY - other.cY) < accuracy:
             return True
         else: return False
 
     def readText(self, img):
-        """WARNING: this is a slow operation, taking ~0.3 seconds per square. Do not use if it is not required."""
+        """WARNING: this is a slow operation, taking ~0.3 seconds per square, due to file creation/deletion. Do not use if it is not required."""
         roi = img[self.y:self.y+self.h, self.x:self.x+self.w]
         self.text = detect.text(roi)
 

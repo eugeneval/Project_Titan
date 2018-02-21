@@ -3,7 +3,7 @@ import modules.detect as detect
 from dronekit import connect, VehicleMode
 from modules.vehicle import Vehicle as MyVehicle
 
-scaleFactor = 0.6
+SCALE_FACTOR = 0.6
 offset = (0, 0)
 offset_lock = threading.Lock()
 
@@ -66,7 +66,7 @@ while True:
 
     offX, offY = 0, 0
     img, offX, offY = process(img, center)
-    img = cv2.resize(img, (0,0), fx=scaleFactor, fy=scaleFactor)
+    img = cv2.resize(img, (0,0), fx=SCALE_FACTOR, fy=SCALE_FACTOR)
     cv2.imshow('Target', img)
     drone.run('GOTO_ABS', offX/10, offY/10, 0)
 

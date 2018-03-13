@@ -8,22 +8,11 @@ class Vehicle(dronekit_Vehicle):
     def __init__(self, handler):
         super(Vehicle, self).__init__(handler)
 
-    # def wait_for_home(self):
-    #     home_position_set = False
-    #     @self.on_message('HOME_POSITION')
-    #     def listener(self, name, home_position):
-    #         global home_position_set
-    #         home_position_set = True
-    #     while not home_position_set:
-    #         print "Waiting for home position..."
-    #         time.sleep(1)
-    #     print(" Home location: %s" % self.vehicle.home_location)
-
     def arm_and_takeoff(self, targetAlt, accuracy=0.5):
         """Overrides DroneKit command. Takeoff to a target altitude, then loiter."""
 
         wp = get_location_offset_meters(self.home_location, 0, 0, targetAlt)
-        self.commands.add(__PX4Command(wp, "TO"))
+        self.commands.add(PX4Command(wp, "TO"))
         self.commands.upload()
         time.sleep(1)
 
@@ -112,6 +101,17 @@ class Vehicle(dronekit_Vehicle):
 
         self.send_mavlink(msg)
 
+    # def wait_for_home(self):
+    #     home_position_set = False
+    #     @self.on_message('HOME_POSITION')
+    #     def listener(self, name, home_position):
+    #         global home_position_set
+    #         home_position_set = True
+    #     while not home_position_set:
+    #         print "Waiting for home position..."
+    #         time.sleep(1)
+    #     print(" Home location: %s" % self.vehicle.home_location)
+
 def PX4setMode(vehicle, mavMode):
     """For PX4 mode switching as it is currently unsuported in DroneKit"""
     vehicle._master.mav.command_long_send(vehicle._master.target_system, vehicle._master.target_component,
@@ -120,7 +120,7 @@ def PX4setMode(vehicle, mavMode):
                                                0, 0, 0, 0, 0, 0)
 
 
-def __PX4Command(wp, type):
+def PX4Command(wp, type):
     """Builds a command based on a LocationGlobal waypoint and a type (takeoff, waypoint, or land)"""
     if type == "TO":
         cmd = Command(0,0,0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 1, 0, 0, 0, 0, wp.lat, wp.lon, wp.alt)

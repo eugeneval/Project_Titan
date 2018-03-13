@@ -386,7 +386,7 @@ First, squares are recognised. This is a multi-stage process:
     \item Check that the contour is above a minimum size
     \item Check that the solidity of the contour is above a threshold
     \begin{compactitem}
-        \item This is done by drawing a rectangle that encloses the entire contour, and comparing the area of the rectangle to the area of the contour
+        \item This is done by drawing a rectangle (the \emph{bounding rectangle}) that encloses the entire contour, and comparing the area of the rectangle to the area of the contour
         \item An ideal square would have a solidity of 1
     \end{compactitem}
     \item Check that the aspect ratio of the bounding rectangle is within thresholds
@@ -408,6 +408,13 @@ From here, it is trivial to calculate the offset of the target from the center o
 
 \subsubsection{Integrating into Control}
 Using the code developed in Section \ref{control_implementation}, a program was created to integrate the newly-developed computer vision. This takes off to 10m, and once there the webcam on the computer is turned on. It looks for a target, and uses the offset of the target from the center of the camera as an input for the desired position of the drone. This was verified to work as intended, validating all the work we have done up to this point.
+
+\subsubsection{Investigating Frame Rate}
+The method of finding all squares, checking through them all for duplicates, then checking through them all for targets, intuitively seems inneficient. This could especially become an issue when deployed to a drone platform, which will likely have less processing power.
+
+However, timing sections of the program revealed that the vast majority of the time that went into processing a frame went into receiving a frame from the camera, with the entire process of target detection taking approximately 10\% of the required time per frame. This is because I/O (Input/Output) operations are very expensive in terms of computing time. Meanwhile all the square comparisons are simple number comparisons, which are cheap.
+
+Thus, it was decided there was no need to optimise the target-finding algorithm, as it would have a minimal effect on frame rate. Any appreciable frame rate improvement will have to come from improving the speed of obtaining a frame from the camera.
 
 \subsection{Communication}
 Communication from Pete to a base station to transmit information will, by necessity, be over a serial connection.
@@ -436,7 +443,7 @@ Of these, the Raspberry Pi3 was the preferred choice, as it is cheap and light, 
 \appendix
 \section{Table of All Symbol Definitions}
 \begin{center}
-    \emph{Note: values in normal text are constants, values in italics are values derived from constants. Where no value is given, that variable is a dynamic variable which changes continously.}
+    \emph{Note: values are only given for variables which are constants. No values are given for values derived from contants or for dynamic variables.}
 \begin{longtable}{|ccc|}
     \hline
     \emph{Symbol} & \emph{Definition} & \emph{Value(where appropriate)} \\

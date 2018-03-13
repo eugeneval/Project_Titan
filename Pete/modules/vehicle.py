@@ -2,11 +2,17 @@ from dronekit import VehicleMode, LocationLocal, Command
 from dronekit import Vehicle as dronekit_Vehicle
 from pymavlink import mavutil
 from navigation import get_location_offset_meters, get_location_metres_local, get_distance_metres_local
+from payload import Payload
 import time
 
 class Vehicle(dronekit_Vehicle):
     def __init__(self, handler):
         super(Vehicle, self).__init__(handler)
+
+        self.payload1 = Payload()
+        self.payload2 = Payload()
+        self.payload3 = Payload()
+        self.payload4 = Payload()
 
     def arm_and_takeoff(self, targetAlt, accuracy=0.5):
         """Overrides DroneKit command. Takeoff to a target altitude, then loiter."""

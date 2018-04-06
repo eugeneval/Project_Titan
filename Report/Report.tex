@@ -132,7 +132,20 @@ The jet is modelled as a cylinder. However, it does not rotate about its origin 
     I_{Jx} = I_{Jy} = 3.89\times10^{-4} + M_J\cdot3r_J^2 + h_J^2 + M_Jl_c^2
 \end{equation}
 
-We know from Appendix \ref{app:servo_info} the maximum torque the servo can exert is 0.34 kg-m. The actual torque exerted is controlled by a PID controller in order to keep the jet vertical.
+It can be seen in Section \ref{sec:servo_info} the maximum torque the servo can exert is 0.34 kg-m. The actual torque exerted is controlled by a PID controller in order to keep the jet vertical.
+
+\subsubsection{Servo Information}  \label{sec:servo_info}
+Servo information was based on a sample servo that may well end up being used on the vehicle, the Futaba BLS177SV.
+
+\begin{center}
+\begin{tabular}{ccc}
+    Torque (at 6.6V): & 34 kg-cm \\
+    Speed (at 6.6V): & 0.12sec/60\textdegree{} \\
+    Weight: & 79g \\
+\end{tabular}
+\end{center}
+
+We can see from the datasheet that it takes the servo 0.12 seconds to rotate 60\textdegree{}. Assuming it takes 0.01 of those seconds to accelerate to full speed, this gives an acceleration of $873rad/s^2$. Since we know it exerts a torque of 0.34kgm, this means its inertia must be $3.89\times10^{-4}$.
 
 \subsection{PID Control} \label{sec:PID_Control}
 8 PID controllers are needed in total: 3 position and 3 angle controllers for the quad, and 2 angle controllers for the jet gimbal. These controllers use the standard PID control logic:
@@ -200,41 +213,7 @@ The quad section was implemented first. A controller was first tested solely in 
 
 Testing involved flying a simple path: takeoff to 10m, a square path (10m north, 10m east, 10m south, 10m west), and then landing. This gave the results seen in Figure \ref{fig:square_path_quad_only}. It can be seen that there is an oscilliation in x and y position. It proved difficult to eliminate, due to the not straightforward interaction of position and angle PID values. This, however proved not to be a problem. It can be seen in Figure \ref{fig:square_path_w_jet} that the addition of the jet has, likely due to the added mass, damped out the oscillations in x and y position. It has also added an overshoot in z and a steady state error in x and y, but this can be corrected by fine-tuning of PID values. The flight time has also increased but this is to be expected with greater mass. In Figure \ref{fig:square_path_w_jet_angle} we can see how the quadcopter changes angle about the x axis, and how the jet initially starts to move in that direction but is quickly brought back to the vertical by the servo.
 
-\begin{figure}[p]
-    \begin{subfigure}{0.48\textwidth}
-        \includegraphics[width=\linewidth]{square_path_quad_only}
-        \caption{Quad Only}
-        \label{fig:square_path_quad_only}
-    \end{subfigure}\hspace*{\fill}
-    \begin{subfigure}{0.48\textwidth}
-        % Placeholder
-    \end{subfigure}
-    \medskip
-    \begin{subfigure}{0.48\textwidth}
-        \includegraphics[width=\linewidth]{square_path_w_jet}
-        \caption{With Jet}
-        \label{fig:square_path_w_jet}
-    \end{subfigure}\hspace*{\fill}
-    \begin{subfigure}{0.48\textwidth}
-        \includegraphics[width=\linewidth]{square_path_w_jet_angle}
-        \caption{With Jet}
-        \label{fig:square_path_w_jet_angle}
-    \end{subfigure}
-    \medskip
-    \begin{subfigure}{0.48\textwidth}
-        \includegraphics[width=\linewidth]{square_path_limited_servos}
-        \caption{With Refiments}
-        \label{fig:square_path_limited_servos}
-    \end{subfigure}\hspace*{\fill}
-    \begin{subfigure}{0.48\textwidth}
-        \includegraphics[width=\linewidth]{square_path_limited_servos_angle}
-        \caption{With Refiments}
-        \label{fig:square_path_limited_servos_angle}
-    \end{subfigure}
 
-    \caption{Simulation of a Square Path}
-    \label{fig:Square Path}
-\end{figure}
 
 \subsubsection{Programming Detail}
 Seen in Figure \ref{fig:XQuad_2_Class_Diagram}
@@ -271,7 +250,41 @@ The full code can be seen in Appendix
     \label{fig:XQuad_2_Class_Diagram}
 \end{figure}
 
+\begin{figure}[p]
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\linewidth]{square_path_quad_only}
+        \caption{Quad Only}
+        \label{fig:square_path_quad_only}
+    \end{subfigure}\hspace*{\fill}
+    \begin{subfigure}{0.48\textwidth}
+        % Placeholder
+    \end{subfigure}
+    \medskip
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\linewidth]{square_path_w_jet}
+        \caption{With Jet}
+        \label{fig:square_path_w_jet}
+    \end{subfigure}\hspace*{\fill}
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\linewidth]{square_path_w_jet_angle}
+        \caption{With Jet}
+        \label{fig:square_path_w_jet_angle}
+    \end{subfigure}
+    \medskip
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\linewidth]{square_path_limited_servos}
+        \caption{With Refiments}
+        \label{fig:square_path_limited_servos}
+    \end{subfigure}\hspace*{\fill}
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\linewidth]{square_path_limited_servos_angle}
+        \caption{With Refiments}
+        \label{fig:square_path_limited_servos_angle}
+    \end{subfigure}
 
+    \caption{Simulation of a Square Path}
+    \label{fig:Square Path}
+\end{figure}
 
 \subsection{Refiment}
 It was realised that the mass of the quad had been implemented incorrectly ($r_r$ had not been squared and the rod mass and motor mass had not been multiplied by 4 in equation \ref{eqn:total_mass}). Additionally, the maximum torque of the servo had not been limited to 0.34kgm. Correcting these resulted in Figures \ref{fig:square_path_limited_servos} and \ref{fig:square_path_limited_servos_angle}.
@@ -469,8 +482,9 @@ From here, it is trivial to calculate the offset of the target from the center o
 \subsubsection{Integrating into Control}
 Using the code developed in Section \ref{control_implementation}, a program was created to integrate the newly-developed computer vision. This takes off to 10m, and once there the webcam on the computer is turned on. It looks for a target, and uses the offset of the target from the center of the camera as an input for the desired position of the drone. This was verified to work as intended, validating all the work we have done up to this point.
 
-A demonstration video of this was created. For obvious reasons, it could not be put in this report, but is available on request.
-% TODO: Maybe upload to youtube?
+Multithreading was used to optimise performance and increase effectiveness. Unfortunately, it could not be fully implemented, as OpenCV's \lstinline|VideoCapture()|, used to receive input from the camera, is only capable of functioning inside the main thread. This is a known unresolved issue with OpenCV itself. This meant that receiving input could not occur in a subthread, which is unfortunate as input/output operations are normally the most desirable operation to keep in subthreads. In this version of the program, the main thread handles computer vision and a subthread contains the \lstinline|vehicle| class which communicates with the PixHawk.
+
+A demonstration video of this was created. For obvious reasons, it could not be put in this report, but is available at \url{https://youtu.be/sFyZphH8_CM}
 
 \subsubsection{Investigating Frame Rate}
 The method of finding all squares, checking through them all for duplicates, then checking through them all for targets, intuitively seems inneficient. This could especially become an issue when deployed to a drone platform, which will likely have less processing power.
@@ -494,7 +508,7 @@ This was tested by sending the targets over the virtual serial connection, and d
 \subsection{Choosing a Computer}
 By this point, Pete has advanced about as far as is possible in a purely simulated enviroment. Further development required moving onto a real companion computer, and testing either with a real drone or a Hardware-in-the-Loop (HITL) simulation.
 
-A comparison was made of availible companion computers on the market. The Intel Edison, Raspberry Pi3, Nvidia TX2, Odroid XU4, and Snapdragon Flight were compared on criteria such as processing power, weight, and cost. The full comparison can be seen in Appendix \ref{fig:cc_selection}.
+A comparison was made of availible companion computers on the market. The Intel Edison, Raspberry Pi3, Nvidia TX2, Odroid XU4, and Snapdragon Flight were compared on criteria such as processing power, weight, and cost. The full comparison can be seen in Figure \ref{fig:cc_selection}.
 
 \begin{figure}[h]
     \includegraphics[width=\linewidth]{companion_computer_comparison}
@@ -630,20 +644,6 @@ A Raspberry Pi3 was obtained, and Raspbian was installed on it. It was discovere
         \hline
     \end{longtable}
 \end{center}
-
-\section{Servo Information} \label{app:servo_info}
-Servo information was based on a sample servo that may well end up being used on the vehicle, the Futaba BLS177SV.
-
-\begin{center}
-\begin{tabular}{ccc}
-    Torque (at 6.6V): & 34 kg-cm \\
-    Speed (at 6.6V): & 0.12sec/60\textdegree{} \\
-    Weight: & 79g \\
-\end{tabular}
-\end{center}
-
-We can see from the datasheet that it takes the servo 0.12 seconds to rotate 60\textdegree{}. Assuming it takes 0.01 of those seconds to accelerate to full speed, this gives an acceleration of $873rad/s^2$. Since we know it exerts a torque of 0.34kgm, this means its inertia must be $3.89\times10^{-4}$.
-% TODO: perhaps follow this up experimentally?
 
 
 

@@ -48,27 +48,69 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
 \maketitle
+
+\begin{center}
+    GitHub Repository: \url{https://github.com/eugeneval/Project_Titan}
+
+    \vspace{4em}
+    \emph{I, Eugene Valetsky, confirm that the work presented in this report is my own. Where information has been derived from other sources, I confirm that this has been indicated in the report.}
+\end{center}
+
+\newpage
 \tableofcontents
 \listoffigures
 \newpage
 
-\emph{I, Eugene Valetsky, confirm that the work presented in this report is my own. Where information has been derived from other sources, I confirm that this has been indicated in the report.}
 
-\input{Sections/Abstract.tex}
+
+\section{Abstract}
+% TODO make abstract more abstract
+The goal of this project is to design and test the control system for a vehicle to compete in the Institution of Mechanical Engineers (\emph{IMechE}) Unmanned Aerial Systems (\emph{UAS}) Challenge. This vehicle must be capable of autonomous flight, which will include GPS waypoint navigation, location of a ground target, and the accurate delivery onto a payload onto said target.
+
+The UAS design uses a novel concept: a traditional quadcopter built around a central micro jet engine. The control system will consist of a PixHawk flight controller running the PX4 flight stack, augmented by a companion computer running custom-made software to handle the duties of control, communication, and computer vision.
+
+A simulation was built to test the feasability of the chosen configuration, using a simplified model. Results showed that while stability was significantly impacted over a pure quadcopter, especially in height, it was still within acceptable margins. It was also found that stability is significantly improved with more powerful servo motors for the jet gimbal.
+
+The three main modules for the companion computer software were built and tested: control of the PixHawk, communication with a ground station, and target-finding computer vision. Python was chosen as a programming language due to its simplicity and available libraries.
+
+PixHawk control was tested using a software-in-the-loop (\emph{SITL}) PX4 simulation and jMAVSim. The DroneKit SDK was used as the basis for the module, but it had to be modified, as it was originally designed to work with APM, the predecessor of PX4. Commands for connecting to the PX4, taking off, navigating it both using GPS coordinates and in the local frame of reference, navigating it using both absolute and relative coordinates, and returning to base were all created and tested thoroughly within the simulation enviroment of jAVSim.
+
+Computer vision is done using the OpenCV-Python library. The target is recognised by searching for concentric squares in the image. Optical Character Recognition (\emph{OCR}) is possible using the Tesseract and pytesseract libraries.
+
+Communication will be by radio, and so will be limited to a serial connection. Functions were created which allowed the transfer of crucial information, such as the coordinates of a located target, over said serial connection using the JSON format. The socat command line utility was used to establish two virtual serial ports to allow testing.
+
+These disparate modules were brought together, and allow a simulated drone to navigate to a target, by using the offset of the target from the center of the frame as an input for a command navigating to a target relative to the current position. Although modifications will need to be made before deployment on the real vehicle, the basis for an autonomous flight control system has been proven.
+
 
 \section{Introduction}
 The Unmanned Aerial System (UAS) Challenge was launched by the Institution of Mechanical Engineers (IMechE) in 2014 `with the key objectives of developing professional engineers and inspiring the next generation'\cite{IMechE_about_uas}. The main goal is to design and build a UAS in order to autonomously deliver humanitarian aid such as medical supplies in a disaster zone. This requires a broad range of skills, from project management to airframe design to avionics system programming. To add to the challenge there is a strict weight limit and stringent safety regulations. Working together with another student, Ismail Ahmad, our goal is to follow the design and build cycle all the way through to competing at the IMechE UAS competition in June 2018.
 
 One of the greatest individual challenges as part of the project is creating an autonomous flight system. The UAS must be capable of quickly and safely navigating to and locating a target using computer vision, dropping a payload accurately, and returning to base. This requires an understanding of the UAS’s flight dynamics as well as good programming and wiring capabilities. This is the aspect that I will be focusing on for my individual project, although I will be assisting with many parts of the project.
 
+There are three missions that the vehicle has to perform as part of the UAS Challenge:
+% TODO: talk about missions
+
+% TODO: aims and objectives
+
+% TODO: lit review
+
 \section{Design}
-% \subsection{Concept}
+\subsection{Airframe}
 The concept for our UAS uses a hybrid symbioisis between a \emph{Micro Jet Engine}, henceforth refered to as MJE, and an external multi-rotor. The MJE is gimballed to always remain vertical and only provides lift, while the multirotor rotates around it providing stabilisation and control. This configuration means that standard quadcopter flight control software can be used rather than needing to come up with custom architecture.
 
 The MJE provides a higher thrust to weight ratio than the equivalent electric motors and batteries. It does this without introducing the vibration issues of a piston engine, which would seriously impact stability and control on such a lightweight design. With the current MJE and electric motors we hope to lift a payload of 3kg while remaining under the 6.9kg weight limit.
 
+Further detail as to the physical design of the airframe is outside the scope of this project, as this is Ismail Ahmad's responsibility.
+% TODO add a saucy render
+
+\subsection{Control System}
 Flight control will be handled with a Pixhawk running the PX4 flight stack. This will be coupled to a companion computer running software based on the DroneKit SDK, communicating with the PixHawk using the MAVLink protocol. The companion computer is responsible for communication, waypoint navigation, and target location and tracking using computer vision. It then communicates where to go to the PixHawk.
 
+This setup of two computers working in tandem, a low-level flight controller and a high-level companion computer, is the currently widely accepted method for adding complex autonomy to small unmanned aerial vehicles. Computer vision is a computationally intensive task; we do not want it to 'distract' the flight controller from actually flying the vehicle, as flight control might be running at refresh rates of up to 50 times a second. The seperation of flight control ensures the stability and reliability of the vehicle.
+
+As the MJE is both expensive (\~\pounds1300), and fragile, it was decided to go for a top of the range flight controller in an effort to avoid costly crashes. Two main options were considered - the DJI A4 and the PixHawk 2. These are both considered excellent quality flight controllers, and also both allows for external control with a companion computer, using either the DJI SDK for the A4 or one of DroneCore, DroneKit, or MAVROS for the PixHawk. In the end, the PixHawk was chosen as it is open source, allowing for easier modification to our needs; there is also more documentation, tutorials, and other information available online for it.
+
+Reasons for the choice of the DroneKit SDK over alternatives are explained in Section \ref{PX4 Control}. The full code can be found on GitHub at \url{https://github.com/eugeneval/Project_Titan}.
 
 
 \section{Simulation: System Plausibility}
@@ -127,14 +169,14 @@ On the quad, the gimbal servos exert offset moments about the z-axis. This resul
 \subsubsection{Jet Rotation}
 Since $\theta_z = \phi_z$, we are only interested in the rotation of the jet about the x and y axes. Since there is a rigid linkage between the servo and the gimbal, the position of the servo is proportional to the rotation of the jet.
 
-The jet is modelled as a cylinder. However, it does not rotate about its origin in x and y, but about the appropriate servo. Including the inertia of the servos themselves (see Appendix \ref{app:servo_info}) results in the following inertias:
+The jet is modelled as a cylinder. However, it does not rotate about its origin in x and y, but about the appropriate servo. Including the inertia of the servos themselves, calculated in Section \ref{servo_info} results in the following inertias:
 \begin{equation}
     I_{Jx} = I_{Jy} = 3.89\times10^{-4} + M_J\cdot3r_J^2 + h_J^2 + M_Jl_c^2
 \end{equation}
 
-It can be seen in Section \ref{sec:servo_info} the maximum torque the servo can exert is 0.34 kg-m. The actual torque exerted is controlled by a PID controller in order to keep the jet vertical.
+It can be seen in Section \ref{servo_info} the maximum torque the servo can exert is 0.34 kg-m. The actual torque exerted is controlled by a PID controller in order to keep the jet vertical.
 
-\subsubsection{Servo Information}  \label{sec:servo_info}
+\subsubsection{Servo Information}  \label{servo_info}
 Servo information was based on a sample servo that may well end up being used on the vehicle, the Futaba BLS177SV.
 
 \begin{center}
@@ -241,8 +283,7 @@ Many classes contain an \lstinline|update()| method. This takes the amount of ti
 
 It should be noted that a minimal effort has been made to make use of object-oriented programming concepts such as encapsulation. The focus of programming this simulation was to produce usable results, not to produce clean, re-usable code.
 
-The full code can be seen in Appendix
-% TODO: reference to appendix
+The full code can be seen in the GitHub repository, located at \url{https://github.com/eugeneval/Project_Titan}.
 
 \begin{figure}[p]
     \includegraphics[width=\linewidth]{XQuad_2_Class_Diagram}
@@ -285,14 +326,15 @@ The full code can be seen in Appendix
     \caption{Simulation of a Square Path}
     \label{fig:Square Path}
 \end{figure}
+% TODO: bigger font in graphs, or just bigger graphs
 
 \subsection{Refiment}
 It was realised that the mass of the quad had been implemented incorrectly ($r_r$ had not been squared and the rod mass and motor mass had not been multiplied by 4 in equation \ref{eqn:total_mass}). Additionally, the maximum torque of the servo had not been limited to 0.34kgm. Correcting these resulted in Figures \ref{fig:square_path_limited_servos} and \ref{fig:square_path_limited_servos_angle}.
 
-These refiments decreased the stability of the drone. It is still well within acceptable parameters for rotation, and for x and y positioning, but height now has considerable steady state error and oscillation.
+These refiments decreased the stability of the drone. It is still well within acceptable parameters for rotation, and for x and y positioning, but height now has considerable steady state error and oscillation. \label{height overshoot}
 
 With sufficient PID tuning, height could be stabilised, but not without a massive initial overshoot, and slightly increasing instability in x and y. This is because as the proportion of motor control that comes from height control increases (due to increasing $k_p$ and $k_i$ terms), the proportion of motor control left available for the other controllers decreases.
-% TODO finish this off, add graphs
+% TODO quantify!!!!
 
 \subsection{Conclusion}
 The reason for the overshoot in height appears to be that the jet adds mass to the system, without adding weight (as this is cancelled out by its thrust). This is not something that a controller would expect. However, we are not greatly concerened with the accuracy of the height-keeping of the system. As long as we stay above 20ft, the minimum height required by the regulations\cite{IMechE_rules}, it is not a concern.
@@ -302,7 +344,7 @@ It can be seen that the addition of a gimballed jet to a quadcopter does not cat
 
 
 \section{Companion Computer Software}
-\subsection{PX4 Control}
+\subsection{PX4 Control} \label{PX4 Control}
 We will be controlling the PixHawk flight controller using offboard commands from an external companion computer, henceforth refered to as Pete (since CC is a rather ambigous acronym). Pete will consist of three main components: communication with the PixHawk, communication with a ground station, and target-finding computer vision.
 
 PixHawk 2 is a fully integrated flight controller running the PX4 flight stack. PX4 is an open source project, and is a further development of the popular ArduPilot flight control software. It is an excellent choice for this project as it is easily adaptable to different vehicles, and is capable of calculating many flight paramters by itself and continously optimise them. This minimises the amount of work that will be required to adapt it to our custom-built airframe.
@@ -354,71 +396,80 @@ def send_ned_position(pos_x, pos_y, pos_z):
 Similarly, other commands have been created to suit our purposes. Some of these have been adapted from examples in the DroneKit and PX4 documentation.\cite{dronekit}\cite{PX4_dev_guide}
 
 \begin{lstlisting}[language=Python]
-def arm_and_takeoff(targetAlt, accuracy=0.5):
-    wp = get_location_offset_meters(home, 0, 0, targetAlt)
-    cmds.add(PX4Command(wp, "TO"))
-    cmds.upload()
+def arm_and_takeoff(self, targetAlt, accuracy=0.5):
+    """Overrides DroneKit command. Takeoff to a target altitude, then loiter."""
+
+    wp = get_location_offset_meters(self.home_location, 0, 0, targetAlt)
+    self.commands.add(PX4Command(wp, "TO"))
+    self.commands.upload()
     time.sleep(1)
 
-    vehicle.mode = VehicleMode("MISSION")
+    self.mode = VehicleMode("MISSION")
     time.sleep(1)
-    print("Vehicle mode should be MISSION: %s" % vehicle.mode.name)
-    vehicle.armed = True
+    print("Vehicle mode should be MISSION: %s" % self.mode.name)
+    self.armed = True
     while True:
-        print " Altitude: ", vehicle.location.global_relative_frame.alt
-        #Break and return from function just below target altitude.
-        if vehicle.location.global_relative_frame.alt>=targetAlt-accuracy:
+        print " Altitude: ", self.location.global_relative_frame.alt
+        if self.location.global_relative_frame.alt>=targetAlt-accuracy:
             print "Reached target altitude"
+            self.mode = VehicleMode("LOITER")
+            time.sleep(0.5)
             break
         time.sleep(1)
 
-def goto_absolute(pos_x, pos_y, pos_z, accuracy=0.5):
-# Go to a position relative to the home position
+def goto_absolute(self, pos_x, pos_y, pos_z, accuracy=0.5, wait=True, text=True):
+    """Go to a position relative to the home position"""
 
     targetLocation = LocationLocal(pos_x, pos_y, -pos_z)
 
-    send_ned_position(pos_x, pos_y, -pos_z)
-    vehicle.mode = VehicleMode("OFFBOARD")
-    print("Vehicle mode should be OFFBOARD: %s" % vehicle.mode.name)
+    self.__send_ned_position(pos_x, pos_y, -pos_z)
+    self.mode = VehicleMode("OFFBOARD")
+    if text: print("Vehicle mode should be OFFBOARD: %s" % self.mode.name)
 
     while True:
-        send_ned_position(pos_x, pos_y, -pos_z)
-        remainingDistance = get_distance_metres_local(vehicle.location.local_frame, targetLocation)
+        self.__send_ned_position(pos_x, pos_y, -pos_z)
+        remainingDistance = get_distance_metres_local(self.location.local_frame, targetLocation)
         if remainingDistance<=accuracy:
-            print("Arrived at target")
+            if text: print("Arrived at target")
             break
-        print "Distance to target: ", remainingDistance
+        if wait == False: break
+        if text: print "Distance to target: ", remainingDistance
         time.sleep(0.1)
 
-def goto_relative(pos_x, pos_y, pos_z, accuracy=0.5):
-# Go to a position relative to the current posotion
+def goto_relative(self, pos_x, pos_y, pos_z, accuracy=0.5, wait=True, text=True):
+    """Go to a position relative to the current posotion"""
 
-    currentLocation = vehicle.location.local_frame
+    currentLocation = self.location.local_frame
     targetLocation = get_location_metres_local(currentLocation, pos_x, pos_y, -pos_z)\
 
-    send_ned_position(targetLocation.north, targetLocation.east, targetLocation.down)
-    vehicle.mode = VehicleMode("OFFBOARD")
-    print("Vehicle mode should be OFFBOARD: %s" % vehicle.mode.name)
+    self.__send_ned_position(targetLocation.north, targetLocation.east, targetLocation.down)
+    self.mode = VehicleMode("OFFBOARD")
+    if text: print("Vehicle mode should be OFFBOARD: %s" % self.mode.name)
 
     while True:
-        send_ned_position(targetLocation.north, targetLocation.east, targetLocation.down)
-        remainingDistance = get_distance_metres_local(vehicle.location.local_frame, targetLocation)
+        self.__send_ned_position(targetLocation.north, targetLocation.east, targetLocation.down)
+        remainingDistance = get_distance_metres_local(self.location.local_frame, targetLocation)
         if remainingDistance<=accuracy:
-            print("Arrived at target")
+            if text: print("Arrived at target")
             break
-        print "Distance to target: ", remainingDistance
+        if wait == False: break
+        if text: print "Distance to target: ", remainingDistance
         time.sleep(0.1)
 
-def setMaxXYSpeed(speed):
-    vehicle.parameters['MPC_XY_VEL_MAX']=speed
-    print("Set max speed to: %s" % vehicle.parameters['MPC_XY_VEL_MAX'])
+def setMaxXYSpeed(self, speed):
+    """Required due to DroneKit's vehicle.groundspeed not working with PX4"""
+
+    self.parameters['MPC_XY_VEL_MAX']=speed
+    print("Set max speed to: %s" % self.parameters['MPC_XY_VEL_MAX'])
     time.sleep(0.5)
 
-def returnToLand():
-    vehicle.mode = VehicleMode("RTL")
+def returnToLand(self):
+    """RTL and wait for auto disarm on land"""
+
+    self.mode = VehicleMode("RTL")
     time.sleep(1)
-    print("Vehicle mode should be RTL: %s" % vehicle.mode.name)
-    while vehicle.armed == True:
+    print("Vehicle mode should be RTL: %s" % self.mode.name)
+    while self.armed == True:
         print("Waiting for landing...")
         time.sleep(3)
 \end{lstlisting}
@@ -504,6 +555,25 @@ It was quickly discovered that sending an entire image over a serial connection 
 A \lstinline|Square2| and \lstinline|Target2| class were created. These inherit from \lstinline|Square| and \lstinline|Target|. The only difference is that they are missing the contours of the squares. \lstinline|Square| and \lstinline|Target| gained a \lstinline|to_json()| method that converts their attributes to a string using JavaScript Object Notation (JSON), a standard for transmitting information. \lstinline|Square2| and \lstinline|Target2| have a function \lstinline|from_json()| which can recreate the squares from the JSON string.
 
 This was tested by sending the targets over the virtual serial connection, and drawing them on the image. With minor modifications to the way that squares and targets are drawn, this worked sucessfully. Notably, squares are now defined largely based on their bounding rectangle and not on their own contours, which for a square or rectangle makes little difference.
+
+\subsection{Jet Engine Control \& Payload Delivery}
+The thrust output of the MJE will need to be controlled to compensate for the change in weight as payloads are dropped. Additionally, by more closely controlling jet thrust it may be possibly to reduce the instability in height noted in Section \ref{height overshoot}.
+
+The MJE is controlled with a FADEC that takes a PWM (Pulse Width Modulation) signal as an input. PWM is a standard method of sending a digital signal to control a single variable such as speed on a motor, widely used in electronics; most companion computers are capable of creating such a signal using output pins and libraries for it in Python are widely available. This input signal can vary from 1000 to 2000 microseconds, and the FADEC is fully configurable as to what this range represents. In our case, it has been configured so that 1000 microseconds corresponds to idle and 2000 microseconds corresponds to maximum thrust.
+
+\begin{wrapfigure}{r}{0.5\textwidth}
+    \begin{center}
+        \includegraphics[width=0.48\linewidth]{makeblock_gripper}
+        \caption{Makeblock 86502 Robot Gripper}
+        \label{fig:makeblock_gripper}
+    \end{center}
+\end{wrapfigure}
+
+Additionaly, a mechanism to control the payload delivery mechanism is also required. Development of the specifics of payload delivery is being undertaken by a 1st year student, Arkadiy Serezhkin. The current solution will likely use a servo mechanism of some description. An example of such a mechanism would be the Makeblock 86502 Robot Gripper\cite{Makeblock_gripper}, seen in Figure \ref{fig:makeblock_gripper}.
+
+The issue of a moving center of gravity when a payload is dropped is also an issue that is currently being investigated. Placing the payload underneath the jet engine, with a cone to divert the jet exhaust, was rejected due to the large loss of thrust from the jet this would cause. Placing the payloads evenly distributed, as close to the center of the vehicle as possible, still raises issues with one of the electric motors having to take on too much of the weight. Whatever the final solution, it may well factor in to the programming required for the payload drop mechanism.
+
+The full implemenation of this will depend on the specific companion computer chosen, as the libraries to output signals using the output pins of a companion computer are specific to that companion computer, as well as the final payload deliver method chosen. For now, a \lstinline|Payload| class has been created, and incorporated into the \lstinline|Vehicle|. Later, the specific code for controlling payload drops, and varying jet engine thrust in response to payload drops, will be incorporated into this class.
 
 \subsection{Choosing a Computer}
 By this point, Pete has advanced about as far as is possible in a purely simulated enviroment. Further development required moving onto a real companion computer, and testing either with a real drone or a Hardware-in-the-Loop (HITL) simulation.
@@ -617,30 +687,34 @@ A Raspberry Pi3 was obtained, and Raspbian was installed on it. It was discovere
 
 \section{Table of Abbreviations}
 \begin{center}
-    In order of appearance:
+    In alphabetical order:
     \begin{longtable}{|cc|}
         \hline
         \emph{Abbreviation} & \emph{Definition} \\
         \hline \endhead
-        IMechE & Institution of Mechanical Engineers \\
-        UAS & Unmanned Aerial Systems \\
-        GPS & Global Positioning System \\
-        SITL & Software In The Loop \\
-        SDK & Software Development Kit \\
-        APM & ArduPilot Mega \\
-        OCR & Optical Character Recognition \\
-        JSON & JavaScript Object Notation \\
-        MJE & Micro Jet Engine \\
-        PID & Proportional Integral Derivative \\
-        ESC & Electronic Speed Control \\
-        PWM & Pulse Width Modulation \\
-        UML & Unified Modelling Language \\
-        UDP & User Datagram Protocol \\
         API & Application Programming Interface \\
-        RTL & Return To Land \\
-        NED & North East Down \\
-        I/O & Input/Output \\
+        APM & ArduPilot Mega \\
+        ESC & Electronic Speed Control \\
+        FADEC & Full Authority Digital Engine Control \\
+        GPS & Global Positioning System \\
         HITL & Hardware In The Loop \\
+        I/O & Input/Output \\
+        IMechE & Institution of Mechanical Engineers \\
+        JSON & JavaScript Object Notation \\
+        MAVLink & Micro Air Vehicle Link \\
+        MAVROS & Micro Air Vehicle Robotic Operating System \\
+        MJE & Micro Jet Engine \\
+        NED & North East Down \\
+        OCR & Optical Character Recognition \\
+        PID & Proportional Integral Derivative \\
+        PWM & Pulse Width Modulation \\
+        PWM & Pulse Width Modulation \\
+        RTL & Return To Land \\
+        SDK & Software Development Kit \\
+        SITL & Software In The Loop \\
+        UAS & Unmanned Aerial Systems \\
+        UDP & User Datagram Protocol \\
+        UML & Unified Modelling Language \\
         \hline
     \end{longtable}
 \end{center}
@@ -676,6 +750,9 @@ A Raspberry Pi3 was obtained, and Raspbian was installed on it. It was discovere
 
 \bibitem{pyimagesearch_ocr}
     Adrian Rosebrock. Using Tesseract OCR with Python [Internet]. 10 July 2017. [Accessed 22 December 2017]; Available from: \url{https://www.pyimagesearch.com/2017/07/10/using-tesseract-ocr-python/}.
+
+\bibitem{Makeblock_gripper}
+    Rapid Eletronics Limited. Makeblock 86502 Robot Gripper up to 1.5KG with 12V Motor [Internet]. [Accessed 16 April 2018]; Available from: \url{https://www.rapidonline.com/Makeblock-86502-Robot-Gripper-up-to-1-5KG-with-12V-Motor-75-0703?IncVat=1&pdg=aud-313476734810:pla-339342696145:kwd-339342696145:cmp-757438067:adg-44804851896:crv-207912323492:pid-75-0703:dev-c&gclid=CjwKCAjwk9HWBRApEiwA6mKWaUnklYF9qNoe1kG8G0wc0quum8lmKrSm6ndSPCsK9-yZVVFx949oThoCedMQAvD_BwE}
 
 
 \end{thebibliography}

@@ -1,7 +1,7 @@
 \documentclass[11pt]{article}
 \usepackage{textcomp}
 \usepackage{longtable}
-\usepackage[draft]{graphicx}
+\usepackage{graphicx}
 \usepackage{subcaption}
 \usepackage{listings}
 \usepackage{color}
@@ -64,21 +64,21 @@
 
 
 \section{Abstract}
- The goal of this project is to design and test, in a simulated enviroment, the control system for a vehicle to compete in the Institution of Mechanical Engineers (\emph{IMechE}) Unmanned Aerial Systems (\emph{UAS}) Challenge. This vehicle must be capable of autonomous flight, which will include GPS waypoint navigation, location of a ground target, and the accurate delivery onto a payload onto said target.\cite{IMechE_rules}
+ The goal of this project is to design and test, in a simulated environment, the control system for a vehicle to compete in the Institution of Mechanical Engineers (\emph{IMechE}) Unmanned Aerial Systems (\emph{UAS}) Challenge. This vehicle must be capable of autonomous flight, which will include GPS waypoint navigation, location of a ground target, and the accurate delivery onto a payload onto said target.\cite{IMechE_rules}
 
 \subsection*{Design Concept Validation}
-The UAS design uses a novel concept: a traditional quadcopter built around a central micro jet engine\cite{Ismail_paper}. Equations of motion were derived from first principles for a simplified model of the airframe, and a computer simulation was built in Processing\cite{processing} to test the feasability of the chosen configuration, especially with regards to the impact that the jet engine would have on stability. Results showed that while stability was significantly impacted over a pure quadcopter, especially in height, it was still within acceptable margins.
+The UAS design uses a novel concept: a traditional quadcopter built around a central micro jet engine\cite{Ismail_paper}. Equations of motion were derived from first principles for a simplified model of the airframe, and a computer simulation was built in Processing\cite{processing} to test the feasibility of the chosen configuration, especially with regards to the impact that the jet engine would have on stability. Results showed that while stability was significantly impacted over a pure quadcopter, especially in height, it was still within acceptable margins.
 
 \subsection*{Control System Design}
 A control system was designed consisting of a PixHawk flight controller running the PX4 software\cite{PX4_user_guide}, augmented by a companion computer running custom-made software to handle the duties of control, communication, and computer vision. Python\cite{python} was chosen as a programming language due to its simplicity, abundance of available relevant libraries, and good cross-platform compatibility.
 
 The three main modules for the companion computer software were built and tested: control of the PixHawk, communication with a ground station, and target-finding computer vision.
-These were tested using a software-in-the-loop (\emph{SITL}) PX4 simulation and the jMAVSim simulation enviroment. The DroneKit SDK was used as the basis for control of the PixHawk, but it had to be modified, as it was originally designed to work with APM, the predecessor of PX4\cite{dronekit}. Commands for connecting to the PX4, taking off, navigating it both using GPS coordinates and in the local frame of reference, navigating it using both absolute and relative coordinates, and returning to base were all created and tested thoroughly within the simulation enviroment of jAVSim. Computer vision is done using the OpenCV-Python library. The target is recognised by searching for concentric squares in the image. Optical Character Recognition (\emph{OCR}) is possible using the Tesseract and pytesseract libraries. Communication will be by radio, and so will be limited to a serial connection. Functions were created and tested which allowed the transfer of crucial information, such as the coordinates of a located target, over said serial connection using the JSON format.
+These were tested using a software-in-the-loop (\emph{SITL}) PX4 simulation and the jMAVSim simulation environment. The DroneKit SDK was used as the basis for control of the PixHawk, but it had to be modified, as it was originally designed to work with APM, the predecessor of PX4\cite{dronekit}. Commands for connecting to the PX4, taking off, navigating it both using GPS coordinates and in the local frame of reference, navigating it using both absolute and relative coordinates, and returning to base were all created and tested thoroughly within the simulation environment of jAVSim. Computer vision is done using the OpenCV-Python library. The target is recognised by searching for concentric squares in the image. Optical Character Recognition (\emph{OCR}) is possible using the Tesseract and pytesseract libraries. Communication will be by radio, and so will be limited to a serial connection. Functions were created and tested which allowed the transfer of crucial information, such as the coordinates of a located target, over said serial connection using the JSON format.
 
 These disparate modules were brought together, and allow a simulated drone to navigate to a target, by using the offset of the target from the center of the frame as an input for a command navigating to a target relative to the current position. A specific companion computer was chosen, the Raspberry Pi3. The control system was ported to the companion computer, and modifications were made to account for the details of running on specific hardware.
 
 \subsection*{Conclusion}
-The airframe concept has been validated in a simulated enviroment and stability has been shown to be within acceptable margins. Control software has been designed, created, and tested in a simulated enviroment. The control system is ready for deployment to the real vehicle as and when it is complete.
+The airframe concept has been validated in a simulated environment and stability has been shown to be within acceptable margins. Control software has been designed, created, and tested in a simulated environment. The control system is ready for deployment to the real vehicle as and when it is complete.
 
 
 % ORIGINAL ABSTRACT
@@ -104,16 +104,13 @@ The Unmanned Aerial System (UAS) Challenge was launched by the Institution of Me
 
 One of the greatest individual challenges as part of the project is creating an autonomous flight system. The UAS must be capable of quickly and safely navigating to and locating a target using computer vision, dropping a payload accurately, and returning to base. This requires an understanding of the UAS’s flight dynamics as well as good programming and wiring capabilities. This is the aspect that I will be focusing on for my individual project, although I will be assisting with many parts of the project.
 
-% NOTE: do I need to talk about missions in detail?
-% There are three missions that the vehicle has to perform as part of the UAS Challenge:
-
 
 \subsection{Airframe Design}
-The concept for our UAS uses a hybrid symbioisis between a \emph{Micro Jet Engine}, henceforth refered to as MJE, and an external multi-rotor. The MJE is gimballed to always remain vertical and only provides lift, while the multirotor rotates around it providing stabilisation and control. This configuration means that standard quadcopter flight control software can be used rather than needing to come up with custom architecture.
+The concept for our UAS uses a hybrid symbiosis between a \emph{Micro Jet Engine}, henceforth referred to as MJE, and an external multi-rotor. The MJE is gimballed to always remain vertical and only provides lift, while the multi-rotor rotates around it providing stabilisation and control. This configuration means that standard quadcopter flight control software can be used rather than needing to come up with custom architecture.
 
 The MJE provides a higher thrust to weight ratio than the equivalent electric motors and batteries. It does this without introducing the vibration issues of a piston engine, which would seriously impact stability and control on such a lightweight design. With the current MJE and electric motors we hope to lift a payload of 3kg while remaining under the 6.9kg weight limit.
 
-The chosen airframe configuration is a novel airframe that, to the extent of research done into the subject, has only been tried by several hobbyists, who often have no publicaly available documentation outside of videos posted on YouTube that rarely contain any useful technical information. We were to discover only quite late in the design process (see Section \ref{payload_delivery}) a possible reason as to why – the central MJE greatly complicates the carriage of payload.
+The chosen airframe configuration is a novel airframe that, to the extent of research done into the subject, has only been tried by several hobbyists, who often have no publicly available documentation outside of videos posted on YouTube that rarely contain any useful technical information. We were to discover only quite late in the design process (see Section \ref{payload_delivery}) a possible reason as to why – the central MJE greatly complicates the carriage of payload.
 
 Further detail as to the physical design of the airframe is outside the scope of this project, as this is Ismail Ahmad's responsibility.\cite{Ismail_paper} A render of his design for the airframe can be seen in Figure \ref{fig:saucy_render}.
 
@@ -134,14 +131,11 @@ Further detail as to the physical design of the airframe is outside the scope of
 \end{figure}
 
 
-
-% TODO: aims and objectives
 \subsection{Aim and Objectives}
 Ultimately, the long term goal of this project is to take part in the IMechE UAS Challenge. However, within the extent of the third-year project, the objectives are as follows:
 
 \begin{compactenum}
     \item Determine, via simulation or otherwise, whether the stability of the airframe configuration is within acceptable parameters.
-    % TODO: quantify stability parameters
     \item Investigate and design a control system for the UAS. This control system must be able to:
     \begin{compactenum}
         \item Travel to predetermined GPS waypoints.
@@ -151,9 +145,9 @@ Ultimately, the long term goal of this project is to take part in the IMechE UAS
 \end{compactenum}
 
 \subsection{Control System Design}
-Flight control will be handled with a Pixhawk running the PX4 flight stack. This will be coupled to a companion computer running software based on the DroneKit SDK, communicating with the PixHawk using the MAVLink protocol. The companion computer is responsible for communication, waypoint navigation, and target location and tracking using computer vision. It then communicates where to go to the PixHawk.
+Flight control will be handled with a PixHawk running the PX4 flight stack. This will be coupled to a companion computer running software based on the DroneKit SDK, communicating with the PixHawk using the MAVLink protocol. The companion computer is responsible for communication, waypoint navigation, and target location and tracking using computer vision. It then communicates where to go to the PixHawk.
 
-This setup of two computers working in tandem, a low-level flight controller and a high-level companion computer, is the currently widely accepted method for adding complex autonomy to small unmanned aerial vehicles. Computer vision is a computationally intensive task; we do not want it to 'distract' the flight controller from actually flying the vehicle, as flight control might be running at refresh rates of up to 50 times a second. The seperation of flight control ensures the stability and reliability of the vehicle.
+This setup of two computers working in tandem, a low-level flight controller and a high-level companion computer, is the currently widely accepted method for adding complex autonomy to small unmanned aerial vehicles. Computer vision is a computationally intensive task; we do not want it to 'distract' the flight controller from actually flying the vehicle, as flight control might be running at refresh rates of up to 50 times a second. The separation of flight control ensures the stability and reliability of the vehicle.
 
 As the MJE is both expensive (\~\pounds1300), and fragile, it was decided to go for a top of the range flight controller in an effort to avoid costly crashes. Two main options were considered - the DJI A4 and the PixHawk 2. These are both considered excellent quality flight controllers, and also both allows for external control with a companion computer, using either the DJI SDK for the A4 or one of DroneCore, DroneKit, or MAVROS for the PixHawk. In the end, the PixHawk was chosen as it is open source, allowing for easier modification to our needs; there is also more documentation, tutorials, and other information available online for it.
 
@@ -164,7 +158,7 @@ Reasons for the choice of the DroneKit SDK over alternatives are explained in Se
 \subsection{Concept}
 One of the main concepts behind the UAS concept is the idea that, if the MJE is gimballed to remain vertical, and its thrust vector is through the center of gravity of the vehicle, it exerts no horizontal forces or moments on the rest of the vehicle. This means its effect on the stability and control of the vehicle can be ignored. In turn, this means that regular quadcopter flight control software can be used, such as the PX4 flight stack.
 
-Being able to use PX4 firmware running on a Pixhawk is crucial. The UAS will come to cost approximately \pounds2,500. Using home-made flight control software is therefore extremely risky. PX4, on the other hand, is a project that has been worked on by thousands of people for years, and is infinitely more reliable than anything we could put together from scratch. Additionally, creating custom flight control software is both discouraged by the IMechE, who recomend adapting an off-the-shelf autopilot \cite{IMechE_rules}, and falls well outside the scope of a university third-year project.
+Being able to use PX4 firmware running on a PixHawk is crucial. The UAS will come to cost approximately \pounds2,500. Using home-made flight control software is therefore extremely risky. PX4, on the other hand, is a project that has been worked on by thousands of people for years, and is infinitely more reliable than anything we could put together from scratch. Additionally, creating custom flight control software is both discouraged by the IMechE, who recommend adapting an off-the-shelf autopilot \cite{IMechE_rules}, and falls well outside the scope of a university third-year project.
 
 Therefore, it was decided to build a simulation to test the validity of the concept that the MJE can be ignored.
 
@@ -181,13 +175,13 @@ The gimbal is controlled by two servos, one moving the gimbal in roll and one in
     \end{center}
 \end{wrapfigure}
 
-The multirotor uses the `quad-x' configuration, as shown in Figure \ref{fig:quad-x}. Note that motors 1 and 3 spin clockwise, and motors 2 and 4 spin anticlockwise. In the quad-x configuration, pairs of motors control each of the flight axes. For example, to pitch forward, motors 1 and 2 are spun down, and motors 3 and 4 are spun up; to yaw left, motors 2 and 4 would be spun up whilst motors 1 and 3 are spun down. The flight control system combines these various control movements, as well as ensuring that the net upward thrust is mantained. This can be seen in Equations \ref{eqn:FM1} through \ref{eqn:FM4}.
+The multi-rotor uses the `quad-x' configuration, as shown in Figure \ref{fig:quad-x}. Note that motors 1 and 3 spin clockwise, and motors 2 and 4 spin anticlockwise. In the quad-x configuration, pairs of motors control each of the flight axes. For example, to pitch forward, motors 1 and 2 are spun down, and motors 3 and 4 are spun up; to yaw left, motors 2 and 4 would be spun up whilst motors 1 and 3 are spun down. The flight control system combines these various control movements, as well as ensuring that the net upward thrust is maintained. This can be seen in Equations \ref{eqn:FM1} through \ref{eqn:FM4}.
 
 
 \subsubsection{Forces}\label{sec:Forces}
 Our gimbal design will transmit forces, but not moments. Thus, from a forces perspective, the vehicle is treated as a single unit.
 
-The quad is modeled as an inner thin, hollow cylinder, the \emph{frame}, with four cylindrical rods, the \emph{arms}, extending outwards. The motors are point masses on the ends of the arms. It is assumed to be constructed of aircraft-grade aluminium. The total mass is therefore:
+The quad is modelled as an inner thin, hollow cylinder, the \emph{frame}, with four cylindrical rods, the \emph{arms}, extending outwards. The motors are point masses on the ends of the arms. It is assumed to be constructed of aircraft-grade aluminium. The total mass is therefore:
 \begin{equation}
     M_{TOT} = \underbrace{\rho\pi h (r_2-r_1)}_{Frame} + 4\cdot\underbrace{\rho\pi L r_r^2}_{Arms} + 4\cdot\underbrace{M_M}_{Motors} + 2\cdot\underbrace{M_G}_{Servos} + \underbrace{M_J}_{Jet} \label{eqn:total_mass}
 \end{equation}
@@ -265,7 +259,7 @@ In a real quadcopter, the controller sends a signal to an \emph{electronic speed
 \end{tabular}
 \end{center}
 
-The controllers work in sequence, with the x and y position controllers determing the setpoint of the x and y angle controllers. The Z axis controller is independent.
+The controllers work in sequence, with the x and y position controllers determining the setpoint of the x and y angle controllers. The Z axis controller is independent.
 \begin{eqnarray}
      O_x = SP_{\theta_x} \nonumber \\
      O_y = SP_{\theta_y} \nonumber \\
@@ -299,6 +293,10 @@ The program was built up in stages, with the physics of each stage checked befor
 
 The quad section was implemented first. A controller was first tested solely in the z direction, and the response was used to calibrate PID values for the z controller. Angular controllers were then implemented, tested, and calibrated, before finally introducing x and y position controllers.
 
+Testing involved flying a simple path: takeoff to 10m, a square path (10m north, 10m east, 10m south, 10m west), and then landing. This gave the results seen in Figure \ref{fig:square_path_quad_only}. It can be seen that there is an oscillation in x and y position of approximately 0.2m. It proved difficult to eliminate, due to the not straightforward interaction of position and angle PID values, and could potentially cause issues with the accuracy of payload delivery.
+
+This, however proved not to be a problem. It can be seen in Figure \ref{fig:square_path_w_jet} that the addition of the jet has, likely due to the added mass, damped out the oscillations in x and y position. It has also added an overshoot in z of several meters and a steady state error in x and y of about 0.2m, but this can be corrected by fine-tuning of PID values. The flight time has also increased but this is to be expected due to the increase in mass causing a decrease in acceleration. In Figure \ref{fig:square_path_w_jet_angle} we can see how the quadcopter changes angle about the x axis, and how the jet initially starts to move in that direction but is quickly brought back to the vertical by the servo.
+
 \begin{figure}
     \vspace{20em}
     \includegraphics[width=\linewidth]{square_path_quad_only}
@@ -323,12 +321,10 @@ The quad section was implemented first. A controller was first tested solely in 
     \label{fig:Square Path Jet}
 \end{figure}
 
-Testing involved flying a simple path: takeoff to 10m, a square path (10m north, 10m east, 10m south, 10m west), and then landing. This gave the results seen in Figure \ref{fig:square_path_quad_only}. It can be seen that there is an oscilliation in x and y position. It proved difficult to eliminate, due to the not straightforward interaction of position and angle PID values. This, however proved not to be a problem. It can be seen in Figure \ref{fig:square_path_w_jet} that the addition of the jet has, likely due to the added mass, damped out the oscillations in x and y position. It has also added an overshoot in z and a steady state error in x and y, but this can be corrected by fine-tuning of PID values. The flight time has also increased but this is to be expected with greater mass. In Figure \ref{fig:square_path_w_jet_angle} we can see how the quadcopter changes angle about the x axis, and how the jet initially starts to move in that direction but is quickly brought back to the vertical by the servo.
-
 \subsubsection{Programming Detail}
 Seen in Figure \ref{fig:XQuad_2_Class_Diagram}
 is a partial UML\footnotemark class diagram. This provides an overview of the various classes and objects used in the simulation and their relationships to each other.
-\footnotetext{Unified Modeling Language (UML) is a visual modelling language used to describe processes and structures, particularly in software modelling. More information is widely available online.}
+\footnotetext{Unified Modelling Language (UML) is a visual modelling language used to describe processes and structures, particularly in software modelling. More information is widely available online.}
 
 \begin{figure}
     \includegraphics[width=\linewidth]{XQuad_2_Class_Diagram}
@@ -336,7 +332,7 @@ is a partial UML\footnotemark class diagram. This provides an overview of the va
     \label{fig:XQuad_2_Class_Diagram}
 \end{figure}
 
-It can be seen that there exists a \lstinline|PhysicalObject| class, from which several other classes inherit, which contains atributes which cover information such as mass, position, velocity, and inertia. \lstinline|Quad| contains \lstinline|QuadFrame|, which itself contains 4 \lstinline|Motors|, as well as \lstinline|Jet| and 2 \lstinline|GimbalServos|. \lstinline|QuadFrame|, \lstinline|Jet|, and \lstinline|GimbalServo| are all interconnected, ensuring that changes to one will be accurately and correctly reflected in the other as required.
+It can be seen that there exists a \lstinline|PhysicalObject| class, from which several other classes inherit, which contains attributes which cover information such as mass, position, velocity, and inertia. \lstinline|Quad| contains \lstinline|QuadFrame|, which itself contains 4 \lstinline|Motors|, as well as \lstinline|Jet| and 2 \lstinline|GimbalServos|. \lstinline|QuadFrame|, \lstinline|Jet|, and \lstinline|GimbalServo| are all interconnected, ensuring that changes to one will be accurately and correctly reflected in the other as required.
 
 \lstinline|PID\textunderscore Values| is a class which describes one set of PID values and the relevant PID calculations, and is used by the \lstinline|GimbalServos| and the \lstinline|Controller|. As described in Section \ref{sec:PID_Control}, standard PID control logic is used, with one addition: integral wind-up has been added. This prevents the integral term from growing disproportionately large, which otherwise occurs in this implementation as our feedback loop occurs several orders of magnitude faster than changes in the output. The code for this is:
 
@@ -380,32 +376,30 @@ It was realised that the mass of the quad had been implemented incorrectly ($r_r
     \label{fig:Square Path Refined}
 \end{figure}
 
-These refiments decreased the stability of the drone. It is still well within acceptable parameters for rotation, and for x and y positioning, but height now has considerable steady state error and oscillation. \label{height overshoot}
-
-With sufficient PID tuning, height could be stabilised, but not without a massive initial overshoot, and slightly increasing instability in x and y. This is because as the proportion of motor control that comes from height control increases (due to increasing $k_p$ and $k_i$ terms), the proportion of motor control left available for the other controllers decreases.
-% TODO quantify!!!!
+These refinements decreased the stability of the drone. It is still well within acceptable parameters for rotation, and for x and y positioning; in fact the steady state error in x and y has been eliminated after further turning of the PID values. The overshoot in height has increased further, and is now over 100\%. There is also a steady state error approximately 1m, and an oscillation also of approximately 1 m.
+\label{height overshoot}
 
 \subsection{Conclusion}
-The reason for the overshoot in height appears to be that the jet adds mass to the system, without adding weight (as this is cancelled out by its thrust). This is not something that a controller would expect. However, we are not greatly concerened with the accuracy of the height-keeping of the system. As long as we stay above 20ft, the minimum height required by the regulations\cite{IMechE_rules}, it is not a concern.
+The reason for the overshoot in height appears to be that the jet adds mass to the system, without adding weight (as this is cancelled out by its thrust). This is not something that a controller would expect. However, we are not greatly concerned with the accuracy of the height-keeping of the system. As long as we stay above 20ft, the minimum height required by the regulations\cite{IMechE_rules}, it is not a concern.
 
-It can be seen that the addition of a gimballed jet to a quadcopter does not catastrophically destabilise it. The extremely simple PID controllers used in our simulation are able to cope to a sufficient degree, implying that a significantly more advanced flight stack such as the PX4 should have no problems. Our initial assumption that the jet can simply be ignored is, indeed, valid. We have completed Objective 1, determing that the stability of the airframe configuration is within acceptable parameters.
+It can be seen that the addition of a gimballed jet to a quadcopter does not catastrophically destabilise it. The extremely simple PID controllers used in our simulation are able to cope to a sufficient degree, implying that a significantly more advanced flight stack such as the PX4 should have no problems. Our initial assumption that the jet can simply be ignored is, indeed, valid. We have completed Objective 1, determining that the stability of the airframe configuration is within acceptable parameters.
 
 
 
 \section{Companion Computer Software}
 \subsection{PX4 Control} \label{PX4 Control}
-We will be controlling the PixHawk flight controller using offboard commands from an external companion computer, henceforth refered to as Pete (since CC is a rather ambigous acronym). Pete will consist of three main components: communication with the PixHawk, communication with a ground station, and target-finding computer vision.
+We will be controlling the PixHawk flight controller using offboard commands from an external companion computer, henceforth referred to as Pete (since CC is a rather ambiguous acronym). Pete will consist of three main components: communication with the PixHawk, communication with a ground station, and target-finding computer vision.
 
-PixHawk 2 is a fully integrated flight controller running the PX4 flight stack. PX4 is an open source project, and is a further development of the popular ArduPilot flight control software. It is an excellent choice for this project as it is easily adaptable to different vehicles, and is capable of calculating many flight paramters by itself and continously optimise them. This minimises the amount of work that will be required to adapt it to our custom-built airframe.
+PixHawk 2 is a fully integrated flight controller running the PX4 flight stack. PX4 is an open source project, and is a further development of the popular ArduPilot flight control software. It is an excellent choice for this project as it is easily adaptable to different vehicles, and is capable of calculating many flight parameters by itself and continuously optimise them. This minimises the amount of work that will be required to adapt it to our custom-built airframe.
 
-PX4 is fully capable of Software-in-the-Loop (SITL) simulation, using either the jMAVSim or Gazebo simulation enviroments.\cite{PX4_dev_guide} This is crucial, as it allows code to be tested with no danger to the real vehicle. Pete can commicate with the simulated vehicle using MAVLink through a UDP port; this is exactly the same as how it would connect to a real vehicle. As far as Pete's code is concerned, there is no difference between a real and a simulated vehicle except for the UDP address.
+PX4 is fully capable of Software-in-the-Loop (SITL) simulation, using either the jMAVSim or Gazebo simulation environments.\cite{PX4_dev_guide} This is crucial, as it allows code to be tested with no danger to the real vehicle. Pete can communicate with the simulated vehicle using MAVLink through a UDP port; this is exactly the same as how it would connect to a real vehicle. As far as Pete's code is concerned, there is no difference between a real and a simulated vehicle except for the UDP address.
 
 % Repetition
 % Communication with the PX4 flight stack on the PixHawk is based on the DroneKit SDK. This is a platform for devoloping apps written in Python that run on a drone's companion computer. It communicates with the PixHawk using the MAVLink communication protocol.\cite{dronekit} The DroneCore API was also experimented with but proved significantly harder to implement and hence was abandoned.
 
-PX4 has 12 flight modes when employed on a multirotor. We are interested in the autonomous modes, which include Hold, Return(RTL), Takeoff, Land, Mission, Follow Me, and Offboard. Of particular interest are Mission, in which `the vehicle follows a programmed mission', and Offboard, where `the vehicle obeys a position, velocity or attitude setpoint provided over MAVLink'.\cite{PX4_user_guide}
+PX4 has 12 flight modes when employed on a multi-rotor. We are interested in the autonomous modes, which include Hold, Return(RTL), Takeoff, Land, Mission, Follow Me, and Offboard. Of particular interest are Mission, in which `the vehicle follows a programmed mission', and Offboard, where `the vehicle obeys a position, velocity or attitude setpoint provided over MAVLink'.\cite{PX4_user_guide}
 
-The DroneKit SDK was used to create code that will run on Pete and communicate with PX4 using the MAVLink communication protocol. This is an open source, freely available software development kit, specifically designed for offboard control of vehicles using companion computers to enable autonomous behaviour. It is available in three main implementation: on Android, on iOS, and in Python. It is the Python version we will be using here, as almost all available comapnion computers come with Python preinstalled and with a high level of support for it.
+The DroneKit SDK was used to create code that will run on Pete and communicate with PX4 using the MAVLink communication protocol. This is an open source, freely available software development kit, specifically designed for offboard control of vehicles using companion computers to enable autonomous behaviour. It is available in three main implementation: on Android, on iOS, and in Python. It is the Python version we will be using here, as almost all available companion computers come with Python preinstalled and with a high level of support for it.
 
 During research into the subject area, two alternative libraries were found that could have been used: MAVROS and DroneCore. These were rejected as they are both written in C++. Although code written in C++ is often faster, it also typically takes longer to write as it is a lower-level language with more need for `boilerplate' code. We did not anticipate our control system to be advanced enough for the speed of code execution to make a significant difference, and developing a control system on time was the larger priority. Python is also more suited to be used as a cross-platform language, which allows for code to be created in one operating system, MacOS, and eventually run in another, specifically Linux (which all available companion computer run on a distribution of).
 Additionally, much of the difference can be made up by using C or C++ libraries with Python implementations, as OpenCV, used later in this report, does.
@@ -417,7 +411,7 @@ Additionally, it is usually assumed that one is operating in the \lstinline|glob
 \begin{center}
 \begin{tabular}{cc}
     \lstinline|global_frame| & GPS coordinates, with 0 altitude at sea level \\
-    \lstinline|global_relative_frame| & GPS coordinates, with 0 altidue as ground level at the starting location \\
+    \lstinline|global_relative_frame| & GPS coordinates, with 0 altitude as ground level at the starting location \\
     \lstinline|local_frame| & Cartesian coordinates relative to the starting location
 \end{tabular}
 \end{center}
@@ -527,12 +521,12 @@ Altogether, this means that the communication with the PixHawk has been simplifi
 
 
 \subsection{Computer Vision}
-The next component of the control system is a computer vision system capable of identifying the target. This takes the form of a red 1x1m square, incoporating an alphanumeric code in white, within a larger 2x2m white square\cite{IMechE_rules}. The system would have to locate the target, calculate the offset from being centered underneath the vehicle, and to indentify the alphanumeric code.
+The next component of the control system is a computer vision system capable of identifying the target. This takes the form of a red 1x1m square, incorporating an alphanumeric code in white, within a larger 2x2m white square\cite{IMechE_rules}. The system would have to locate the target, calculate the offset from being centered underneath the vehicle, and to identify the alphanumeric code.
 
 Since an interface had already been programmed in Python, it was decided to program the computer vision in Python as well to allow for them to easily work in conjunction. To this end the OpenCV-Python library was chosen.
 
 \subsubsection{Square Detection}
-The target consists of two concentric squares and a central leter, as seen on Figure \ref{fig:target}\cite{IMechE_rules}. Therefore, a good way of identifying the target is looking for concentric squares. This is called feature detection. The other main method is known as creating a cascade, and allows objects whose features cannot be easily described mathematically, such as a chair, to be recognised. However, creating a cascade requires the processing of thousands of images and considerable time. As we are fortunate enough to have a feature which can be described easily mathematically (concentric squares), feature detection is the way to go.
+The target consists of two concentric squares and a central letter, as seen on Figure \ref{fig:target}\cite{IMechE_rules}. Therefore, a good way of identifying the target is looking for concentric squares. This is called feature detection. The other main method is known as creating a cascade, and allows objects whose features cannot be easily described mathematically, such as a chair, to be recognised. However, creating a cascade requires the processing of thousands of images and considerable time. As we are fortunate enough to have a feature which can be described easily mathematically (concentric squares), feature detection is the way to go.
 
 \begin{wrapfigure}{r}{0.5\textwidth}
     \begin{center}
@@ -564,7 +558,7 @@ First, squares are recognised. This is a multi-stage process:
 These contours are then drawn onto the image, showing us the squares. This method can be applied to images, or to video by applying it to each frame in the video. It is modified from examples available online.\cite{opencv_tutorials}\cite{pyimagesearch_squares}
 
 \subsubsection{Optical Character Recognition}
-Reading the letter inside the target is also a requirement of our system. To this end, Optical Character Recognition (OCR) was added to our system. This is done using the freely available Tesseract OCR library, in conjuction with the pytesseract library that adapts it to Python. A simple function was created that takes an image and puts it through Tesseract, printing all that is written on that page. Once again, it was adapted from examples available online.\cite{pyimagesearch_ocr}
+Reading the letter inside the target is also a requirement of our system. To this end, Optical Character Recognition (OCR) was added to our system. This is done using the freely available Tesseract OCR library, in conjunction with the pytesseract library that adapts it to Python. A simple function was created that takes an image and puts it through Tesseract, printing all that is written on that page. Once again, it was adapted from examples available online.\cite{pyimagesearch_ocr}
 
 It should be noted that the function which performs this OCR was discovered to be extremely inefficient, taking about 0.3 seconds to execute, due to the way that the Tesseract library is accessed. This would decrease the frame rate below usable levels if run routinely, and so will only be run a single time once the target has been positively identified.
 
@@ -573,7 +567,7 @@ The next step was to find the target by finding squares that are concentric to e
 
 At this point, a \lstinline|Square| class was made to improve the code under the concepts of object-oriented programming. A \lstinline|concentric()| method was made in this class that compares squares against each other to see if their center points are within a certain distance of each other (by default, 5\% of the size of the square). Two squares that are concentric are added to a new intance of a \lstinline|Target| class. Repeated comparisons are avoided by using \lstinline|intertools.combinations()| to make a list of all the unique pairs of squares before comparing.
 
-Initially, it appeared that all squares were targets. The problem was discovered to be that there were in fact multiple, very similar squares being generated for each actual square on the image. For example, for a square whose border is a black line might have the outside of the line and the inside of the line counted as seperate squares. These squares are clearly concentric and thus all squares are targets. The problem was solved by creating a \lstinline|similar()| method for \lstinline|Square| and using it to eliminte squares that are too similar (again, 5\% by default), ensuring that all squares are unique before running the \lstinline|concentric()| method to find targets.
+Initially, it appeared that all squares were targets. The problem was discovered to be that there were in fact multiple, very similar squares being generated for each actual square on the image. For example, for a square whose border is a black line might have the outside of the line and the inside of the line counted as separate squares. These squares are clearly concentric and thus all squares are targets. The problem was solved by creating a \lstinline|similar()| method for \lstinline|Square| and using it to eliminate squares that are too similar (again, 5\% by default), ensuring that all squares are unique before running the \lstinline|concentric()| method to find targets.
 
 From here, it is trivial to calculate the offset of the target from the center of the image or camera frame. This offset will be used as an input into a control system to move the drone above the target.
 
@@ -585,7 +579,7 @@ Multithreading was used to optimise performance and increase effectiveness. Unfo
 A demonstration video of this was created. For obvious reasons, it could not be put in this report, but is available at \url{https://youtu.be/sFyZphH8_CM}.
 
 \subsubsection{Investigating Frame Rate}
-The method of finding all squares, checking through them all for duplicates, then checking through them all for targets, intuitively seems inneficient. This could especially become an issue when deployed to a drone platform, which will likely have less processing power.
+The method of finding all squares, checking through them all for duplicates, then checking through them all for targets, intuitively seems inefficient. This could especially become an issue when deployed to a drone platform, which will likely have less processing power.
 
 However, timing sections of the program using the \lstinline|timeit| library revealed that the vast majority of the time that went into processing a frame went into receiving a frame from the camera, with the entire process of target detection taking approximately 10\% of the required time per frame. This is because I/O (Input/Output) operations are very expensive in terms of computing time. Meanwhile all the square comparisons are simple number comparisons, which are cheap.
 
@@ -594,14 +588,14 @@ Thus, it was decided there was no need to optimise the target-finding algorithm,
 \subsection{Communication}
 Communication from Pete to a base station to transmit information will, by necessity, be over a serial connection, as this is how most low-end radio links are designed. (High-end radio links capable of transmitting )
 
-The socat command line utility was used to establish two virtual serial ports which communicate with each other. These are then acessed using the pyserial library to write and read information from these serial ports.
+The socat command line utility was used to establish two virtual serial ports which communicate with each other. These are then accessed using the pyserial library to write and read information from these serial ports.
 
 \subsubsection{Serialising Targets}
 It was quickly discovered that sending an entire image over a serial connection within a reasonable amount of time is not possible. Even sending the contours of a square does not work well, as this is a large set of points. Thus, it was decided to send only the most important information.
 
 A \lstinline|Square2| and \lstinline|Target2| class were created. These inherit from \lstinline|Square| and \lstinline|Target|. The only difference is that they are missing the contours of the squares. \lstinline|Square| and \lstinline|Target| gained a \lstinline|to_json()| method that converts their attributes to a string using JavaScript Object Notation (JSON), a standard for transmitting information. \lstinline|Square2| and \lstinline|Target2| have a function \lstinline|from_json()| which can recreate the squares from the JSON string.
 
-This was tested by sending the targets over the virtual serial connection, and drawing them on the image. With minor modifications to the way that squares and targets are drawn, this worked sucessfully. Notably, squares are now defined largely based on their bounding rectangle and not on their own contours, which for a square or rectangle makes little difference.
+This was tested by sending the targets over the virtual serial connection, and drawing them on the image. With minor modifications to the way that squares and targets are drawn, this worked successfully. Notably, squares are now defined largely based on their bounding rectangle and not on their own contours, which for a square or rectangle makes little difference.
 
 \subsection{Jet Engine Control \& Payload Delivery}
 The thrust output of the MJE will need to be controlled to compensate for the change in weight as payloads are dropped. Additionally, by more closely controlling jet thrust it may be possibly to reduce the instability in height noted in Section \ref{height overshoot}.
@@ -616,27 +610,27 @@ The MJE is controlled with a FADEC that takes a PWM (Pulse Width Modulation) sig
     \end{center}
 \end{wrapfigure}
 
-Additionaly, a mechanism to control the payload delivery mechanism is also required. Development of the specifics of payload delivery is being undertaken by a 1st year student, Arkadiy Serezhkin. The current solution will likely use a servo mechanism of some description. An example of such a mechanism would be the Makeblock 86502 Robot Gripper\cite{Makeblock_gripper}, seen in Figure \ref{fig:makeblock_gripper}.
+Additionally, a mechanism to control the payload delivery mechanism is also required. Development of the specifics of payload delivery is being undertaken by a 1st year student, Arkadiy Serezhkin. The current solution will likely use a servo mechanism of some description. An example of such a mechanism would be the Makeblock 86502 Robot Gripper\cite{Makeblock_gripper}, seen in Figure \ref{fig:makeblock_gripper}.
 
 The issue of a moving center of gravity when a payload is dropped is also an issue that is currently being investigated. Placing the payload underneath the jet engine, with a cone to divert the jet exhaust, was rejected due to the large loss of thrust from the jet this would cause. Placing the payloads evenly distributed, as close to the center of the vehicle as possible, still raises issues with one of the electric motors having to take on too much of the weight. Whatever the final solution, it may well factor in to the programming required for the payload drop mechanism. \label{payload_delivery}
 
-The full implemenation of this will depend on the specific companion computer chosen, as the libraries to output signals using the output pins of a companion computer are specific to that companion computer, as well as the final payload deliver method chosen. For now, a \lstinline|Payload| class has been created, and incorporated into the \lstinline|Vehicle|. Later, the specific code for controlling payload drops, and varying jet engine thrust in response to payload drops, will be incorporated into this class.
+The full implementation of this will depend on the specific companion computer chosen, as the libraries to output signals using the output pins of a companion computer are specific to that companion computer, as well as the final payload deliver method chosen. For now, a \lstinline|Payload| class has been created, and incorporated into the \lstinline|Vehicle|. Later, the specific code for controlling payload drops, and varying jet engine thrust in response to payload drops, will be incorporated into this class.
 
 \subsection{Choosing a Computer} \label{cc_selection}
-By this point, Pete has advanced about as far as is possible in a purely simulated enviroment. Further development required moving onto a real companion computer, and testing either with a real drone or a Hardware-in-the-Loop (HITL) simulation.
+By this point, Pete has advanced about as far as is possible in a purely simulated environment. Further development required moving onto a real companion computer, and testing either with a real drone or a Hardware-in-the-Loop (HITL) simulation.
 
-A comparison was made of availible companion computers on the market. The Intel Edison, Raspberry Pi3, Nvidia TX2, Odroid XU4, and Snapdragon Flight were compared on criteria such as processing power, weight, and cost. The full comparison can be seen in Figure \ref{fig:cc_selection}.
+A comparison was made of available companion computers on the market. The Intel Edison, Raspberry Pi3, Nvidia TX2, Odroid XU4, and Snapdragon Flight were compared on criteria such as processing power, weight, and cost. The full comparison can be seen in Figure \ref{fig:cc_selection}.
 
 \begin{figure}[h]
     \includegraphics[width=\linewidth]{companion_computer_comparison}
     \caption{Companion Computer Selection} \label{fig:cc_selection}
 \end{figure}
 
-Of these, the Raspberry Pi3 was the preferred choice, as it is cheap and light, and has the greatest amount of community support and available documentation. It is, however, borderline as to whether it is powerful to run the required computer vision computation.\cite{companion_computer_power}. The Nvidia TX2 is a close second. It is definetely powerful enough to meet our needs, but is significantly more expensive and has less support available. It was therefore decided to buy a Raspberry Pi, and to upgrade to the TX2 if it turns out to not be powerful enough.
+Of these, the Raspberry Pi3 was the preferred choice, as it is cheap and light, and has the greatest amount of community support and available documentation. It is, however, borderline as to whether it is powerful to run the required computer vision computation.\cite{companion_computer_power}. The Nvidia TX2 is a close second. It is definitely powerful enough to meet our needs, but is significantly more expensive and has less support available. It was therefore decided to buy a Raspberry Pi, and to upgrade to the TX2 if it turns out to not be powerful enough.
 
 
 \section{Companion Computer Setup \& Testing}
-A Raspberry Pi3, along with camera, was obtained, and Raspbian (a distribution of Linux specifically designed for the Pi) was installed on it. It was discovered that the 8GB microSD card that the Pi3 comes with is not large enough for our purposes. The amount of free space after the operating system and default programs are installed is approximately 1.6GB, and OpenCV requires around 4GB free space to compile from source. Therefore, a 32GB microSD card was obtained and the setup process was restarted. OpenCV was succesfully compiled, and other required libraries such as DroneKit were also acquired.
+A Raspberry Pi3, along with camera, was obtained, and Raspbian (a distribution of Linux specifically designed for the Pi) was installed on it. It was discovered that the 8GB microSD card that the Pi3 comes with is not large enough for our purposes. The amount of free space after the operating system and default programs are installed is approximately 1.6GB, and OpenCV requires around 4GB free space to compile from source. Therefore, a 32GB microSD card was obtained and the setup process was restarted. OpenCV was successfully compiled, and other required libraries such as DroneKit were also acquired.
 
 Slight modification to the existing code needed to made, mainly that the \lstinline|picamera| library was used as an intermediary between the Pi's camera and the existing computer vision code.
 
@@ -644,8 +638,8 @@ When tested the code performed as expected, communicating with the simulation ru
 
 \section{Conclusion \& Further Work}
 \begin{compactenum}
-    \item The stability of the airframe configuration has been examined in a simulated enviroment, and shown to be within acceptable parameters in the x and y directions. There is a large overshoot and not incosiderable oscillation in z (height), but this is acceptable as the required precision in height for our vehicle is very low.
-    \item A control system has been designed and tested within a simulated enviroment, which can:
+    \item The stability of the airframe configuration has been examined in a simulated environment, and shown to be within acceptable parameters in the x and y directions. There is a large overshoot and not inconsiderable oscillation in z (height), but this is acceptable as the required precision in height for our vehicle is very low.
+    \item A control system has been designed and tested within a simulated environment, which can:
     \begin{compactenum}
         \item Travel to predetermined GPS waypoints.
         \item Recognise and navigate to a target using computer vision.
@@ -655,11 +649,11 @@ When tested the code performed as expected, communicating with the simulation ru
 \end{compactenum}
 
 \vspace{1em}
-The control system has been tested as far as is possible within the current simulated enviroment. The next stage is preferably deployment on a real platform, where further testing and development can take place. This is depedent on Ismail delivering a working airframe; at the time of writing, all design work has been completed with manufacturing to commence shortly.\cite{Ismail_paper}
+The control system has been tested as far as is possible within the current simulated environment. The next stage is preferably deployment on a real platform, where further testing and development can take place. This is dependent on Ismail delivering a working airframe; at the time of writing, all design work has been completed with manufacturing to commence shortly.\cite{Ismail_paper}
 
-An alternative would be to move to a more advanced simulation enviroment, specifically Gazebo, which is an advanced robotics and physics simulation library and which is capable of interfacing with a PX4 simulation.\cite{PX4_dev_guide} Enough research and investigation has been done into this to discover that creating an accurate simulation in Gazebo, with our custom airframe modelled correctly and integrated with the PX4 simulation, is almost ambitious enough to form a third-year project in and of itself.
+An alternative would be to move to a more advanced simulation environment, specifically Gazebo, which is an advanced robotics and physics simulation library and which is capable of interfacing with a PX4 simulation.\cite{PX4_dev_guide} Enough research and investigation has been done into this to discover that creating an accurate simulation in Gazebo, with our custom airframe modelled correctly and integrated with the PX4 simulation, is almost ambitious enough to form a third-year project in and of itself.
 
-The design of the control system so far allows for a great deal of flexibility and expansion through the use of object-oriented programming, although further work could be done in this area, especially when it comes to the usage of OpenCV and multithreading (This is a known issue, as decribed in Section \ref{OpenCV_multithreading_issues}). The use of the \lstinline|picamera| module rather than OpenCV's \lstinline|VideoCapture| may allow image processing to be moved into a subthread and proper multithreading implemented. Additionally, the code that has been written could be better packaged, although this would only really become an issue if it was being distributed.
+The design of the control system so far allows for a great deal of flexibility and expansion through the use of object-oriented programming, although further work could be done in this area, especially when it comes to the usage of OpenCV and multithreading (This is a known issue, as described in Section \ref{OpenCV_multithreading_issues}). The use of the \lstinline|picamera| module rather than OpenCV's \lstinline|VideoCapture| may allow image processing to be moved into a subthread and proper multithreading implemented. Additionally, the code that has been written could be better packaged, although this would only really become an issue if it was being distributed.
 
 
 
@@ -671,7 +665,7 @@ The design of the control system so far allows for a great deal of flexibility a
 \appendix
 \section{Table of All Symbol Definitions}
 \begin{center}
-    \emph{Note: values are only given for variables which are constants. No values are given for values derived from contants or for dynamic variables.}
+    \emph{Note: values are only given for variables which are constants. No values are given for values derived from constants or for dynamic variables.}
 \begin{longtable}{|ccc|}
     \hline
     \emph{Symbol} & \emph{Definition} & \emph{Value(where appropriate)} \\
@@ -800,13 +794,13 @@ The design of the control system so far allows for a great deal of flexibility a
 \begin{thebibliography}{11}
 
 \bibitem{IMechE_about_uas}
-    IMechE. About UAS Challenge - IMechE [Internet]. [Accessed 20 December 2017]; Availible from: \url{https://www.imeche.org/events/challenges/uas-challenge/about-uas-challenge}.
+    IMechE. About UAS Challenge - IMechE [Internet]. [Accessed 20 December 2017]; Available from: \url{https://www.imeche.org/events/challenges/uas-challenge/about-uas-challenge}.
 
 \bibitem{IMechE_rules}
     Institution of Mechanical Engineers. University UAS Challenge 2018 Competition Rules [Internet]. Issue 7.1. [Accessed 27 December 2017]; Available from: \url{https://www.imeche.org/docs/default-source/1-oscar/uas-challenge/uas-challenge--competition-rules.pdf?sfvrsn=2}.
 
 \bibitem{PX4_user_guide}
-    DroneCode. PX4 Autopilot User Guide [Internet]. Updated 20 December 2017. [Last accessed 20 December 2017]; Availible from: \url{https://docs.px4.io/en/}.
+    DroneCode. PX4 Autopilot User Guide [Internet]. Updated 20 December 2017. [Last accessed 20 December 2017]; Available from: \url{https://docs.px4.io/en/}.
 
 \bibitem{PX4_dev_guide}
     DroneCode. PX4 Development Guide [Internet]. Updated 15 December 2017. [Last accessed 20 December 2017]; Availible from: \url{https://dev.px4.io/en/}.
@@ -818,7 +812,7 @@ The design of the control system so far allows for a great deal of flexibility a
     OpenCV. OpenCV-Python Tutorials — OpenCV 3.0.0-dev documentation [Internet]. Last updated 10 Novemeber 2014. [Accessed 22 December 2017]; Available from: \url{https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_tutorials.html}.
 
 \bibitem{pyimagesearch_squares}
-    Adrian Rosebrock. Target acquired: Finding targets in drone and quadcopter video streams using Python and OpenCV [Internet]. 4 May 2015. [Accessed 22 Decemeber 2017]; Available from: \url{https://www.pyimagesearch.com/2015/05/04/target-acquired-finding-targets-in-drone-and-quadcopter-video-streams-using-python-and-opencv/}.
+    Adrian Rosebrock. Target acquired: Finding targets in drone and quadcopter video streams using Python and OpenCV [Internet]. 4 May 2015. [Accessed 22 December 2017]; Available from: \url{https://www.pyimagesearch.com/2015/05/04/target-acquired-finding-targets-in-drone-and-quadcopter-video-streams-using-python-and-opencv/}.
 
 \bibitem{pyimagesearch_ocr}
     Adrian Rosebrock. Using Tesseract OCR with Python [Internet]. 10 July 2017. [Accessed 22 December 2017]; Available from: \url{https://www.pyimagesearch.com/2017/07/10/using-tesseract-ocr-python/}.

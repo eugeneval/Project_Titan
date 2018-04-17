@@ -113,6 +113,8 @@ The concept for our UAS uses a hybrid symbioisis between a \emph{Micro Jet Engin
 
 The MJE provides a higher thrust to weight ratio than the equivalent electric motors and batteries. It does this without introducing the vibration issues of a piston engine, which would seriously impact stability and control on such a lightweight design. With the current MJE and electric motors we hope to lift a payload of 3kg while remaining under the 6.9kg weight limit.
 
+The chosen airframe configuration is a novel airframe that, to the extent of research done into the subject, has only been tried by several hobbyists, who often have no publicaly available documentation outside of videos posted on YouTube that rarely contain any useful technical information. We were to discover only quite late in the design process (see Section \ref{payload_delivery}) a possible reason as to why – the central MJE greatly complicates the carriage of payload.
+
 Further detail as to the physical design of the airframe is outside the scope of this project, as this is Ismail Ahmad's responsibility.\cite{Ismail_paper} A render of his design for the airframe can be seen in Figure \ref{fig:saucy_render}.
 
 \begin{figure}[h]
@@ -147,13 +149,6 @@ Ultimately, the long term goal of this project is to take part in the IMechE UAS
         \item Communicate the GPS coordinate of the target to a ground station.
     \end{compactenum}
 \end{compactenum}
-
-% TODO: lit review
-\subsection{Previous Work}
-The chosen airframe configuration is a novel airframe that, to the extent of research done into the subject, has only been tried by several hobbyists, who often have no publicaly available documentation outside of videos posted on YouTube that rarely contain any useful technical information. We were to discover only quite late in the design process (see Section \ref{payload_delivery}) a possible reason as to why – the central MJE greatly complicates the carriage of payload.
-
-Designing a control system is a more straightforward task with much information available online. There are established
-
 
 \subsection{Control System Design}
 Flight control will be handled with a Pixhawk running the PX4 flight stack. This will be coupled to a companion computer running software based on the DroneKit SDK, communicating with the PixHawk using the MAVLink protocol. The companion computer is responsible for communication, waypoint navigation, and target location and tracking using computer vision. It then communicates where to go to the PixHawk.
@@ -304,14 +299,42 @@ The program was built up in stages, with the physics of each stage checked befor
 
 The quad section was implemented first. A controller was first tested solely in the z direction, and the response was used to calibrate PID values for the z controller. Angular controllers were then implemented, tested, and calibrated, before finally introducing x and y position controllers.
 
+\begin{figure}
+    \vspace{20em}
+    \includegraphics[width=\linewidth]{square_path_quad_only}
+    \caption{Simulation of a Square Path - Quad Only}
+    \label{fig:square_path_quad_only}
+\end{figure}
+
+\begin{figure}
+    \begin{subfigure}{\textwidth}
+        \includegraphics[width=\linewidth]{square_path_w_jet}
+        \caption{Position}
+        \label{fig:square_path_w_jet}
+    \end{subfigure}\hspace*{\fill}
+    \\
+    \begin{subfigure}{\textwidth}
+        \includegraphics[width=\linewidth]{square_path_w_jet_angle}
+        \caption{Angle}
+        \label{fig:square_path_w_jet_angle}
+    \end{subfigure}
+
+    \caption{Simulation of a Square Path - With Jet}
+    \label{fig:Square Path Jet}
+\end{figure}
+
 Testing involved flying a simple path: takeoff to 10m, a square path (10m north, 10m east, 10m south, 10m west), and then landing. This gave the results seen in Figure \ref{fig:square_path_quad_only}. It can be seen that there is an oscilliation in x and y position. It proved difficult to eliminate, due to the not straightforward interaction of position and angle PID values. This, however proved not to be a problem. It can be seen in Figure \ref{fig:square_path_w_jet} that the addition of the jet has, likely due to the added mass, damped out the oscillations in x and y position. It has also added an overshoot in z and a steady state error in x and y, but this can be corrected by fine-tuning of PID values. The flight time has also increased but this is to be expected with greater mass. In Figure \ref{fig:square_path_w_jet_angle} we can see how the quadcopter changes angle about the x axis, and how the jet initially starts to move in that direction but is quickly brought back to the vertical by the servo.
-
-
 
 \subsubsection{Programming Detail}
 Seen in Figure \ref{fig:XQuad_2_Class_Diagram}
 is a partial UML\footnotemark class diagram. This provides an overview of the various classes and objects used in the simulation and their relationships to each other.
 \footnotetext{Unified Modeling Language (UML) is a visual modelling language used to describe processes and structures, particularly in software modelling. More information is widely available online.}
+
+\begin{figure}
+    \includegraphics[width=\linewidth]{XQuad_2_Class_Diagram}
+    \caption{XQuad2 UML Class Diagram}
+    \label{fig:XQuad_2_Class_Diagram}
+\end{figure}
 
 It can be seen that there exists a \lstinline|PhysicalObject| class, from which several other classes inherit, which contains atributes which cover information such as mass, position, velocity, and inertia. \lstinline|Quad| contains \lstinline|QuadFrame|, which itself contains 4 \lstinline|Motors|, as well as \lstinline|Jet| and 2 \lstinline|GimbalServos|. \lstinline|QuadFrame|, \lstinline|Jet|, and \lstinline|GimbalServo| are all interconnected, ensuring that changes to one will be accurately and correctly reflected in the other as required.
 
@@ -336,51 +359,26 @@ It should be noted that a minimal effort has been made to make use of object-ori
 
 The full code can be seen in the GitHub repository, located at \url{https://github.com/eugeneval/Project_Titan}.
 
-\begin{figure}[p]
-    \includegraphics[width=\linewidth]{XQuad_2_Class_Diagram}
-    \caption{XQuad2 UML Class Diagram}
-    \label{fig:XQuad_2_Class_Diagram}
-\end{figure}
-
-\begin{figure}[p]
-    \begin{subfigure}{0.48\textwidth}
-        \includegraphics[width=\linewidth]{square_path_quad_only}
-        \caption{Quad Only}
-        \label{fig:square_path_quad_only}
-    \end{subfigure}\hspace*{\fill}
-    \begin{subfigure}{0.48\textwidth}
-        % Placeholder
-    \end{subfigure}
-    \medskip
-    \begin{subfigure}{0.48\textwidth}
-        \includegraphics[width=\linewidth]{square_path_w_jet}
-        \caption{With Jet}
-        \label{fig:square_path_w_jet}
-    \end{subfigure}\hspace*{\fill}
-    \begin{subfigure}{0.48\textwidth}
-        \includegraphics[width=\linewidth]{square_path_w_jet_angle}
-        \caption{With Jet}
-        \label{fig:square_path_w_jet_angle}
-    \end{subfigure}
-    \medskip
-    \begin{subfigure}{0.48\textwidth}
-        \includegraphics[width=\linewidth]{square_path_limited_servos}
-        \caption{With Refiments}
-        \label{fig:square_path_limited_servos}
-    \end{subfigure}\hspace*{\fill}
-    \begin{subfigure}{0.48\textwidth}
-        \includegraphics[width=\linewidth]{square_path_limited_servos_angle}
-        \caption{With Refiments}
-        \label{fig:square_path_limited_servos_angle}
-    \end{subfigure}
-
-    \caption{Simulation of a Square Path}
-    \label{fig:Square Path}
-\end{figure}
-% TODO: bigger font in graphs, or just bigger graphs
 
 \subsection{Refiment}
 It was realised that the mass of the quad had been implemented incorrectly ($r_r$ had not been squared and the rod mass and motor mass had not been multiplied by 4 in equation \ref{eqn:total_mass}). Additionally, the maximum torque of the servo had not been limited to 0.34kgm. Correcting these resulted in Figures \ref{fig:square_path_limited_servos} and \ref{fig:square_path_limited_servos_angle}.
+
+\begin{figure}
+    \begin{subfigure}{\textwidth}
+        \includegraphics[width=\linewidth]{square_path_limited_servos}
+        \caption{Position}
+        \label{fig:square_path_limited_servos}
+    \end{subfigure}\hspace*{\fill}
+    \\
+    \begin{subfigure}{\textwidth}
+        \includegraphics[width=\linewidth]{square_path_limited_servos_angle}
+        \caption{Angle}
+        \label{fig:square_path_limited_servos_angle}
+    \end{subfigure}
+
+    \caption{Simulation of a Square Path - With Refinements}
+    \label{fig:Square Path Refined}
+\end{figure}
 
 These refiments decreased the stability of the drone. It is still well within acceptable parameters for rotation, and for x and y positioning, but height now has considerable steady state error and oscillation. \label{height overshoot}
 
@@ -661,7 +659,7 @@ The control system has been tested as far as is possible within the current simu
 
 An alternative would be to move to a more advanced simulation enviroment, specifically Gazebo, which is an advanced robotics and physics simulation library and which is capable of interfacing with a PX4 simulation.\cite{PX4_dev_guide} Enough research and investigation has been done into this to discover that creating an accurate simulation in Gazebo, with our custom airframe modelled correctly and integrated with the PX4 simulation, is almost ambitious enough to form a third-year project in and of itself.
 
-The design of the control system so far allows for a great deal of flexibility and expansion through the use of object-oriented programming, although further work could be done in this area, especially when it comes to the usage of OpenCV and multithreading (This is a known issue, as decribed in Section \ref{OpenCV_multithreading_issues}). Additionally, the code that has been written could be better packaged, although this would only really become an issue if it was being distributed.
+The design of the control system so far allows for a great deal of flexibility and expansion through the use of object-oriented programming, although further work could be done in this area, especially when it comes to the usage of OpenCV and multithreading (This is a known issue, as decribed in Section \ref{OpenCV_multithreading_issues}). The use of the \lstinline|picamera| module rather than OpenCV's \lstinline|VideoCapture| may allow image processing to be moved into a subthread and proper multithreading implemented. Additionally, the code that has been written could be better packaged, although this would only really become an issue if it was being distributed.
 
 
 

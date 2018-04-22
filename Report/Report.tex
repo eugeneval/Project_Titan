@@ -54,7 +54,7 @@
     GitHub Repository: \url{https://github.com/eugeneval/Project_Titan}
 
     \vspace{2em}
-    Word Count: 7106
+    Word Count: 7122
 
     \vspace{6em}
     \emph{I, Eugene Valetsky, confirm that the work presented in this report is my own. Where information has been derived from other sources, I confirm that this has been indicated in the report.}
@@ -613,7 +613,7 @@ It should be noted that the function which performs this OCR was discovered to b
 \subsection{Target Detection}
 The next step was to find the target by finding squares that are concentric to each other. This was done by finding the coordinates of the center of the square, using OpenCV's \lstinline|moments()| function. This center was then compared to the centers of all other squares that had been found.
 
-At this point, a \lstinline|Square| class was made to improve the code under the concepts of object-oriented programming. A \lstinline|concentric()| method was made in this class that compares squares against each other to see if their center points are within a certain distance of each other (by default, 5\% of the size of the square). Two squares that are concentric are added to a new intance of a \lstinline|Target| class. Repeated comparisons are avoided by using \lstinline|intertools.combinations()| to make a list of all the unique pairs of squares before comparing.
+At this point, a \lstinline|Square| class was made to improve the code under the concepts of object-oriented programming. A \lstinline|concentric()| method was made in this class that compares squares against each other to see if their center points are within a certain distance of each other (by default, 5\% of the size of the square). Two squares that are concentric are added to a new instance of a \lstinline|Target| class. Repeated comparisons are avoided by using \lstinline|intertools.combinations()| to make a list of all the unique pairs of squares before comparing.
 
 Initially, it appeared that all squares were targets. The problem was discovered to be that there were in fact multiple, very similar squares being generated for each actual square on the image. For example, for a square whose border is a black line might have the outside of the line and the inside of the line counted as separate squares. These squares are clearly concentric and thus all squares are targets. The problem was solved by creating a \lstinline|similar()| method for \lstinline|Square| and using it to eliminate squares that are too similar (again, 5\% by default), ensuring that all squares are unique before running the \lstinline|concentric()| method to find targets.
 
@@ -641,7 +641,7 @@ Investigations have been made into multithreading and frame rate. These can be t
 Potentially, some of the parameters used to identify the target will need to be fine-tuned once deployed on a real vehicle to account for how the target may look different. The code has been written in such a way that these parameters are easy to modify.
 
 \section{Companion Computer Software: Communication}
-Communication from Pete to a base station to transmit information will, by necessity, be over a serial connection, as this is how most low-end radio links are designed. (High-end radio links capable of transmitting )
+Communication from Pete to a base station to transmit information will, by necessity, be over a serial connection, as this is how most low-end radio links are designed.
 
 The socat command line utility was used to establish two virtual serial ports which communicate with each other. These are then accessed using the pyserial library to write and read information from these serial ports.
 

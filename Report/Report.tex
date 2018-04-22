@@ -54,7 +54,7 @@
     GitHub Repository: \url{https://github.com/eugeneval/Project_Titan}
 
     \vspace{2em}
-    Word Count: 7311
+    Word Count: 7106
 
     \vspace{6em}
     \emph{I, Eugene Valetsky, confirm that the work presented in this report is my own. Where information has been derived from other sources, I confirm that this has been indicated in the report.}
@@ -112,7 +112,7 @@ One of the greatest individual challenges as part of the project is creating an 
 \subsection{Airframe Design}
 The concept for our UAS uses a hybrid symbiosis between a \emph{Micro Jet Engine}, henceforth referred to as MJE, and an external multi-rotor. The MJE is gimballed to always remain vertical and only provides lift, while the multi-rotor rotates around it providing stabilisation and control. This configuration means that standard quadcopter flight control software can be used rather than needing to come up with custom architecture.
 
-The MJE provides a higher thrust to weight ratio than the equivalent electric motors and batteries. It does this without introducing the vibration issues of a piston engine, which would seriously impact stability and control on such a lightweight design. With the current MJE and electric motors we hope to lift a payload of 3kg while remaining under the 6.9kg weight limit imposed by the rules.\cite{IMechE_rules}
+The MJE provides a higher thrust to weight ratio than the equivalent electric motors and batteries. It does this without introducing the vibration issues of a piston engine, which would seriously impact stability and control on such a lightweight design. With the current MJE and electric motors we hope to lift a payload of 3kg while remaining under the 6.9kg weight limit imposed by the rules.\cite{IMechE_rules} MJE's are also capable of running on a wide variety of fuels, which would be an advantage in a disaster zone where fuel and electricity supplies may be limited or unavailable.\cite{Ismail_paper}
 
 The chosen airframe configuration is a novel airframe that, to the extent of research done into the subject, has only been tried by several hobbyists and never as a serious technical endeavour. We were to discover only quite late in the design process (see Section \ref{payload_delivery}) a possible reason as to why - the central MJE greatly complicates the carriage of payload.
 
@@ -146,6 +146,7 @@ Ultimately, the long term goal of this project is to take part in the IMechE UAS
         \item Recognise and navigate to a target using computer vision.
         \item Communicate the GPS coordinate of the target to a ground station.
     \end{compactenum}
+    \item Test the control system in a simulated environment.
 \end{compactenum}
 
 As this is an open-ended design project, the exact details of the final solution cannot be determined at this stage.
@@ -408,8 +409,8 @@ It can be seen that the addition of a gimballed jet to a quadcopter does not cat
 
 
 \section{Companion Computer Software}
-\subsection{PX4 Control} \label{PX4 Control}
-\subsubsection{Introduction}
+\subsection{PX4 Control}
+\subsubsection{Introduction}\label{PX4 Control}
 We will be controlling the PixHawk flight controller using offboard commands from an external companion computer, henceforth referred to as Pete (since CC is a rather ambiguous acronym). Pete will consist of three main components: communication with the PixHawk, communication with a ground station, and target-finding computer vision.
 
 PixHawk 2 is a fully integrated flight controller running the PX4 flight stack. PX4 is an open source project, and is a further development of the popular ArduPilot flight control software. It is an excellent choice for this project as it is easily adaptable to different vehicles, and is capable of calculating many flight parameters by itself and continuously optimise them. This minimises the amount of work that will be required to adapt it to our custom-built airframe.

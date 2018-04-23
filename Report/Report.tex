@@ -10,6 +10,9 @@
 \usepackage{geometry}
 \usepackage{wrapfig}
 
+% \usepackage{titlesec}
+% \newcommand{\sectionbreak}{\clearpage}
+
 \geometry{a4paper, left=25mm, top=25mm}
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
@@ -36,7 +39,7 @@
     tabsize=2
 }
 
-\lstset{style=mystyle}
+\lstset{basicstyle=\footnotesize,style=mystyle}
 
 \linespread{1.3}
 
@@ -54,7 +57,7 @@
     GitHub Repository: \url{https://github.com/eugeneval/Project_Titan}
 
     \vspace{2em}
-    Word Count: 7122
+    Word Count: 7149
 
     \vspace{6em}
     \emph{I, Eugene Valetsky, confirm that the work presented in this report is my own. Where information has been derived from other sources, I confirm that this has been indicated in the report.}
@@ -83,24 +86,6 @@ These disparate modules were brought together, and allow a simulated drone to na
 
 \subsection*{Conclusion}
 The airframe concept has been validated in a simulated environment and stability has been shown to be within acceptable margins. Control software has been designed, created, and tested in a simulated environment. The control system is ready for deployment to the real vehicle as and when it is complete.
-
-
-% ORIGINAL ABSTRACT
-% The goal of this project is to design and test the control system for a vehicle to compete in the Institution of Mechanical Engineers (\emph{IMechE}) Unmanned Aerial Systems (\emph{UAS}) Challenge. This vehicle must be capable of autonomous flight, which will include GPS waypoint navigation, location of a ground target, and the accurate delivery onto a payload onto said target.
-%
-% The UAS design uses a novel concept: a traditional quadcopter built around a central micro jet engine. The control system will consist of a PixHawk flight controller running the PX4 flight stack, augmented by a companion computer running custom-made software to handle the duties of control, communication, and computer vision.
-%
-% A computer simulation was built to test the feasability of the chosen configuration, using a simplified model. Results showed that while stability was significantly impacted over a pure quadcopter, especially in height, it was still within acceptable margins. It was also found that stability is significantly improved with more powerful servo motors for the jet gimbal.
-%
-% The three main modules for the companion computer software were built and tested: control of the PixHawk, communication with a ground station, and target-finding computer vision. Python was chosen as a programming language due to its simplicity and available libraries.
-%
-% PixHawk control was tested using a software-in-the-loop (\emph{SITL}) PX4 simulation and jMAVSim. The DroneKit SDK was used as the basis for the module, but it had to be modified, as it was originally designed to work with APM, the predecessor of PX4. Commands for connecting to the PX4, taking off, navigating it both using GPS coordinates and in the local frame of reference, navigating it using both absolute and relative coordinates, and returning to base were all created and tested thoroughly within the simulation enviroment of jAVSim.
-%
-% Computer vision is done using the OpenCV-Python library. The target is recognised by searching for concentric squares in the image. Optical Character Recognition (\emph{OCR}) is possible using the Tesseract and pytesseract libraries.
-%
-% Communication will be by radio, and so will be limited to a serial connection. Functions were created which allowed the transfer of crucial information, such as the coordinates of a located target, over said serial connection using the JSON format. The socat command line utility was used to establish two virtual serial ports to allow testing.
-%
-% These disparate modules were brought together, and allow a simulated drone to navigate to a target, by using the offset of the target from the center of the frame as an input for a command navigating to a target relative to the current position. Although modifications will need to be made before deployment on the real vehicle, the basis for an autonomous flight control system has been proven.
 
 
 \section{Introduction}
@@ -155,7 +140,7 @@ As such, these aims and objectives have been expanded on in more detail in the r
 \subsection{Control System Design}
 Flight control will be handled with a PixHawk running the PX4 flight stack. This will be coupled to a companion computer running software based on the DroneKit SDK, communicating with the PixHawk using the MAVLink protocol. The companion computer is responsible for communication, waypoint navigation, and target location and tracking using computer vision. It then communicates where to go to the PixHawk.
 
-This setup of two computers working in tandem, a low-level flight controller and a high-level companion computer, is the currently widely accepted method for adding complex autonomy to small unmanned aerial vehicles. Computer vision is a computationally intensive task; we do not want it to 'distract' the flight controller from actually flying the vehicle, as flight control might be running at refresh rates of up to 50 times a second. The separation of flight control ensures the stability and reliability of the vehicle.
+This setup of two computers working in tandem, a low-level flight controller and a high-level companion computer, is the currently widely accepted method for adding complex autonomy to small unmanned aerial vehicles\cite{student_drone_platform}. Computer vision is a computationally intensive task; we do not want it to 'distract' the flight controller from actually flying the vehicle, as flight control might be running at refresh rates of up to 50 times a second. The separation of flight control ensures the stability and reliability of the vehicle.
 
 As the MJE is both expensive (\~\pounds1300), and fragile, it was decided to go for a top of the range flight controller in an effort to avoid costly crashes. Two main options were considered - the DJI A4 and the PixHawk 2. These are both considered excellent quality flight controllers, and also both allows for external control with a companion computer, using either the DJI SDK for the A4 or one of DroneCore, DroneKit, or MAVROS for the PixHawk. In the end, the PixHawk was chosen as it is open source, allowing for easier modification to our needs; there is also more documentation, tutorials, and other information available online for it.
 
@@ -307,13 +292,13 @@ Servos are controlled by sending an electronic signal to tell them what position
 \end{center}
 
 \subsection{Programming}
-The simulation itself was written in Processing. This is a language originally based on Java that is designed for ease of programming, especially with regards to displaying graphical elements\cite{processing}. It was chosen over using MATLAB due to the author's increased familiarity with it, and the fact that this simulation has no need of advanced mathematical capability - there are no complex differential equations or matrix operations.
+The simulation itself was written in Processing. This is a language originally based on Java that is designed for ease of programming, especially with regards to displaying graphical elements\cite{processing}. It was chosen over using MATLAB due to the author's increased familiarity with it, and the fact that this simulation has no need of advanced mathematical capability - there are no complex differential equations or matrix operations. Previous simulations of quadcopters have generally used Newton-Euler equations\cite{quad_modelling_matlab}\cite{quad_modelling}, but these have been deliberately avoided in this model.
 
 The program was built up in stages, with the physics of each stage checked before adding complexity. As far as possible, good object-oriented programming practice has been followed.
 
 The quad section was implemented first. A controller was first tested solely in the z direction, and the response was used to calibrate PID values for the z controller. Angular controllers were then implemented, tested, and calibrated, before finally introducing x and y position controllers.
 
-Testing involved flying a simple path: takeoff to 10m, a square path (10m north, 10m east, 10m south, 10m west), and then landing. This gave the results seen in Figure \ref{fig:square_path_quad_only}. It can be seen that there is an oscillation in x and y position of approximately 0.2m. It proved difficult to eliminate, due to the not straightforward interaction of position and angle PID values, and could potentially cause issues with the accuracy of payload delivery.
+Testing involved flying a simple path: takeoff to 10m, a square path (10m north, 10m east, 10m south, 10m west), and then landing. This gave the results seen in Figure \ref{fig:square_path_quad_only}. It can be seen that there is an oscillation in x and y position of approximately 0.2m. It proved difficult to eliminate, due to the not straightforward interaction of position and angle PID values, and could potentially cause issues with the accuracy of payload delivery. PID tuning was done using accepted PID tuning techniques\cite{PID_tuning}.
 
 This, however proved not to be a problem. It can be seen in Figure \ref{fig:square_path_w_jet} that the addition of the jet has, likely due to the added mass, damped out the oscillations in x and y position. It has also added an overshoot in z of several meters and a steady state error in x and y of about 0.2m, but this can be corrected by fine-tuning of PID values. The flight time has also increased but this is to be expected due to the increase in mass causing a decrease in acceleration. In Figure \ref{fig:square_path_w_jet_angle} we can see how the quadcopter changes angle about the x axis, and how the jet initially starts to move in that direction but is quickly brought back to the vertical by the servo.
 
@@ -574,8 +559,6 @@ Since an interface had already been programmed in Python, it was decided to prog
 \end{compactenum}
 
 \subsection{Square Detection}
-The target consists of two concentric squares and a central letter, as seen on Figure \ref{fig:target}\cite{IMechE_rules}. Therefore, a good way of identifying the target is looking for concentric squares. This is called feature detection. The other main method is known as creating a cascade, and allows objects whose features cannot be easily described mathematically, such as a chair, to be recognised. However, creating a cascade requires the processing of thousands of images and considerable time. As we are fortunate enough to have a feature which can be described easily mathematically (concentric squares), feature detection is the optimal method.
-
 \begin{wrapfigure}{r}{0.5\textwidth}
     \begin{center}
         \includegraphics[width=0.48\linewidth]{IMechE_target}
@@ -583,6 +566,8 @@ The target consists of two concentric squares and a central letter, as seen on F
         \label{fig:target}
     \end{center}
 \end{wrapfigure}
+
+The target consists of two concentric squares and a central letter, as seen on Figure \ref{fig:target}\cite{IMechE_rules}. Therefore, a good way of identifying the target is looking for concentric squares. This is called feature detection. The other main method is known as creating a cascade, and allows objects whose features cannot be easily described mathematically, such as a chair, to be recognised. However, creating a cascade requires the processing of thousands of images and considerable time. As we are fortunate enough to have a feature which can be described easily mathematically (concentric squares), feature detection is the optimal method.
 
 First, squares are recognised. This is a multi-stage process:
 \begin{compactenum}
@@ -827,6 +812,7 @@ The design of the control system so far allows for a great deal of flexibility a
 \end{longtable}
 \end{center}
 
+\newpage
 \section{Table of Abbreviations}
 \begin{center}
     In alphabetical order:
@@ -900,8 +886,20 @@ The design of the control system so far allows for a great deal of flexibility a
 \bibitem{companion_computer_power}
     Dries Hulens, Jon Verbeke and Toon Goedem\'e. How to choose the best embedded processing platform for on-board UAV image processing. In: Computer Vision, Imaging and Computer Graphics Theory and Applications edition:VISIGRAPP 2015 pages:455-472.
 
+\bibitem{quad_modelling_matlab}
+    Fernando HC, De Silva AT, De Zoysa MD, Dilshan KA, Munasinghe SR. Modelling, simulation and implementation of a quadrotor UAV. InIndustrial and Information Systems (ICIIS), 2013 8th IEEE International Conference on 2013 Dec 17 (pp. 207-212). IEEE.
+
 \bibitem{quadcopter_dynamics}
     Andrew Gibiansky. Quadcopter Dynamics, Simulation, and Control [Internet]. 23rd Nov 2012. [Accessed 23 November]; Available from: \url{http://andrew.gibiansky.com/downloads/pdf/Quadcopter%20Dynamics,%20Simulation,%20and%20Control.pdf}
+
+\bibitem{student_drone_platform}
+    Mathias HD. An autonomous drone platform for student research projects. Journal of Computing Sciences in Colleges. 2016 May 1;31(5):12-20.
+
+\bibitem{quad_modelling}
+    Luukkonen T. Modelling and control of quadcopter. Independent research project in applied mathematics, Espoo. 2011 Aug 22;22.
+
+\bibitem{PID_tuning}
+    Leong BT, Low SM, Ooi MP. Low-cost microcontroller-based hover control design of a quadcopter. Procedia Engineering. 2012 Jan 1;41:458-64.
 
 \bibitem{Ismail_paper}
     Syed Ismail Ahamad. Unmanned Ariel Systems. MECH3002 Final Report. 25 April 2018.

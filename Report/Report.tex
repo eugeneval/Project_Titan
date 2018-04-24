@@ -57,7 +57,7 @@
     GitHub Repository: \url{https://github.com/eugeneval/Project_Titan}
 
     \vspace{2em}
-    Word Count: 7314
+    Word Count: 7313
 
 
     \vspace{6em}
@@ -144,7 +144,7 @@ Flight control will be handled with a PixHawk running the PX4 flight stack. This
 
 This setup of two computers working in tandem, a low-level flight controller and a high-level companion computer, is the currently widely accepted method for adding complex autonomy to small unmanned aerial vehicles\cite{student_drone_platform}. Computer vision is a computationally intensive task; we do not want it to 'distract' the flight controller from actually flying the vehicle, as flight control might be running at refresh rates of up to 50 times a second. The separation of flight control ensures the stability and reliability of the vehicle.
 
-As the MJE is both expensive (\~\pounds1300), and fragile, it was decided to go for a top of the range flight controller in an effort to avoid costly crashes. Two main options were considered - the DJI A4 and the PixHawk 2. These are both considered excellent quality flight controllers, and also both allows for external control with a companion computer, using either the DJI SDK for the A4 or one of DroneCore, DroneKit, or MAVROS for the PixHawk. In the end, the PixHawk was chosen as it is open source, allowing for easier modification to our needs; there is also more documentation, tutorials, and other information available online for it.
+As the MJE is both expensive (\~\pounds1300), and fragile, it was decided to utilise a top of the range flight controller in an effort to avoid costly crashes. Two main options were considered - the DJI A4 and the PixHawk 2. These are both considered excellent quality flight controllers, and also both allows for external control with a companion computer, using either the DJI SDK for the A4 or one of DroneCore, DroneKit, or MAVROS for the PixHawk. In the end, the PixHawk was chosen as it is open source, allowing for easier modification to our needs; there is also more documentation, tutorials, and other information available online for it.
 
 Reasons for the choice of the DroneKit SDK over alternatives are explained in Section \ref{PX4 Control}. Companion computer selection is covered in Section \ref{cc_selection}. The full code can be found on GitHub at \url{https://github.com/eugeneval/Project_Titan}.
 
@@ -153,7 +153,7 @@ Reasons for the choice of the DroneKit SDK over alternatives are explained in Se
 \subsection{Concept}
 One of the main concepts behind the UAS concept is the idea that, if the MJE is gimballed to remain vertical, and its thrust vector is through the center of gravity of the vehicle, it exerts no horizontal forces or moments on the rest of the vehicle. This means its effect on the stability and control of the vehicle can be ignored. In turn, this means that regular quadcopter flight control software can be used, such as the PX4 flight stack.
 
-Being able to use PX4 firmware running on a PixHawk is crucial. The UAS will come to cost approximately \pounds2,500. Using home-made flight control software is therefore extremely risky. PX4, on the other hand, is a project that has been worked on by thousands of people for years, and is infinitely more reliable than anything we could put together from scratch. Additionally, creating custom flight control software is both discouraged by the IMechE, who recommend adapting an off-the-shelf autopilot \cite{IMechE_rules}, and falls well outside the scope of a university third-year project.
+Being able to use PX4 firmware running on a PixHawk is crucial. The UAS will come to cost approximately \pounds2,500. Using home-made flight control software is therefore extremely risky. PX4, on the other hand, is a project that has been worked on by thousands of people for years, and is infinitely more reliable than anything we could put together from scratch. Additionally, creating custom flight control software is both discouraged by the IMechE, who recommend adapting an off-the-shelf autopilot\cite{IMechE_rules}, and falls well outside the scope of a university third-year project.
 
 Therefore, it was decided to build a simulation to test the validity of the concept that the MJE can be ignored.
 

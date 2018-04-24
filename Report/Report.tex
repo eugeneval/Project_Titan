@@ -1,7 +1,7 @@
 \documentclass[11pt,twoside]{article}
 \usepackage{textcomp}
 \usepackage{longtable}
-\usepackage[draft]{graphicx}
+\usepackage{graphicx}
 \usepackage{subcaption}
 \usepackage{listings}
 \usepackage{color}
@@ -10,8 +10,8 @@
 \usepackage{geometry}
 \usepackage{wrapfig}
 
-\usepackage{titlesec}
-\newcommand{\sectionbreak}{\clearpage}
+% \usepackage{titlesec}
+% \newcommand{\sectionbreak}{\clearpage}
 
 \geometry{a4paper, left=25mm, top=25mm}
 
@@ -49,7 +49,7 @@
 
 \lstset{basicstyle=\footnotesize,style=mystyle}
 
-\linespread{1.29}
+\linespread{1.26}
 
 \graphicspath{ {Images/}{Graphs/} }
 \author{Eugene Valetsky\\ \and Supervisor: Dr Tim Baker}
@@ -65,7 +65,7 @@
     GitHub Repository: \url{https://github.com/eugeneval/Project_Titan}
 
     \vspace{2em}
-    Word Count: 7334
+    Word Count: 7421
 
 
 
@@ -77,7 +77,6 @@
 \tableofcontents
 \listoffigures
 \newpage
-
 
 
 \section{Abstract}
@@ -97,7 +96,7 @@ These separate modules were brought together, and allow a simulated drone to nav
 \subsection*{Conclusion}
 The airframe concept has been validated in a simulated environment and stability has been shown to be within acceptable margins. Control software has been designed, created, and tested in a simulated environment. The control system is ready for deployment to the real vehicle as and when it is complete.
 
-
+\newpage
 \section{Introduction}
 The Unmanned Aerial System (UAS) Challenge was launched by the Institution of Mechanical Engineers (IMechE) in 2014 `with the key objectives of developing professional engineers and inspiring the next generation'\cite{IMechE_about_uas}. The main goal is to design and build a UAS in order to autonomously deliver humanitarian aid such as medical supplies in a disaster zone. This requires a broad range of skills, from project management to airframe design to avionics system programming. To add to the challenge there is a strict weight limit and stringent safety regulations. Working together with another student, Ismail Ahmad, our goal is to follow the design and build cycle all the way through to competing at the IMechE UAS competition in June 2018.
 
@@ -157,7 +156,7 @@ As the MJE is both expensive (\~\pounds1300), and fragile, it was decided to uti
 
 Reasons for the choice of the DroneKit SDK over alternatives are explained in Section \ref{PX4 Control}. Companion computer selection is covered in Section \ref{cc_selection}. The full code can be found on GitHub at \url{https://github.com/eugeneval/Project_Titan}.
 
-
+\newpage
 \section{Simulation of System Plausibility} \label{simulation}
 \subsection{Concept}
 One of the main concepts behind the UAS concept is the idea that, if the MJE is gimballed to remain vertical, and its thrust vector is through the center of gravity of the vehicle, it exerts no horizontal forces or moments on the rest of the vehicle. This means its effect on the stability and control of the vehicle can be ignored. In turn, this means that regular quadcopter flight control software can be used, such as the PX4 flight stack.
@@ -403,7 +402,7 @@ It can be seen that the addition of a gimballed jet to a quadcopter does not cat
 
 The accuracy of this simulation could be improved by using a model that more closely resembles the actual design or by taking into account factors that have been ignored such as lift and drag. However, this is unlikely to provide us with results different from those obtained. The purpose of this simulation was not to produce accurate numerical results, but to provide an assessment of the inherent stability of the airframe configuration, giving us a `go/no go' on whether the PX4 flight software can be used.
 
-
+\newpage
 \section{Companion Computer Software: PX4 Control}
 \subsection{Introduction}\label{PX4 Control}
 We will be controlling the PixHawk flight controller using offboard commands from an external companion computer, henceforth referred to as Pete (since CC is a rather ambiguous acronym). Pete will consist of three main components: communication with the PixHawk, communication with a ground station, and target-finding computer vision.
@@ -552,7 +551,7 @@ The code that has been written means that the communication with the PixHawk has
 
 The created code has been throughly tested using a SITL PX4 simulation and jMAVSim, and packaged into a module which can be easily integrated into an overall control system. Using object-oriented programming principles will allow the code to be easily extended or modified later if this is required.
 
-
+\newpage
 \section{Companion Computer Software: Computer Vision}
 The next component of the control system is a computer vision system capable of identifying the target. This takes the form of a red 1x1m square, incorporating an alphanumeric code in white, within a larger 2x2m white square\cite{IMechE_rules}. The system would have to locate the target, calculate the offset from being centered underneath the vehicle, and to identify the alphanumeric code.
 
@@ -637,6 +636,7 @@ Investigations have been made into multithreading and frame rate. These can be t
 
 Potentially, some of the parameters used to identify the target will need to be fine-tuned once deployed on a real vehicle to account for how the target may look different. The code has been written in such a way that these parameters are easy to modify.
 
+\newpage
 \section{Companion Computer Software: Communication}
 Communication from Pete, our companion computer, to a base station to transmit information will, by necessity, be over a serial connection, as this is how most low-end radio links are designed.
 
@@ -668,6 +668,7 @@ Through the usage of JSON and the pyserial library the location of a target can 
 
 The UAS Challenge requires the GPS coordinates of a target to be relayed to the base station. This will be done by knowing the current location of the vehicle using our control module, and knowing the offset of the target from directly underneath the vehicle. Calibration will be needed upon deployment on a real vehicle to ensure accuracy, but otherwise this module is complete.
 
+\newpage
 \section{Companion Computer Software: Other Concerns}
 \subsection{Jet Engine Control \& Payload Delivery}
 The thrust output of the MJE will need to be controlled to compensate for the change in weight as payloads are dropped. Additionally, by more closely controlling jet thrust it may be possibly to reduce the instability in height noted in Section \ref{height overshoot}.
@@ -708,6 +709,7 @@ Slight modification to the existing code needed to made, mainly that the \lstinl
 
 When tested the code performed as expected, communicating with the simulation running on the main computer over a UDP connection, and recognising targets using the Pi's camera. This is important because it means the companion computer is ready to be installed on the vehicle, and also validates the choice of Python as a cross-platform programming language.
 
+\newpage
 \section{Conclusion \& Further Work}
 \begin{compactenum}
     \item The stability of the airframe configuration has been examined in a simulated environment, and shown to be within acceptable parameters in the x and y directions. There is a large overshoot and not inconsiderable oscillation in z (height), but this is acceptable as the required precision in height for our vehicle is very low.

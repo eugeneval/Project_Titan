@@ -1,7 +1,7 @@
-\documentclass[11pt]{article}
+\documentclass[11pt,twoside]{article}
 \usepackage{textcomp}
 \usepackage{longtable}
-\usepackage{graphicx}
+\usepackage[draft]{graphicx}
 \usepackage{subcaption}
 \usepackage{listings}
 \usepackage{color}
@@ -10,8 +10,8 @@
 \usepackage{geometry}
 \usepackage{wrapfig}
 
-% \usepackage{titlesec}
-% \newcommand{\sectionbreak}{\clearpage}
+\usepackage{titlesec}
+\newcommand{\sectionbreak}{\clearpage}
 
 \geometry{a4paper, left=25mm, top=25mm}
 
@@ -19,6 +19,14 @@
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[ER,OL]{\leftmark}
+\fancyhead[OR,EL]{}
+\fancyfoot[CE,CO]{\thepage}
+
 
 \lstdefinestyle{mystyle}{
     backgroundcolor=\color{backcolour},
@@ -57,7 +65,8 @@
     GitHub Repository: \url{https://github.com/eugeneval/Project_Titan}
 
     \vspace{2em}
-    Word Count: 7312
+    Word Count: 7334
+
 
 
     \vspace{6em}
@@ -92,7 +101,7 @@ The airframe concept has been validated in a simulated environment and stability
 \section{Introduction}
 The Unmanned Aerial System (UAS) Challenge was launched by the Institution of Mechanical Engineers (IMechE) in 2014 `with the key objectives of developing professional engineers and inspiring the next generation'\cite{IMechE_about_uas}. The main goal is to design and build a UAS in order to autonomously deliver humanitarian aid such as medical supplies in a disaster zone. This requires a broad range of skills, from project management to airframe design to avionics system programming. To add to the challenge there is a strict weight limit and stringent safety regulations. Working together with another student, Ismail Ahmad, our goal is to follow the design and build cycle all the way through to competing at the IMechE UAS competition in June 2018.
 
-One of the greatest individual challenges as part of the project is creating an autonomous flight system. The UAS must be capable of quickly and safely navigating to and locating a target using computer vision, dropping a payload accurately, and returning to base. This requires an understanding of the UAS’s flight dynamics as well as good programming and wiring capabilities. This is the aspect that I will be focusing on for my individual project. I will also be assisting with other parts of the project, but this is outside the scope of this report.
+One of the greatest individual challenges as part of the project is creating an autonomous flight system. The UAS must be capable of quickly and safely navigating to and locating a target using computer vision, dropping a payload accurately, and returning to base. This requires an understanding of the UAS's flight dynamics as well as good programming and wiring capabilities. This is the aspect that I will be focusing on for my individual project. I will also be assisting with other parts of the project, but this is outside the scope of this report.
 
 
 \subsection{Airframe Design}
@@ -170,6 +179,10 @@ The specific objectives of this section of the project are:
 \end{compactenum}
 
 \subsection{Equations of Motion}
+
+The vehicle is split into two sections, the outer quadcopter frame, \emph{Quad}, and the gimballed section containing the MJE, \emph{Jet}. A cartesian reference frame was chosen, with the xy plane being the horizontal plane and z being height. +x is right, +y is forward, +z is up. A rotation about the x axis is pitch, about the y axis is roll, and about the z axis is yaw. These are labelled $\theta_x, \theta_y,$ and $\theta_z$ for the quad and $\phi_x, \phi_y,$ and $\phi_z$ for the jet respectively.
+
+The gimbal is controlled by two servos, one moving the gimbal in roll and one in pitch. (There is no need for yaw control of the jet.)  Note that this means $\theta_z = \phi_z$.
 \begin{wrapfigure}{r}{0.45\textwidth}
     \begin{center}
         \includegraphics[width=0.48\linewidth]{Quad-X}
@@ -177,10 +190,6 @@ The specific objectives of this section of the project are:
         \label{fig:quad-x}
     \end{center}
 \end{wrapfigure}
-The vehicle is split into two sections, the outer quadcopter frame, \emph{Quad}, and the gimballed section containing the MJE, \emph{Jet}. A cartesian reference frame was chosen, with the xy plane being the horizontal plane and z being height. +x is right, +y is forward, +z is up. A rotation about the x axis is pitch, about the y axis is roll, and about the z axis is yaw. These are labelled $\theta_x, \theta_y,$ and $\theta_z$ for the quad and $\phi_x, \phi_y,$ and $\phi_z$ for the jet respectively.
-
-The gimbal is controlled by two servos, one moving the gimbal in roll and one in pitch. (There is no need for yaw control of the jet.)  Note that this means $\theta_z = \phi_z$.
-
 The multi-rotor uses the `quad-x' configuration, as shown in Figure \ref{fig:quad-x}. Note that motors 1 and 3 spin clockwise, and motors 2 and 4 spin anticlockwise. In the quad-x configuration, pairs of motors control each of the flight axes. For example, to pitch forward, motors 1 and 2 are spun down, and motors 3 and 4 are spun up; to yaw left, motors 2 and 4 would be spun up whilst motors 1 and 3 are spun down. The flight control system combines these various control movements, as well as ensuring that the net upward thrust is maintained. This can be seen in Equations \ref{eqn:FM1} through \ref{eqn:FM4}.
 
 
@@ -392,6 +401,7 @@ A simplified model of the airframe configuration has been created and equations 
 
 It can be seen that the addition of a gimballed jet to a quadcopter does not catastrophically destabilise it. The extremely simple PID controllers used in our simulation are able to cope to a sufficient degree, implying that a significantly more advanced flight stack such as the PX4 should have no problems. Our initial assumption that the jet can simply be ignored is, indeed, valid. We have completed our objectives for this section, as defined in Section \ref{simulation objectives}, determining that the stability of the airframe configuration is within acceptable parameters.
 
+The accuracy of this simulation could be improved by using a model that more closely resembles the actual design or by taking into account factors that have been ignored such as lift and drag. However, this is unlikely to provide us with results different from those obtained. The purpose of this simulation was not to produce accurate numerical results, but to provide an assessment of the inherent stability of the airframe configuration, giving us a `go/no go' on whether the PX4 flight software can be used.
 
 
 \section{Companion Computer Software: PX4 Control}
@@ -415,12 +425,12 @@ Additionally, much of the difference can be made up by using C or C++ libraries 
 \subsection{Aims and Objectives}
 \begin{compactenum}
     \item Research autonomous vehicle flight control solutions and decide on a configuration. \emph{(Already completed)}
-    \item Download and set up PX4, JMAVSim, and Dronekit.
+    \item Download and set up PX4, JMAVSim, and DroneKit.
     \item Run a SITL PX4 simulation, in conjunction with a jMAVSim simulation, and become familiar with this simulation environment.
     \item Create code using DroneKit that will communicate with the PX4 simulation and JMAVSim.
     \item Create code using DroneKit that will allow for a predetermined flight path to be followed, and test using PX4 and jMAVSim.
     \item Create code using DroneKit that will allows for real-time flight control relative to the current position (required to allow the vehicle to navigate to the target in response to an input from the computer vision module), and test using PX4 and JMAVSim.
-    \item Package created code in a module to allow for easy implementation in a full control system.
+    \item Package the created code in a module to allow for easy implementation in a full control system.
 \end{compactenum}
 
 
@@ -555,7 +565,7 @@ Since an interface had already been programmed in Python, it was decided to prog
     \item Create code that can recognise the IMechE target using computer vision, and test it.
     \item Create code that can read the alphanumeric code inside the IMechE target, and test it.
     \item Create code that can calculate the offset of the target from directly underneath the vehicle (we will use this offset as an input for navigation), and test it.
-    \item Package created code in a module to allow for easy implementation in a full control system.
+    \item Package the created code in a module to allow for easy implementation in a full control system.
     \item Integrate this new module with the existing control module, and test it using PX4 and jMAVSim.
 \end{compactenum}
 
@@ -608,9 +618,10 @@ From here, it is trivial to calculate the offset of the target from the center o
 \subsection{Integrating into Control}
 Using the code developed in Section \ref{control_implementation}, a program was created to integrate the newly-developed computer vision. This takes off to 10m, and once there the webcam on the computer is turned on. It looks for a target, and uses the offset of the target from the center of the camera as an input for the desired position of the drone. This was verified to work as intended, validating all the work we have done up to this point.
 
-Multithreading was used to optimise performance and increase effectiveness. Unfortunately, it could not be fully implemented, as OpenCV's \lstinline|VideoCapture()|, used to receive input from the camera, is only capable of functioning inside the main thread. This is a known unresolved issue with OpenCV itself. This meant that receiving input could not occur in a subthread, which is unfortunate as input/output operations are normally the most desirable operation to keep in subthreads. In this version of the program, the main thread handles computer vision and a subthread contains the \lstinline|vehicle| class which communicates with the PixHawk. \label{OpenCV_multithreading_issues}
+Multithreading\footnotemark was used to optimise performance and increase effectiveness. Unfortunately, it could not be fully implemented, as OpenCV's \lstinline|VideoCapture()|, used to receive input from the camera, is only capable of functioning inside the main thread. This is a known unresolved issue with OpenCV itself. This meant that receiving input could not occur in a subthread, which is unfortunate as input/output operations are normally the most desirable operations to keep in subthreads. In this version of the program, the main thread handles computer vision and a subthread contains the \lstinline|vehicle| class which communicates with the PixHawk. \label{OpenCV_multithreading_issues}
+\footnotetext{Multithreading is a way of optimising computer programs. Instead of a single process, where all tasks occur sequentially, a program is split into multiple processes happening concurrently and communicating with each other.}
 
-A demonstration video of this was created. For obvious reasons, it could not be put in this report, but is available at \url{https://youtu.be/sFyZphH8_CM}.
+A demonstration video of this was created; it is available at \url{https://youtu.be/sFyZphH8_CM}.
 
 \subsection{Investigating Frame Rate}
 The method of finding all squares, checking through them all for duplicates, then checking through them all for targets, intuitively seems inefficient. This could especially become an issue when deployed to a drone platform, which will likely have less processing power.
@@ -636,7 +647,7 @@ The socat\cite{socat} command line utility was used to establish two virtual ser
     \item Research serial communication solutions and decided on a configuration. \emph{(Already completed)}
     \item Download and become familiar with relevant libraries.
     \item Create code that will allow for relevant information to be sent over a serial connection, and test it using socat.
-    \item Package created code in a module to allow for easy implementation in a full control system.
+    \item Package the created code in a module to allow for easy implementation in a full control system.
     \item Integrate this new module with existing software, and test it.
 \end{compactenum}
 
@@ -673,9 +684,9 @@ The MJE is controlled with a FADEC that takes a PWM (Pulse Width Modulation) sig
 
 Additionally, a mechanism to control the payload delivery mechanism is also required. Development of the specifics of payload delivery is being undertaken by a 1st year student, Arkadiy Serezhkin. The current solution will likely use a servo mechanism of some description. An example of such a mechanism would be the Makeblock 86502 Robot Gripper\cite{Makeblock_gripper}, seen in Figure \ref{fig:makeblock_gripper}.
 
-The issue of a moving center of gravity when a payload is dropped is also an issue that is currently being investigated. Placing the payload underneath the jet engine, with a cone to divert the jet exhaust, was rejected due to the large loss of thrust from the jet this would cause. Placing the payloads evenly distributed, as close to the center of the vehicle as possible, still raises issues with one of the electric motors having to take on too much of the weight. Whatever the final solution, it may well factor in to the programming required for the payload drop mechanism. \label{payload_delivery}
+The problem of a moving center of gravity when a payload is dropped is also an issue that is currently being investigated. Placing the payload underneath the jet engine, with a cone to divert the jet exhaust, was rejected due to the large loss of thrust from the jet this would cause. Placing the payloads evenly distributed, as close to the center of the vehicle as possible, still raises issues with one of the electric motors having to take on too much of the weight. Whatever the final solution, it may well factor in to the programming required for the payload drop mechanism. \label{payload_delivery}
 
-The full implementation of this will depend on the specific companion computer chosen, as the libraries to output signals using the output pins of a companion computer are specific to that companion computer, as well as the final payload deliver method chosen. For now, a \lstinline|Payload| class has been created, and incorporated into the \lstinline|Vehicle|. Later, the specific code for controlling payload drops, and varying jet engine thrust in response to payload drops, will be incorporated into this class.
+The full implementation of this will depend on the specific companion computer chosen, as the libraries to output signals using the output pins of a companion computer are specific to that companion computer, as well as the final payload deliver method chosen. For now, a \lstinline|Payload| class has been created, and incorporated into the \lstinline|Vehicle|. Later, the specific code for controlling payload drops and varying jet engine thrust in response to payload drops will be incorporated into this class.
 
 \subsection{Choosing a Computer} \label{cc_selection}
 By this point, Pete has advanced about as far as is possible in a purely simulated environment. Further development required moving onto a real companion computer, and testing either with a real drone or a Hardware-in-the-Loop (HITL) simulation.
@@ -687,7 +698,7 @@ A comparison was made of available companion computers on the market. The Intel 
     \caption{Companion Computer Selection} \label{fig:cc_selection}
 \end{figure}
 
-Of these, the Raspberry Pi3 was the preferred choice, as it is cheap and light, and has the greatest amount of community support and available documentation. It is, however, borderline as to whether it is powerful to run the required computer vision computation\cite{companion_computer_power}. The Nvidia TX2 is a close second. It is definitely powerful enough to meet our needs, but is significantly more expensive and has less support available. It was therefore decided to buy a Raspberry Pi, and to upgrade to the TX2 if it turns out to not be powerful enough.
+Of these, the Raspberry Pi3 was the preferred choice, as it is cheap and light, and has the greatest amount of community support and available documentation. It is, however, borderline as to whether it is powerful enough to run the required computer vision computation\cite{companion_computer_power}. The Nvidia TX2 is a close second. It is definitely powerful enough to meet our needs, but is significantly more expensive and has less support available. It was therefore decided to buy a Raspberry Pi, and to upgrade to the TX2 if it turns out to not be powerful enough.
 
 
 \subsection{Companion Computer Setup \& Testing}
@@ -714,7 +725,7 @@ More detail on each of these completed objectives is available within the sub-co
 
 The control system has been tested as far as is possible within the current simulated environment. The next stage is preferably deployment on a real platform, where further testing and development can take place. This is dependent on Ismail delivering a working airframe; at the time of writing, all design work has been completed with manufacturing to commence shortly\cite{Ismail_paper}.
 
-An alternative would be to move to a more advanced simulation environment, specifically Gazebo, which is an advanced robotics and physics simulation library and which is capable of interfacing with a PX4 simulation\cite{PX4_dev_guide}. Enough research and investigation has been done into this to discover that creating an accurate simulation in Gazebo, with our custom airframe modelled correctly and integrated with the PX4 simulation, is almost ambitious enough to form a third-year project in and of itself.
+An alternative would be to move to a more advanced simulation environment, specifically Gazebo, which is an advanced robotics and physics simulation library and which is capable of interfacing with a PX4 simulation\cite{PX4_dev_guide}. This would allow the airframe configuration and control software to be tested concurrently. Enough research and investigation has been done into this to discover that creating an accurate simulation in Gazebo, with our custom airframe modelled correctly and integrated with the PX4 simulation, is almost ambitious enough to form a third-year project in and of itself.
 
 The design of the control system so far allows for a great deal of flexibility and expansion through the use of object-oriented programming, although further work could be done in this area, especially when it comes to the usage of OpenCV and multithreading (This is a known issue, as described in Section \ref{OpenCV_multithreading_issues}). The use of the \lstinline|picamera| module rather than OpenCV's \lstinline|VideoCapture| may allow image processing to be moved into a subthread and proper multithreading implemented. Additionally, the code that has been written could be better packaged, although this would only really become an issue if it was being distributed.
 
